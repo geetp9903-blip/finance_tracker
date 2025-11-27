@@ -9,7 +9,7 @@ interface FinanceContextType {
     budget: Budget;
     currency: string;
     setCurrency: (code: string) => void;
-    addTransaction: (transaction: Omit<Transaction, 'id'>) => Promise<void>;
+    addTransaction: (transaction: Omit<Transaction, 'id' | 'userId'>) => Promise<void>;
     deleteTransaction: (id: string) => Promise<void>;
     updateBudget: (budget: Budget) => Promise<void>;
     refreshData: () => Promise<void>;
@@ -42,9 +42,9 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
         refreshData();
     }, [user]);
 
-    const addTransaction = async (t: Omit<Transaction, 'id'>) => {
+    const addTransaction = async (t: Omit<Transaction, 'id' | 'userId'>) => {
         if (!user) return;
-        const newTransaction = { ...t, id: crypto.randomUUID() };
+        const newTransaction = { ...t, id: crypto.randomUUID(), userId: user.username };
         const res = await fetch('/api/finance', {
             method: 'POST',
             headers: {
