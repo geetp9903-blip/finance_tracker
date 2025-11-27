@@ -1,36 +1,60 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Prospera Finance Tracker
 
-## Getting Started
+![Prospera Banner](public/Prospera_1.png)
 
-First, run the development server:
+> **Prosper with clarity. Track your finances with style.**
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+Prospera is a modern, high-performance personal finance application designed to give you complete control over your financial health. Built with **Next.js 14**, **Tailwind CSS**, and **Recharts**, it combines powerful analytics with a sleek, premium user interface.
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## ✨ Features
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### 📊 Advanced Analytics
+- **Cumulative Spending Area Chart**: Visualize your spending trends with dynamic gradient fills (Green/Red) indicating budget safety zones.
+- **Income vs Expenses**: A dual-area comparative chart to track cash flow at a glance.
+- **Category Breakdown**: Interactive pie charts to understand where your money goes.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### 💸 Smart Transaction Management
+- **Recent Transactions**: Quick access to your latest activity.
+- **Advanced Sorting**: Sort by Date, Highest Amount, or Lowest Amount to find what you need instantly.
+- **Search & Filter**: Powerful search capabilities to locate specific transactions.
 
-## Learn More
+### 🎨 Premium User Experience
+- **Modern UI**: Glassmorphism design, dark mode, and smooth transitions.
+- **Responsive**: Fully optimized for desktop and tablet experiences.
+- **Animations**: Fluid page transitions and interactive elements powered by Framer Motion.
 
-To learn more about Next.js, take a look at the following resources:
+## 🛠️ Tech Stack
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- **Framework**: [Next.js 14](https://nextjs.org/) (App Router)
+- **Styling**: [Tailwind CSS](https://tailwindcss.com/)
+- **Charts**: [Recharts](https://recharts.org/)
+- **Animations**: [Framer Motion](https://www.framer.com/motion/)
+- **Icons**: [Lucide React](https://lucide.dev/)
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## 🚀 Getting Started
 
-## Deploy on Vercel
+1.  **Clone the repository**
+    ```bash
+    git clone https://github.com/geetp9903-blip/finance_tracker.git
+    cd finance_tracker
+    ```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+2.  **Install dependencies**
+    ```bash
+    npm install
+    ```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+3.  **Run the development server**
+    ```bash
+    npm run dev
+    ```
+
+4.  Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+
+## 📸 Screenshots
+
+*(Add your screenshots here)*
+
+## 📄 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.

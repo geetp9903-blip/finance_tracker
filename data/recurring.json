@@ -1,0 +1,46 @@
+[
+  {
+    "id": "fc871492-10f5-467b-bef7-5bb5652e2c70",
+    "amount": 50000,
+    "description": "Monthly",
+    "category": "Monthly",
+    "type": "income",
+    "frequency": "monthly",
+    "startDate": "2025-12-03T00:00:00.000Z",
+    "nextDueDate": "2025-12-03T00:00:00.000Z",
+    "active": true
+  },
+  {
+    "id": "52ce52c5-0d7e-45d3-bcc5-162a1583d0f7",
+    "amount": 22000,
+    "description": "Rent",
+    "category": "Rent",
+    "type": "expense",
+    "frequency": "monthly",
+    "startDate": "2025-12-05T00:00:00.000Z",
+    "nextDueDate": "2025-12-05T00:00:00.000Z",
+    "active": true
+  },
+  {
+    "id": "f6d4d47a-77b1-4246-a338-43eacfb191b8",
+    "amount": 2500,
+    "description": "Subscriptions",
+    "category": "Entertainment",
+    "type": "expense",
+    "frequency": "monthly",
+    "startDate": "2025-12-04T00:00:00.000Z",
+    "nextDueDate": "2025-12-04T00:00:00.000Z",
+    "active": true
+  },
+  {
+    "id": "acaaef28-191f-4634-8e3b-a53630a6c389",
+    "amount": 2500,
+    "description": "Mobile & Wi-Fi Bills",
+    "category": "Bills",
+    "type": "expense",
+    "frequency": "monthly",
+    "startDate": "2025-12-03T00:00:00.000Z",
+    "nextDueDate": "2025-12-03T00:00:00.000Z",
+    "active": true
+  }
+]
