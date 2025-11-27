@@ -1,13 +1,18 @@
 import { NextResponse } from 'next/server';
 import { saveUsers, saveTransactions, saveBudget } from '@/lib/storage';
 import { Transaction, User, Budget } from '@/lib/types';
+import crypto from 'crypto';
+
+function hashPin(pin: string): string {
+    return crypto.createHash('sha256').update(pin).digest('hex');
+}
 
 export async function GET() {
     try {
         // 1. Create Mock User
         const mockUser: User = {
             username: "DemoUser",
-            pin: "1234"
+            pin: hashPin("1234")
         };
         await saveUsers([mockUser]);
 
@@ -21,6 +26,7 @@ export async function GET() {
 
             return {
                 id: crypto.randomUUID(),
+                userId: "DemoUser",
                 amount: Math.floor(Math.random() * 5000) + 100,
                 type: isIncome ? 'income' : 'expense',
                 category: category,
@@ -43,7 +49,7 @@ export async function GET() {
                 { id: "3", name: "Fun", percentage: 10, color: "bg-purple-500" },
             ]
         };
-        await saveBudget(mockBudget);
+        await saveBudget({ "DemoUser": mockBudget });
 
         return NextResponse.json({
             success: true,
