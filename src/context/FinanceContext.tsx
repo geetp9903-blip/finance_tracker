@@ -42,9 +42,16 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
         refreshData();
     }, [user]);
 
+    const generateId = () => {
+        if (typeof crypto !== 'undefined' && crypto.randomUUID) {
+            return crypto.randomUUID();
+        }
+        return Date.now().toString(36) + Math.random().toString(36).substr(2);
+    };
+
     const addTransaction = async (t: Omit<Transaction, 'id' | 'userId'>) => {
         if (!user) return;
-        const newTransaction = { ...t, id: crypto.randomUUID(), userId: user.username };
+        const newTransaction = { ...t, id: generateId(), userId: user.username };
         const res = await fetch('/api/finance', {
             method: 'POST',
             headers: {
