@@ -1,5 +1,10 @@
 import { NextResponse } from 'next/server';
 import { getUsers, saveUsers } from '@/lib/storage';
+import crypto from 'crypto';
+
+function hashPin(pin: string): string {
+    return crypto.createHash('sha256').update(pin).digest('hex');
+}
 
 export async function POST(request: Request) {
     try {
@@ -10,14 +15,16 @@ export async function POST(request: Request) {
             if (users.find(u => u.username === username)) {
                 return NextResponse.json({ error: 'User already exists' }, { status: 400 });
             }
-            // In a real app, hash the PIN. Here we store plain text as per "simple" requirement.
-            users.push({ username, pin });
+
+            const hashedPin = hashPin(pin);
+            users.push({ username, pin: hashedPin });
             await saveUsers(users);
             return NextResponse.json({ success: true });
         }
 
         if (action === 'login') {
-            const user = users.find(u => u.username === username && u.pin === pin);
+            const hashedPin = hashPin(pin);
+            const user = users.find(u => u.username === username && u.pin === hashedPin);
             if (user) {
                 return NextResponse.json({ success: true, user });
             }
