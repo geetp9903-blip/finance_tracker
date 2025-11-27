@@ -25,6 +25,7 @@ export async function POST(request: Request) {
 
         const testRule = {
             id: 'test-' + Date.now(),
+            userId: 'DemoUser',
             description: 'Test Rule',
             amount: 100,
             category: 'Test',
