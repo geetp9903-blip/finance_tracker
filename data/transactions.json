@@ -16,5 +16,14 @@
     "date": "2025-11-27T05:25:08.965Z",
     "id": "c300469e-6221-483c-9fd8-44cf215e37e5",
     "userId": "geetp9903"
+  },
+  {
+    "id": "test-id-1764227040815",
+    "amount": 123,
+    "description": "Test Transaction",
+    "category": "Test",
+    "type": "expense",
+    "date": "2025-11-27T07:04:00.815Z",
+    "userId": "geetp9903"
   }
 ]

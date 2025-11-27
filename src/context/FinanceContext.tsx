@@ -50,18 +50,35 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
     };
 
     const addTransaction = async (t: Omit<Transaction, 'id' | 'userId'>) => {
-        if (!user) return;
-        const newTransaction = { ...t, id: generateId(), userId: user.username };
-        const res = await fetch('/api/finance', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'x-user-id': user.username
-            },
-            body: JSON.stringify({ type: 'transaction', data: newTransaction }),
-        });
-        if (res.ok) {
-            setTransactions(prev => [...prev, newTransaction]);
+        if (!user) {
+            console.error("User not found in context");
+            alert("Error: User not logged in");
+            return;
+        }
+        try {
+            const newTransaction = { ...t, id: generateId(), userId: user.username };
+            console.log("Adding transaction:", newTransaction);
+
+            const res = await fetch('/api/finance', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'x-user-id': user.username
+                },
+                body: JSON.stringify({ type: 'transaction', data: newTransaction }),
+            });
+
+            if (res.ok) {
+                console.log("Transaction added successfully");
+                setTransactions(prev => [...prev, newTransaction]);
+            } else {
+                const err = await res.json();
+                console.error("Failed to add transaction:", err);
+                alert(`Failed to add transaction: ${err.error || 'Unknown error'}`);
+            }
+        } catch (error) {
+            console.error("Error adding transaction:", error);
+            alert("Error adding transaction. Please check console.");
         }
     };
 
