@@ -1,49 +1,51 @@
 {
-  "fixedExpenses": [
-    {
-      "id": "e5f67ab1-ce87-4cd7-8782-73dae873f055",
-      "name": "Rent",
-      "amount": 22000
-    },
-    {
-      "id": "f6f85b4b-1330-4780-a49b-11f53f07a0f5",
-      "name": "ELectricity Bill",
-      "amount": 3500
-    },
-    {
-      "id": "967b7c25-935e-4cf0-9c21-378e06f0653a",
-      "name": "Blinkit Groceries",
-      "amount": 15000
-    },
-    {
-      "id": "ffd5a269-4651-4f94-ad85-c3996dbd48c9",
-      "name": "Netflix",
-      "amount": 650
-    },
-    {
-      "id": "c5400d52-b4be-4c13-9b79-c27b7d2d9b15",
-      "name": "Subscriptions",
-      "amount": 255
-    }
-  ],
-  "allocations": [
-    {
-      "id": "3cb1540d-a6f4-4a21-87d1-5fad8a45a163",
-      "name": "Savings",
-      "percentage": 20,
-      "color": "bg-emerald-500"
-    },
-    {
-      "id": "5186dd7a-08e5-413f-b591-90f0cadc492f",
-      "name": "Investments",
-      "percentage": 10,
-      "color": "bg-blue-500"
-    },
-    {
-      "id": "a38d8d31-3196-4c76-9b36-b9e281260523",
-      "name": "Wants/Fun",
-      "percentage": 30,
-      "color": "bg-purple-500"
-    }
-  ]
+  "geetp9903": {
+    "fixedExpenses": [
+      {
+        "id": "e5f67ab1-ce87-4cd7-8782-73dae873f055",
+        "name": "Rent",
+        "amount": 22000
+      },
+      {
+        "id": "f6f85b4b-1330-4780-a49b-11f53f07a0f5",
+        "name": "ELectricity Bill",
+        "amount": 3500
+      },
+      {
+        "id": "967b7c25-935e-4cf0-9c21-378e06f0653a",
+        "name": "Blinkit Groceries",
+        "amount": 15000
+      },
+      {
+        "id": "ffd5a269-4651-4f94-ad85-c3996dbd48c9",
+        "name": "Netflix",
+        "amount": 650
+      },
+      {
+        "id": "c5400d52-b4be-4c13-9b79-c27b7d2d9b15",
+        "name": "Subscriptions",
+        "amount": 255
+      }
+    ],
+    "allocations": [
+      {
+        "id": "3cb1540d-a6f4-4a21-87d1-5fad8a45a163",
+        "name": "Savings",
+        "percentage": 20,
+        "color": "bg-emerald-500"
+      },
+      {
+        "id": "5186dd7a-08e5-413f-b591-90f0cadc492f",
+        "name": "Investments",
+        "percentage": 10,
+        "color": "bg-blue-500"
+      },
+      {
+        "id": "a38d8d31-3196-4c76-9b36-b9e281260523",
+        "name": "Wants/Fun",
+        "percentage": 30,
+        "color": "bg-purple-500"
+      }
+    ]
+  }
 }

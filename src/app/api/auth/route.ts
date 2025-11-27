@@ -2,8 +2,8 @@ import { NextResponse } from 'next/server';
 import { getUsers, saveUsers } from '@/lib/storage';
 import crypto from 'crypto';
 
-function hashPin(pin: string): string {
-    return crypto.createHash('sha256').update(pin).digest('hex');
+function hashPin(pin: string | number): string {
+    return crypto.createHash('sha256').update(String(pin)).digest('hex');
 }
 
 export async function POST(request: Request) {

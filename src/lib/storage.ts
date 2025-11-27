@@ -43,14 +43,23 @@ export async function saveUsers(users: User[]) {
     await fs.writeFile(USERS_FILE, JSON.stringify(users, null, 2), 'utf8');
 }
 
-export async function getBudget(): Promise<Budget> {
-    await ensureFile(BUDGET_FILE, { fixedExpenses: [], allocations: [] });
+export async function getBudget(): Promise<Record<string, Budget>> {
+    await ensureFile(BUDGET_FILE, {});
     const data = await fs.readFile(BUDGET_FILE, 'utf-8');
-    return JSON.parse(data);
+    try {
+        const parsed = JSON.parse(data);
+        // Migration check: if it looks like a single budget (has fixedExpenses array), wrap it
+        if (parsed.fixedExpenses && Array.isArray(parsed.fixedExpenses)) {
+            return { "DemoUser": parsed }; // Default legacy data to DemoUser
+        }
+        return parsed;
+    } catch {
+        return {};
+    }
 }
 
-export async function saveBudget(budget: Budget) {
-    await fs.writeFile(BUDGET_FILE, JSON.stringify(budget, null, 2), 'utf8');
+export async function saveBudget(budgets: Record<string, Budget>) {
+    await fs.writeFile(BUDGET_FILE, JSON.stringify(budgets, null, 2), 'utf8');
 }
 
 export async function getRecurringRules(): Promise<RecurringRule[]> {

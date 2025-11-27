@@ -27,7 +27,9 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
     const refreshData = async () => {
         if (!user) return;
         try {
-            const res = await fetch('/api/finance');
+            const res = await fetch('/api/finance', {
+                headers: { 'x-user-id': user.username }
+            });
             const data = await res.json();
             if (data.transactions) setTransactions(data.transactions);
             if (data.budget) setBudget(data.budget);
@@ -41,10 +43,14 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
     }, [user]);
 
     const addTransaction = async (t: Omit<Transaction, 'id'>) => {
+        if (!user) return;
         const newTransaction = { ...t, id: crypto.randomUUID() };
         const res = await fetch('/api/finance', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: {
+                'Content-Type': 'application/json',
+                'x-user-id': user.username
+            },
             body: JSON.stringify({ type: 'transaction', data: newTransaction }),
         });
         if (res.ok) {
@@ -53,9 +59,13 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
     };
 
     const deleteTransaction = async (id: string) => {
+        if (!user) return;
         const res = await fetch('/api/finance', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: {
+                'Content-Type': 'application/json',
+                'x-user-id': user.username
+            },
             body: JSON.stringify({ type: 'delete_transaction', data: { id } }),
         });
         if (res.ok) {
@@ -64,9 +74,13 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
     };
 
     const updateBudget = async (newBudget: Budget) => {
+        if (!user) return;
         const res = await fetch('/api/finance', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: {
+                'Content-Type': 'application/json',
+                'x-user-id': user.username
+            },
             body: JSON.stringify({ type: 'budget', data: newBudget }),
         });
         if (res.ok) {

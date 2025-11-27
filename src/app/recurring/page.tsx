@@ -8,7 +8,10 @@ import { Plus, Trash2, RefreshCw, Calendar } from "lucide-react";
 import { RecurringRule, Frequency, TransactionType } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
+import { useAuth } from "@/context/AuthContext";
+
 export default function RecurringPage() {
+    const { user } = useAuth();
     const [rules, setRules] = useState<RecurringRule[]>([]);
     const [isModalOpen, setIsModalOpen] = useState(false);
 
@@ -21,15 +24,23 @@ export default function RecurringPage() {
     const [startDate, setStartDate] = useState("");
 
     const fetchRules = async () => {
-        const res = await fetch('/api/recurring', { cache: 'no-store' });
+        if (!user) return;
+        const res = await fetch('/api/recurring', {
+            headers: { 'x-user-id': user.username },
+            cache: 'no-store'
+        });
         const data = await res.json();
         if (data.rules) setRules(data.rules);
     };
 
     const processRules = async () => {
+        if (!user) return;
         const res = await fetch('/api/recurring', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: {
+                'Content-Type': 'application/json',
+                'x-user-id': user.username
+            },
             body: JSON.stringify({ action: 'process' }),
         });
         const data = await res.json();
@@ -43,12 +54,15 @@ export default function RecurringPage() {
 
     useEffect(() => {
         fetchRules();
-    }, []);
+    }, [user]);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+        if (!user) return;
+
         const newRule: RecurringRule = {
             id: crypto.randomUUID(),
+            userId: user.username,
             amount: parseFloat(amount),
             description,
             category,
@@ -61,7 +75,10 @@ export default function RecurringPage() {
 
         const res = await fetch('/api/recurring', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: {
+                'Content-Type': 'application/json',
+                'x-user-id': user.username
+            },
             body: JSON.stringify({ action: 'add', rule: newRule }),
         });
         const data = await res.json();
@@ -75,9 +92,13 @@ export default function RecurringPage() {
     };
 
     const deleteRule = async (id: string) => {
+        if (!user) return;
         const res = await fetch('/api/recurring', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: {
+                'Content-Type': 'application/json',
+                'x-user-id': user.username
+            },
             body: JSON.stringify({ action: 'delete', rule: { id } }),
         });
         const data = await res.json();

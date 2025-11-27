@@ -80,7 +80,7 @@ export default function LoginPage() {
                     <div className="mt-6 text-center">
                         <button
                             onClick={() => setIsRegistering(!isRegistering)}
-                            className="text-sm text-white/60 hover:text-white transition-colors"
+                            className="text-sm text-white/60 hover:text-white transition-colors cursor-pointer"
                         >
                             {isRegistering ? "Already have an account? Login" : "Don't have an account? Register"}
                         </button>

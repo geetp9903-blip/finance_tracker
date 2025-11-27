@@ -8,16 +8,10 @@ import { Modal } from "@/components/ui/Modal";
 import { Plus, Edit2, Trash2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-interface BudgetEntry {
-    id: string;
-    description: string;
-    amount: number;
-    category: string;
-    type: 'income' | 'expense';
-}
+import { BudgetEntry } from "@/lib/types";
 
 export default function BudgetPage() {
-    const { transactions, formatAmount } = useFinance();
+    const { transactions, formatAmount, budget, updateBudget } = useFinance();
     const [budgetEntries, setBudgetEntries] = useState<BudgetEntry[]>([]);
     const [isModalOpen, setIsModalOpen] = useState(false);
 
@@ -27,18 +21,23 @@ export default function BudgetPage() {
     const [category, setCategory] = useState("");
     const [type, setType] = useState<'income' | 'expense'>('expense');
 
-    // Load budget entries from localStorage
+    // Load budget entries from Context (Backend)
     useEffect(() => {
-        const stored = localStorage.getItem('monthly_budget');
-        if (stored) setBudgetEntries(JSON.parse(stored));
-    }, []);
+        if (budget.entries) {
+            setBudgetEntries(budget.entries);
+        }
+    }, [budget]);
 
-    const saveBudgetEntries = (entries: BudgetEntry[]) => {
+    const saveBudgetEntries = async (entries: BudgetEntry[]) => {
         setBudgetEntries(entries);
-        localStorage.setItem('monthly_budget', JSON.stringify(entries));
+        // Persist to backend via Context
+        await updateBudget({
+            ...budget,
+            entries: entries
+        });
     };
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         const newEntry: BudgetEntry = {
             id: crypto.randomUUID(),
@@ -47,13 +46,13 @@ export default function BudgetPage() {
             category,
             type,
         };
-        saveBudgetEntries([...budgetEntries, newEntry]);
+        await saveBudgetEntries([...budgetEntries, newEntry]);
         setIsModalOpen(false);
         setDescription(""); setAmount(""); setCategory("");
     };
 
-    const deleteEntry = (id: string) => {
-        saveBudgetEntries(budgetEntries.filter(e => e.id !== id));
+    const deleteEntry = async (id: string) => {
+        await saveBudgetEntries(budgetEntries.filter(e => e.id !== id));
     };
 
     // Calculate totals

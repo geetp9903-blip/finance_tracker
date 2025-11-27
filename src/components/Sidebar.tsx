@@ -57,7 +57,7 @@ export function Sidebar() {
                     </div>
                     <button
                         onClick={logout}
-                        className="flex w-full items-center rounded-xl p-3 text-white transition-colors hover:bg-red-500/20 hover:text-red-400 border border-transparent hover:border-red-500/20"
+                        className="flex w-full items-center rounded-xl p-3 text-white transition-colors hover:bg-red-500/20 hover:text-red-400 border border-transparent hover:border-red-500/20 cursor-pointer"
                     >
                         <LogOut className="h-5 w-5" />
                         <span className="ml-3">Logout</span>

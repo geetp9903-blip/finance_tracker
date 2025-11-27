@@ -5,7 +5,8 @@
     "category": "Grocery",
     "type": "expense",
     "date": "2025-11-27T05:24:26.088Z",
-    "id": "258004fd-b34c-4a88-bae1-c4affc2a2086"
+    "id": "258004fd-b34c-4a88-bae1-c4affc2a2086",
+    "userId": "geetp9903"
   },
   {
     "amount": 25000,
@@ -13,6 +14,7 @@
     "category": "Monthly",
     "type": "income",
     "date": "2025-11-27T05:25:08.965Z",
-    "id": "c300469e-6221-483c-9fd8-44cf215e37e5"
+    "id": "c300469e-6221-483c-9fd8-44cf215e37e5",
+    "userId": "geetp9903"
   }
 ]

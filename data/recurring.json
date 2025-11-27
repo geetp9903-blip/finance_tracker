@@ -8,7 +8,8 @@
     "frequency": "monthly",
     "startDate": "2025-12-03T00:00:00.000Z",
     "nextDueDate": "2025-12-03T00:00:00.000Z",
-    "active": true
+    "active": true,
+    "userId": "geetp9903"
   },
   {
     "id": "52ce52c5-0d7e-45d3-bcc5-162a1583d0f7",
@@ -19,7 +20,8 @@
     "frequency": "monthly",
     "startDate": "2025-12-05T00:00:00.000Z",
     "nextDueDate": "2025-12-05T00:00:00.000Z",
-    "active": true
+    "active": true,
+    "userId": "geetp9903"
   },
   {
     "id": "f6d4d47a-77b1-4246-a338-43eacfb191b8",
@@ -30,7 +32,8 @@
     "frequency": "monthly",
     "startDate": "2025-12-04T00:00:00.000Z",
     "nextDueDate": "2025-12-04T00:00:00.000Z",
-    "active": true
+    "active": true,
+    "userId": "geetp9903"
   },
   {
     "id": "acaaef28-191f-4634-8e3b-a53630a6c389",
@@ -41,6 +44,7 @@
     "frequency": "monthly",
     "startDate": "2025-12-03T00:00:00.000Z",
     "nextDueDate": "2025-12-03T00:00:00.000Z",
-    "active": true
+    "active": true,
+    "userId": "geetp9903"
   }
 ]

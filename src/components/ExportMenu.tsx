@@ -60,21 +60,21 @@ export function ExportMenu({ transactions }: ExportMenuProps) {
                     <div className="py-1">
                         <button
                             onClick={exportPDF}
-                            className="group flex w-full items-center px-4 py-2 text-sm text-white hover:bg-white/10"
+                            className="group flex w-full items-center px-4 py-2 text-sm text-white hover:bg-white/10 cursor-pointer"
                         >
                             <Download className="mr-3 h-4 w-4 text-white/50 group-hover:text-white" />
                             Export PDF
                         </button>
                         <button
                             onClick={exportExcel}
-                            className="group flex w-full items-center px-4 py-2 text-sm text-white hover:bg-white/10"
+                            className="group flex w-full items-center px-4 py-2 text-sm text-white hover:bg-white/10 cursor-pointer"
                         >
                             <FileSpreadsheet className="mr-3 h-4 w-4 text-white/50 group-hover:text-white" />
                             Export Excel
                         </button>
                         <button
                             onClick={handlePrint}
-                            className="group flex w-full items-center px-4 py-2 text-sm text-white hover:bg-white/10"
+                            className="group flex w-full items-center px-4 py-2 text-sm text-white hover:bg-white/10 cursor-pointer"
                         >
                             <Printer className="mr-3 h-4 w-4 text-white/50 group-hover:text-white" />
                             Print View

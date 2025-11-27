@@ -4,10 +4,16 @@ import { RecurringRule, Transaction } from '@/lib/types';
 
 export const dynamic = 'force-dynamic';
 
-export async function GET() {
+export async function GET(request: Request) {
     try {
-        console.log('[Recurring GET] Fetching rules...');
-        const rules = await getRecurringRules();
+        const userId = request.headers.get('x-user-id');
+        if (!userId) {
+            return NextResponse.json({ error: 'User ID required' }, { status: 400 });
+        }
+
+        console.log('[Recurring GET] Fetching rules for user:', userId);
+        const allRules = await getRecurringRules();
+        const rules = allRules.filter(r => r.userId === userId);
         console.log('[Recurring GET] Fetched', rules.length, 'rules');
         return NextResponse.json({ rules });
     } catch (error) {
@@ -19,7 +25,12 @@ export async function GET() {
 
 export async function POST(request: Request) {
     try {
-        console.log('[Recurring POST] Starting...');
+        const userId = request.headers.get('x-user-id');
+        if (!userId) {
+            return NextResponse.json({ error: 'User ID required' }, { status: 400 });
+        }
+
+        console.log('[Recurring POST] Starting for user:', userId);
         const body = await request.json();
         const { action, rule } = body;
         console.log('[Recurring POST] Action:', action);
@@ -28,18 +39,23 @@ export async function POST(request: Request) {
 
         if (action === 'add') {
             console.log('[Recurring POST] Adding rule:', rule.description);
-            rules.push(rule);
+            const newRule = { ...rule, userId };
+            rules.push(newRule);
             await saveRecurringRules(rules);
             console.log('[Recurring POST] Rule added successfully');
-            return NextResponse.json({ success: true, rules });
+            return NextResponse.json({ success: true, rules: rules.filter(r => r.userId === userId) });
         }
 
         if (action === 'delete') {
             console.log('[Recurring POST] Deleting rule:', rule.id);
-            rules = rules.filter(r => r.id !== rule.id);
-            await saveRecurringRules(rules);
+            // Ensure user owns the rule
+            const ruleIndex = rules.findIndex(r => r.id === rule.id && r.userId === userId);
+            if (ruleIndex !== -1) {
+                rules.splice(ruleIndex, 1);
+                await saveRecurringRules(rules);
+            }
             console.log('[Recurring POST] Rule deleted successfully');
-            return NextResponse.json({ success: true, rules });
+            return NextResponse.json({ success: true, rules: rules.filter(r => r.userId === userId) });
         }
 
         if (action === 'process') {
@@ -47,10 +63,14 @@ export async function POST(request: Request) {
             const transactions = await getTransactions();
             const today = new Date();
             let newTransactions: Transaction[] = [];
-            let updatedRules = [...rules];
 
+            // Only process user's rules
+            const userRules = rules.filter(r => r.userId === userId);
+            let updatedRules = [...rules]; // We need to update global rules array but only modify user's rules
+
+            // Map over global rules, but only process if it matches user
             updatedRules = updatedRules.map(r => {
-                if (!r.active) return r;
+                if (r.userId !== userId || !r.active) return r;
 
                 let nextDue = new Date(r.nextDueDate);
                 let processed = false;
@@ -58,6 +78,7 @@ export async function POST(request: Request) {
                 while (nextDue <= today) {
                     newTransactions.push({
                         id: `txn_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+                        userId: userId, // Tag new transaction
                         amount: r.amount,
                         type: r.type,
                         category: r.category,

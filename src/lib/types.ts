@@ -3,6 +3,7 @@ export type Frequency = 'daily' | 'weekly' | 'monthly' | 'yearly';
 
 export interface Transaction {
     id: string;
+    userId: string;
     amount: number;
     type: TransactionType;
     category: string;
@@ -18,6 +19,7 @@ export interface User {
 
 export interface RecurringRule {
     id: string;
+    userId: string;
     type: TransactionType;
     amount: number;
     category: string;
@@ -30,6 +32,7 @@ export interface RecurringRule {
 
 export interface BudgetPeriod {
     id: string;
+    userId: string;
     month: number;
     year: number;
     limits: Record<string, number>;
@@ -48,9 +51,18 @@ export interface Allocation {
     color: string;
 }
 
+export interface BudgetEntry {
+    id: string;
+    description: string;
+    amount: number;
+    category: string;
+    type: 'income' | 'expense';
+}
+
 export interface Budget {
     fixedExpenses: FixedExpense[];
     allocations: Allocation[];
+    entries?: BudgetEntry[];
 }
 
 export interface AppData {
