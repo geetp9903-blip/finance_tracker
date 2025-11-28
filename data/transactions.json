@@ -18,12 +18,12 @@
     "userId": "geetp9903"
   },
   {
-    "id": "test-id-1764227040815",
-    "amount": 123,
-    "description": "Test Transaction",
-    "category": "Test",
+    "amount": 496,
+    "description": "Blinkit",
+    "category": "Grocery",
     "type": "expense",
-    "date": "2025-11-27T07:04:00.815Z",
+    "date": "2025-11-27T07:12:37.834Z",
+    "id": "4cd0b907-987e-43fe-8a45-8e042f1154f1",
     "userId": "geetp9903"
   }
 ]
