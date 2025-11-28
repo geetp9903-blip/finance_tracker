@@ -11,8 +11,8 @@ export async function GET(request: Request) {
         const allTransactions = await getTransactions();
         const transactions = allTransactions.filter(t => t.userId === userId);
 
-        const allBudgets = await getBudget();
-        const budget = allBudgets[userId] || { fixedExpenses: [], allocations: [] };
+        const budgetData = await getBudget(userId);
+        const budget = budgetData[userId] || { fixedExpenses: [], allocations: [], entries: [] };
 
         return NextResponse.json({ transactions, budget });
     } catch (error) {

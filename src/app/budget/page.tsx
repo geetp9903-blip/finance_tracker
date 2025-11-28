@@ -104,7 +104,7 @@ export default function BudgetPage() {
                                 "h-10 w-10 rounded-full flex items-center justify-center text-lg font-bold",
                                 entry.type === 'income' ? "bg-emerald-500/20 text-emerald-400" : "bg-red-500/20 text-red-400"
                             )}>
-                                {entry.category.charAt(0).toUpperCase()}
+                                {entry.category ? entry.category.charAt(0).toUpperCase() : '?'}
                             </div>
                             <div>
                                 <p className="font-medium text-white">{entry.description}</p>

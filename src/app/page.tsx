@@ -98,7 +98,7 @@ export default function Dashboard() {
   // Gradient Offset Calculation for Cumulative Chart
   const maxSpending = Math.max(...chartData.map(d => d.actualCumulative || 0));
   const maxY = Math.max(totalBudget, maxSpending) * 1.1; // Scale Y-axis
-  const gradientOffset = totalBudget / maxY;
+  const gradientOffset = maxY > 0 ? totalBudget / maxY : 0;
 
   // Recent Transactions
   const sortedTransactions = [...transactions]
