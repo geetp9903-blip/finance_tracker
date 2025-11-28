@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { getTransactions, saveTransactions, getBudget, saveBudget } from '@/lib/storage';
+import { getTransactions, createTransaction, deleteTransaction, getBudget, updateUserBudget } from '@/lib/storage';
 
 export async function GET(request: Request) {
     try {
@@ -36,44 +36,41 @@ export async function POST(request: Request) {
 
         if (type === 'transaction') {
             console.log('[Finance API] Adding transaction...');
-            const transactions = await getTransactions();
             const newTransaction = { ...data, userId };
-            transactions.push(newTransaction);
-            await saveTransactions(transactions);
-            console.log('[Finance API] Transaction saved. Total count:', transactions.length);
-            // Return only user's transactions
-            return NextResponse.json({ success: true, transactions: transactions.filter(t => t.userId === userId) });
+            // Use granular create instead of fetch-all-then-save-all
+            await createTransaction(newTransaction);
+            console.log('[Finance API] Transaction created');
+
+            // Return updated list
+            const transactions = await getTransactions(userId);
+            return NextResponse.json({ success: true, transactions });
         }
 
         if (type === 'budget') {
             console.log('[Finance API] Updating budget...');
-            const budgets = await getBudget();
-            budgets[userId] = data;
-            await saveBudget(budgets);
+            await updateUserBudget(userId, data);
             console.log('[Finance API] Budget saved');
             return NextResponse.json({ success: true, budget: data });
         }
 
         if (type === 'delete_transaction') {
             console.log('[Finance API] Deleting transaction:', data.id);
-            const { id } = data;
-            let transactions = await getTransactions();
-            // Ensure user owns the transaction before deleting
-            const txIndex = transactions.findIndex(t => t.id === id && t.userId === userId);
-            if (txIndex !== -1) {
-                transactions.splice(txIndex, 1);
-                await saveTransactions(transactions);
-                console.log('[Finance API] Transaction deleted');
-            } else {
-                console.warn('[Finance API] Transaction not found or access denied');
-            }
-            return NextResponse.json({ success: true, transactions: transactions.filter(t => t.userId === userId) });
+            await deleteTransaction(data.id, userId);
+            console.log('[Finance API] Transaction deleted');
+
+            // Return updated list
+            const transactions = await getTransactions(userId);
+            return NextResponse.json({ success: true, transactions });
         }
 
         console.warn('[Finance API] Invalid type:', type);
         return NextResponse.json({ error: 'Invalid type' }, { status: 400 });
-    } catch (error) {
+    } catch (error: any) {
         console.error('[Finance API] Error:', error);
-        return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
+        // Return explicit error message to help debugging
+        return NextResponse.json({
+            error: 'Internal Server Error',
+            details: error.message
+        }, { status: 500 });
     }
 }
