@@ -9,9 +9,6 @@ const inter = Inter({ subsets: ["latin"] });
 export const metadata: Metadata = {
   title: "Prospera",
   description: "Prosper with clarity. Track your finances with style.",
-  icons: {
-    icon: '/Prospera_1_icon.png',
-  },
 };
 
 export default function RootLayout({
