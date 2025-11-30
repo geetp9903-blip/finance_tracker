@@ -16,20 +16,32 @@ export function ExportMenu({ transactions }: ExportMenuProps) {
 
     const exportPDF = () => {
         const doc = new jsPDF();
-        doc.text("Finance Tracker Report", 14, 22);
+
+        // Header
+        doc.setFontSize(20);
+        doc.setTextColor(40, 40, 40);
+        doc.text("FINANCE TRACKER REPORT", 14, 22);
+
+        doc.setFontSize(10);
+        doc.setTextColor(100, 100, 100);
+        doc.text(`Generated on: ${new Date().toLocaleDateString()}`, 14, 30);
 
         const tableData = transactions.map(t => [
             new Date(t.date).toLocaleDateString(),
             t.description,
-            t.category,
-            t.type,
-            t.amount.toString()
+            t.category.toUpperCase(),
+            t.type.toUpperCase(),
+            t.amount.toFixed(2)
         ]);
 
         autoTable(doc, {
-            head: [['Date', 'Description', 'Category', 'Type', 'Amount']],
+            head: [['DATE', 'DESCRIPTION', 'CATEGORY', 'TYPE', 'AMOUNT']],
             body: tableData,
-            startY: 30,
+            startY: 40,
+            theme: 'grid',
+            headStyles: { fillColor: [20, 20, 20], textColor: [255, 255, 255], fontStyle: 'bold' },
+            styles: { fontSize: 10, cellPadding: 3 },
+            alternateRowStyles: { fillColor: [245, 245, 245] },
         });
 
         doc.save("finance-report.pdf");
@@ -37,7 +49,16 @@ export function ExportMenu({ transactions }: ExportMenuProps) {
     };
 
     const exportExcel = () => {
-        const ws = XLSX.utils.json_to_sheet(transactions);
+        // Transform data for Excel
+        const excelData = transactions.map(t => ({
+            DATE: new Date(t.date).toLocaleDateString(),
+            DESCRIPTION: t.description,
+            CATEGORY: t.category.toUpperCase(),
+            TYPE: t.type.toUpperCase(),
+            AMOUNT: t.amount
+        }));
+
+        const ws = XLSX.utils.json_to_sheet(excelData);
         const wb = XLSX.utils.book_new();
         XLSX.utils.book_append_sheet(wb, ws, "Transactions");
         XLSX.writeFile(wb, "finance-report.xlsx");

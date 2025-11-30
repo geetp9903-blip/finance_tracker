@@ -8,6 +8,7 @@ import { Modal } from "@/components/ui/Modal";
 import { Plus, Search, Trash2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ExportMenu } from "@/components/ExportMenu";
+import { CategorySelector } from "@/components/ui/CategorySelector";
 
 export default function TransactionsPage() {
     const { transactions, addTransaction, deleteTransaction, formatAmount } = useFinance();
@@ -157,7 +158,11 @@ export default function TransactionsPage() {
                     </div>
                     <div>
                         <label className="block text-sm text-white/70 mb-1">Category</label>
-                        <Input type="text" required value={category} onChange={(e) => setCategory(e.target.value)} placeholder="e.g. Food, Salary" />
+                        <CategorySelector
+                            value={category}
+                            onChange={setCategory}
+                            existingCategories={Array.from(new Set(transactions.map(t => t.category)))}
+                        />
                     </div>
 
                     <div className="pt-4 flex justify-end gap-2">

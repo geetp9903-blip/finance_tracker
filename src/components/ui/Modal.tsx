@@ -31,7 +31,7 @@ export function Modal({ isOpen, onClose, title, children }: ModalProps) {
                         exit={{ opacity: 0, scale: 0.95, y: 20 }}
                         className="fixed left-[50%] top-[50%] z-50 w-full max-w-lg translate-x-[-50%] translate-y-[-50%] p-4"
                     >
-                        <div className="glass-card relative overflow-hidden p-6 text-white">
+                        <div className="glass-card relative p-6 text-white">
                             <div className="flex items-center justify-between mb-6">
                                 <h2 className="text-xl font-semibold">{title}</h2>
                                 <Button variant="ghost" size="sm" onClick={onClose} className="h-8 w-8 p-0 rounded-full hover:bg-white/10">

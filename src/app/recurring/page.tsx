@@ -7,6 +7,7 @@ import { Modal } from "@/components/ui/Modal";
 import { Plus, Trash2, RefreshCw, Calendar } from "lucide-react";
 import { RecurringRule, Frequency, TransactionType } from "@/lib/types";
 import { cn } from "@/lib/utils";
+import { CategorySelector } from "@/components/ui/CategorySelector";
 
 import { useAuth } from "@/context/AuthContext";
 
@@ -99,7 +100,7 @@ export default function RecurringPage() {
                 'Content-Type': 'application/json',
                 'x-user-id': user.username
             },
-            body: JSON.stringify({ action: 'delete', rule: { id } }),
+            body: JSON.stringify({ action: 'delete', id }),
         });
         const data = await res.json();
         if (data.success) {
@@ -189,7 +190,11 @@ export default function RecurringPage() {
                         </div>
                         <div>
                             <label className="block text-sm text-white/70 mb-1">Category</label>
-                            <Input required value={category} onChange={(e) => setCategory(e.target.value)} placeholder="e.g. Entertainment" />
+                            <CategorySelector
+                                value={category}
+                                onChange={setCategory}
+                                existingCategories={Array.from(new Set(rules.map(r => r.category)))}
+                            />
                         </div>
                     </div>
                     <div className="grid grid-cols-2 gap-4">

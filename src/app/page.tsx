@@ -57,8 +57,14 @@ export default function Dashboard() {
     return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
   });
 
-  // Calculate Chart Data
-  let runningTotal = 0;
+  // Calculate Balance Trend Data
+  const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+  const startOfMonthBalance = transactions
+    .filter(t => new Date(t.date) < startOfMonth)
+    .reduce((acc, t) => acc + (t.type === 'income' ? t.amount : -t.amount), 0);
+
+  let currentBalance = startOfMonthBalance;
+
   const chartData = Array.from({ length: daysInMonth }, (_, i) => {
     const day = i + 1;
 
@@ -71,9 +77,9 @@ export default function Dashboard() {
       .filter(t => t.type === 'expense' && new Date(t.date).getDate() === day)
       .reduce((acc, t) => acc + t.amount, 0);
 
-    // Cumulative logic for Area Chart
+    // Update running balance
     if (day <= currentDay) {
-      runningTotal += dailyExpense;
+      currentBalance += (dailyIncome - dailyExpense);
     }
 
     // Stop generating "Actual" data for future dates
@@ -90,15 +96,14 @@ export default function Dashboard() {
       day,
       income: dailyIncome,
       expense: dailyExpense,
-      actualCumulative: runningTotal, // For Cumulative Area Chart
-      budgetLimit: totalBudget, // Reference line
+      balance: currentBalance, // For Balance Trend Chart
+      budgetLimit: totalBudget,
     };
   });
 
-  // Gradient Offset Calculation for Cumulative Chart
-  const maxSpending = Math.max(...chartData.map(d => d.actualCumulative || 0));
-  const maxY = Math.max(totalBudget, maxSpending) * 1.1; // Scale Y-axis
-  const gradientOffset = maxY > 0 ? totalBudget / maxY : 0;
+  // Gradient Offset Calculation for Balance Chart (if needed, or just use simple gradient)
+  const minBalance = Math.min(...chartData.filter(d => d.balance !== undefined).map(d => d.balance || 0), 0);
+  const maxBalance = Math.max(...chartData.filter(d => d.balance !== undefined).map(d => d.balance || 0), 100);
 
   // Recent Transactions
   const sortedTransactions = [...transactions]
@@ -207,38 +212,38 @@ export default function Dashboard() {
           </div>
         </Card>
 
-        {/* Cumulative Spending Area Chart */}
+        {/* Balance Trend Chart */}
         <Card className="glass-card p-6">
-          <h3 className="mb-6 text-lg font-semibold text-white">Cumulative Spending</h3>
+          <h3 className="mb-6 text-lg font-semibold text-white">Balance Trend</h3>
           <div className="h-[300px] w-full">
             <ResponsiveContainer width="100%" height="100%">
               <AreaChart data={chartData}>
                 <defs>
-                  <linearGradient id="splitColor" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset={gradientOffset} stopColor="#ef4444" stopOpacity={1} />
-                    <stop offset={gradientOffset} stopColor="#10b981" stopOpacity={1} />
+                  <linearGradient id="colorBalance" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.3} />
+                    <stop offset="95%" stopColor="#3b82f6" stopOpacity={0} />
                   </linearGradient>
                 </defs>
                 <XAxis dataKey="day" stroke="#fff" tick={{ fill: '#fff', opacity: 0.5 }} />
-                <YAxis stroke="#fff" tick={{ fill: '#fff', opacity: 0.5 }} domain={[0, maxY]} />
+                <YAxis stroke="#fff" tick={{ fill: '#fff', opacity: 0.5 }} domain={['auto', 'auto']} />
                 <Tooltip
                   contentStyle={{ backgroundColor: 'rgba(0,0,0,0.8)', border: 'none', borderRadius: '8px', color: '#fff' }}
                   formatter={(value: number, name: string) => {
-                    if (name === "actualCumulative") return [formatAmount(value), "Total Spent"];
+                    if (name === "balance") return [formatAmount(value), "Balance"];
                     return [formatAmount(value), name];
                   }}
                   labelFormatter={(label) => `Day ${label}`}
                 />
                 <Legend />
-                <ReferenceLine y={totalBudget} stroke="#fff" strokeDasharray="3 3" label={{ position: 'top', value: 'Budget Limit', fill: '#fff', fontSize: 12 }} />
                 <Area
                   type="monotone"
-                  dataKey="actualCumulative"
-                  stroke="url(#splitColor)"
-                  fill="url(#splitColor)"
-                  fillOpacity={0.3}
-                  name="Total Spent"
+                  dataKey="balance"
+                  stroke="#3b82f6"
+                  fill="url(#colorBalance)"
+                  fillOpacity={1}
+                  name="Balance"
                   connectNulls
+                  strokeWidth={2}
                 />
               </AreaChart>
             </ResponsiveContainer>
