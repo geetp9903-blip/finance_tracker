@@ -11,6 +11,7 @@ export async function GET() {
     try {
         // 1. Create Mock User
         const mockUser: User = {
+            id: crypto.randomUUID(),
             username: "DemoUser",
             pin: hashPin("1234")
         };
