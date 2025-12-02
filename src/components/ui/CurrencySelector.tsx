@@ -24,7 +24,7 @@ export function CurrencySelector({ currentCurrency, onSelect }: CurrencySelector
         <div className="relative">
             <button
                 onClick={() => setIsOpen(!isOpen)}
-                className="flex items-center gap-2 rounded-full glass-button px-4 py-2 text-sm font-medium transition-all duration-200 ease-in-out hover:scale-105 active:scale-95 hover:shadow-lg hover:shadow-primary/10"
+                className="flex items-center gap-2 rounded-xl bg-white/5 backdrop-blur-md border border-white/10 px-4 py-2 text-sm font-medium transition-all duration-200 ease-in-out hover:scale-105 active:scale-95 hover:shadow-lg hover:shadow-primary/10 hover:bg-white/10"
             >
                 <Globe className="h-4 w-4" />
                 <span>{selected.symbol} {selected.code}</span>
@@ -39,7 +39,7 @@ export function CurrencySelector({ currentCurrency, onSelect }: CurrencySelector
                             initial={{ opacity: 0, y: 10, scale: 0.95 }}
                             animate={{ opacity: 1, y: 0, scale: 1 }}
                             exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                            className="absolute right-0 top-12 z-20 w-56 glass-card overflow-hidden p-1"
+                            className="absolute right-0 top-12 z-20 w-56 bg-white/5 backdrop-blur-md border border-white/10 rounded-xl overflow-hidden p-1 shadow-xl"
                         >
                             {CURRENCIES.map((currency) => (
                                 <button

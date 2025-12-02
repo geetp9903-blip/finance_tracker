@@ -185,8 +185,8 @@ export default function Dashboard() {
     <div className="space-y-8">
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-foreground bg-accent/50 backdrop-blur-md border border-white/10 rounded-full px-6 py-2 shadow-sm w-fit">Dashboard</h1>
-          <p className="text-muted-foreground mt-2 bg-accent/30 backdrop-blur-sm border border-white/5 rounded-full px-4 py-1 w-fit text-sm">Welcome back, {user.username}</p>
+          <h1 className="text-3xl font-bold text-foreground bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl px-6 py-2 shadow-sm w-fit">Dashboard</h1>
+          <p className="text-muted-foreground mt-2 bg-white/5 backdrop-blur-sm border border-white/5 rounded-xl px-4 py-1 w-fit text-sm">Welcome back, {user.username}</p>
         </div>
         <CurrencySelector currentCurrency={currency} onSelect={setCurrency} />
       </div>
@@ -195,17 +195,17 @@ export default function Dashboard() {
       <div className="space-y-4">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div className="flex items-center gap-4">
-            <h2 className="text-xl font-semibold text-foreground bg-accent/50 backdrop-blur-md border border-white/10 rounded-full px-4 py-1.5 shadow-sm w-fit">Summary</h2>
-            <div className="flex gap-2 bg-accent/50 rounded-lg p-1">
+            <h2 className="text-xl font-semibold text-foreground bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl px-6 py-2 shadow-sm w-fit">Summary</h2>
+            <div className="flex gap-2 bg-white/5 backdrop-blur-md border border-white/10 rounded-xl p-1">
               <button
                 onClick={() => setSummaryViewMode('month')}
-                className={`px-3 py-1 rounded-md text-sm transition-all duration-200 ease-in-out cursor-pointer hover:scale-105 active:scale-95 ${summaryViewMode === 'month' ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-lg shadow-purple-500/20' : 'text-muted-foreground hover:text-foreground hover:bg-accent'}`}
+                className={`px-3 py-1 rounded-xl text-sm transition-all duration-200 ease-in-out cursor-pointer hover:scale-105 active:scale-95 ${summaryViewMode === 'month' ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-lg shadow-purple-500/20' : 'text-muted-foreground hover:text-foreground hover:bg-white/5'}`}
               >
                 Month
               </button>
               <button
                 onClick={() => setSummaryViewMode('year')}
-                className={`px-3 py-1 rounded-md text-sm transition-all duration-200 ease-in-out cursor-pointer hover:scale-105 active:scale-95 ${summaryViewMode === 'year' ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-lg shadow-purple-500/20' : 'text-muted-foreground hover:text-foreground hover:bg-accent'}`}
+                className={`px-3 py-1 rounded-xl text-sm transition-all duration-200 ease-in-out cursor-pointer hover:scale-105 active:scale-95 ${summaryViewMode === 'year' ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-lg shadow-purple-500/20' : 'text-muted-foreground hover:text-foreground hover:bg-white/5'}`}
               >
                 Year
               </button>
@@ -262,17 +262,17 @@ export default function Dashboard() {
         <Card className="glass-card p-6">
           <div className="flex flex-col gap-4 mb-6">
             <div className="flex items-center justify-between">
-              <h3 className="text-lg font-semibold text-foreground bg-accent/50 backdrop-blur-md border border-white/10 rounded-full px-4 py-1.5 shadow-sm w-fit">Income vs Expenses</h3>
-              <div className="flex gap-2 bg-accent/50 rounded-lg p-1">
+              <h3 className="text-lg font-semibold text-foreground bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl px-6 py-2 shadow-sm w-fit">Income vs Expenses</h3>
+              <div className="flex gap-2 bg-white/5 backdrop-blur-md border border-white/10 rounded-xl p-1">
                 <button
                   onClick={() => setIncomeViewMode('month')}
-                  className={`px-3 py-1 rounded-md text-sm transition-all duration-200 ease-in-out cursor-pointer hover:scale-105 active:scale-95 ${incomeViewMode === 'month' ? 'bg-gradient-to-r from-emerald-500 to-teal-500 text-white shadow-lg shadow-emerald-500/20' : 'text-muted-foreground hover:text-foreground hover:bg-accent'}`}
+                  className={`px-3 py-1 rounded-xl text-sm transition-all duration-200 ease-in-out cursor-pointer hover:scale-105 active:scale-95 ${incomeViewMode === 'month' ? 'bg-gradient-to-r from-emerald-500 to-teal-500 text-white shadow-lg shadow-emerald-500/20' : 'text-muted-foreground hover:text-foreground hover:bg-white/5'}`}
                 >
                   Month
                 </button>
                 <button
                   onClick={() => setIncomeViewMode('year')}
-                  className={`px-3 py-1 rounded-md text-sm transition-all duration-200 ease-in-out cursor-pointer hover:scale-105 active:scale-95 ${incomeViewMode === 'year' ? 'bg-gradient-to-r from-emerald-500 to-teal-500 text-white shadow-lg shadow-emerald-500/20' : 'text-muted-foreground hover:text-foreground hover:bg-accent'}`}
+                  className={`px-3 py-1 rounded-xl text-sm transition-all duration-200 ease-in-out cursor-pointer hover:scale-105 active:scale-95 ${incomeViewMode === 'year' ? 'bg-gradient-to-r from-emerald-500 to-teal-500 text-white shadow-lg shadow-emerald-500/20' : 'text-muted-foreground hover:text-foreground hover:bg-white/5'}`}
                 >
                   Year
                 </button>
@@ -332,17 +332,17 @@ export default function Dashboard() {
         <Card className="glass-card p-6">
           <div className="flex flex-col gap-4 mb-6">
             <div className="flex items-center justify-between">
-              <h3 className="text-lg font-semibold text-foreground bg-accent/50 backdrop-blur-md border border-white/10 rounded-full px-4 py-1.5 shadow-sm w-fit">Balance Trend</h3>
-              <div className="flex gap-2 bg-accent/50 rounded-lg p-1">
+              <h3 className="text-lg font-semibold text-foreground bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl px-6 py-2 shadow-sm w-fit">Balance Trend</h3>
+              <div className="flex gap-2 bg-white/5 backdrop-blur-md border border-white/10 rounded-xl p-1">
                 <button
                   onClick={() => setBalanceViewMode('month')}
-                  className={`px-3 py-1 rounded-md text-sm transition-all duration-200 ease-in-out cursor-pointer hover:scale-105 active:scale-95 ${balanceViewMode === 'month' ? 'bg-gradient-to-r from-blue-500 to-cyan-500 text-white shadow-lg shadow-blue-500/20' : 'text-muted-foreground hover:text-foreground hover:bg-accent'}`}
+                  className={`px-3 py-1 rounded-xl text-sm transition-all duration-200 ease-in-out cursor-pointer hover:scale-105 active:scale-95 ${balanceViewMode === 'month' ? 'bg-gradient-to-r from-blue-500 to-cyan-500 text-white shadow-lg shadow-blue-500/20' : 'text-muted-foreground hover:text-foreground hover:bg-white/5'}`}
                 >
                   Month
                 </button>
                 <button
                   onClick={() => setBalanceViewMode('year')}
-                  className={`px-3 py-1 rounded-md text-sm transition-all duration-200 ease-in-out cursor-pointer hover:scale-105 active:scale-95 ${balanceViewMode === 'year' ? 'bg-gradient-to-r from-blue-500 to-cyan-500 text-white shadow-lg shadow-blue-500/20' : 'text-muted-foreground hover:text-foreground hover:bg-accent'}`}
+                  className={`px-3 py-1 rounded-xl text-sm transition-all duration-200 ease-in-out cursor-pointer hover:scale-105 active:scale-95 ${balanceViewMode === 'year' ? 'bg-gradient-to-r from-blue-500 to-cyan-500 text-white shadow-lg shadow-blue-500/20' : 'text-muted-foreground hover:text-foreground hover:bg-white/5'}`}
                 >
                   Year
                 </button>
@@ -391,12 +391,12 @@ export default function Dashboard() {
       {/* Recent Transactions Section */}
       <Card className="glass-card p-6">
         <div className="flex items-center justify-between mb-6">
-          <h3 className="text-lg font-semibold text-foreground bg-accent/50 backdrop-blur-md border border-white/10 rounded-full px-4 py-1.5 shadow-sm w-fit">Recent Transactions</h3>
+          <h3 className="text-lg font-semibold text-foreground bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl px-6 py-2 shadow-sm w-fit">Recent Transactions</h3>
           <div className="flex gap-2">
             <select
               value={recentSort}
               onChange={(e) => setRecentSort(e.target.value as any)}
-              className="bg-accent/50 border border-border rounded-lg px-3 py-1 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+              className="bg-white/5 backdrop-blur-md border border-white/10 rounded-xl px-3 py-1 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
             >
               <option value="date" className="bg-card text-foreground">Most Recent</option>
               <option value="amount-high" className="bg-card text-foreground">Highest Amount</option>

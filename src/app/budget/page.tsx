@@ -67,7 +67,7 @@ export default function BudgetPage() {
     return (
         <div className="space-y-8">
             <div className="flex items-center justify-between">
-                <h1 className="text-3xl font-bold text-foreground bg-accent/50 backdrop-blur-md border border-white/10 rounded-full px-6 py-2 shadow-sm w-fit">Monthly Budget Plan</h1>
+                <h1 className="text-3xl font-bold text-foreground bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl px-6 py-2 shadow-sm w-fit">Monthly Budget Plan</h1>
                 <Button onClick={() => setIsModalOpen(true)}>
                     <Plus className="h-4 w-4 mr-2" /> Add Budget Item
                 </Button>
@@ -96,7 +96,7 @@ export default function BudgetPage() {
 
             {/* Budget Entries */}
             <div className="space-y-4">
-                <h2 className="text-xl font-semibold text-foreground bg-accent/50 backdrop-blur-md border border-white/10 rounded-full px-4 py-1.5 shadow-sm w-fit">Budget Entries</h2>
+                <h2 className="text-xl font-semibold text-foreground bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl px-6 py-2 shadow-sm w-fit">Budget Entries</h2>
                 {budgetEntries.map((entry) => (
                     <Card key={entry.id} className="glass-card flex items-center justify-between p-4">
                         <div className="flex items-center gap-4">

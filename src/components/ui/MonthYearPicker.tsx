@@ -27,7 +27,7 @@ export function MonthYearPicker({ selectedDate, onChange }: MonthYearPickerProps
     const years = Array.from({ length: 10 }, (_, i) => currentYear - 5 + i);
 
     return (
-        <div className="flex items-center gap-2 bg-accent/50 rounded-lg p-1 border border-border transition-all duration-200 hover:bg-accent hover:border-accent hover:shadow-lg hover:shadow-primary/5">
+        <div className="flex items-center gap-2 bg-white/5 backdrop-blur-md border border-white/10 rounded-xl p-1 transition-all duration-200 hover:bg-white/10 hover:shadow-lg hover:shadow-primary/5">
             <select
                 value={selectedDate.getMonth()}
                 onChange={handleMonthChange}

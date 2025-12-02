@@ -88,7 +88,7 @@ export default function CalendarPage() {
 
     return (
         <div className="p-8 max-w-7xl mx-auto space-y-8">
-            <h1 className="text-3xl font-bold text-foreground bg-accent/50 backdrop-blur-md border border-white/10 rounded-full px-6 py-2 shadow-sm w-fit">Calendar</h1>
+            <h1 className="text-3xl font-bold text-foreground bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl px-6 py-2 shadow-sm w-fit">Calendar</h1>
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                 <Card className="lg:col-span-2 p-6">

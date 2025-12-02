@@ -60,13 +60,13 @@ export default function TransactionsPage() {
         <div className="space-y-8">
             <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
                 <div className="flex items-center gap-4">
-                    <h1 className="text-3xl font-bold text-foreground bg-accent/50 backdrop-blur-md border border-white/10 rounded-full px-6 py-2 shadow-sm w-fit">Transactions</h1>
-                    <div className="flex gap-2 bg-accent/50 rounded-lg p-1">
+                    <h1 className="text-3xl font-bold text-foreground bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl px-6 py-2 shadow-sm w-fit">Transactions</h1>
+                    <div className="flex gap-2 bg-white/5 backdrop-blur-md border border-white/10 rounded-xl p-1">
                         <button
                             onClick={() => setViewMode('month')}
                             className={cn(
-                                "px-3 py-1 rounded-md text-sm transition-all duration-200 ease-in-out cursor-pointer hover:scale-105 active:scale-95",
-                                viewMode === 'month' ? "bg-gradient-to-r from-primary to-blue-500 text-white shadow-lg shadow-primary/20" : "text-muted-foreground hover:text-foreground hover:bg-accent"
+                                "px-3 py-1 rounded-xl text-sm transition-all duration-200 ease-in-out cursor-pointer hover:scale-105 active:scale-95",
+                                viewMode === 'month' ? "bg-gradient-to-r from-primary to-blue-500 text-white shadow-lg shadow-primary/20" : "text-muted-foreground hover:text-foreground hover:bg-white/5"
                             )}
                         >
                             Month
@@ -74,8 +74,8 @@ export default function TransactionsPage() {
                         <button
                             onClick={() => setViewMode('year')}
                             className={cn(
-                                "px-3 py-1 rounded-md text-sm transition-all duration-200 ease-in-out cursor-pointer hover:scale-105 active:scale-95",
-                                viewMode === 'year' ? "bg-gradient-to-r from-primary to-blue-500 text-white shadow-lg shadow-primary/20" : "text-muted-foreground hover:text-foreground hover:bg-accent"
+                                "px-3 py-1 rounded-xl text-sm transition-all duration-200 ease-in-out cursor-pointer hover:scale-105 active:scale-95",
+                                viewMode === 'year' ? "bg-gradient-to-r from-primary to-blue-500 text-white shadow-lg shadow-primary/20" : "text-muted-foreground hover:text-foreground hover:bg-white/5"
                             )}
                         >
                             Year
@@ -102,14 +102,14 @@ export default function TransactionsPage() {
                     />
                 </div>
                 <div className="flex gap-2 overflow-x-auto pb-2 md:pb-0">
-                    <div className="flex gap-2 bg-accent/50 p-1 rounded-xl">
+                    <div className="flex gap-2 bg-white/5 backdrop-blur-md border border-white/10 rounded-xl p-1">
                         {(['all', 'income', 'expense'] as const).map((f) => (
                             <button
                                 key={f}
                                 onClick={() => setFilter(f)}
                                 className={cn(
-                                    "px-4 py-2 rounded-lg text-sm font-medium transition-all whitespace-nowrap",
-                                    filter === f ? "bg-accent text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"
+                                    "px-4 py-2 rounded-xl text-sm font-medium transition-all whitespace-nowrap",
+                                    filter === f ? "bg-white/10 text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground hover:bg-white/5"
                                 )}
                             >
                                 {f.charAt(0).toUpperCase() + f.slice(1)}
@@ -119,7 +119,7 @@ export default function TransactionsPage() {
                     <select
                         value={sortBy}
                         onChange={(e) => setSortBy(e.target.value as 'date' | 'amount-high' | 'amount-low')}
-                        className="bg-accent/50 border border-border rounded-xl px-4 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+                        className="bg-white/5 backdrop-blur-md border border-white/10 rounded-xl px-4 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
                     >
                         <option value="date" className="bg-card text-foreground">Most Recent</option>
                         <option value="amount-high" className="bg-card text-foreground">Highest Amount</option>

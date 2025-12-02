@@ -12,15 +12,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
 
     return (
         <div className="flex min-h-screen relative">
-            {/* Background Animation */}
-            <div className="fixed inset-0 z-[-1] pointer-events-none opacity-40">
-                <iframe
-                    src="https://lottie.host/embed/d7c50331-c5fd-4d5f-9340-9f6b54adb168/k7LoP9fWro.lottie"
-                    className="w-full h-full border-none"
-                    loading="lazy"
-                    title="Background Animation"
-                />
-            </div>
+
             {/* Mobile Header */}
             {user && (
                 <div className="fixed top-0 left-0 right-0 z-30 flex items-center p-4 bg-background/80 backdrop-blur-xl border-b border-border md:hidden">

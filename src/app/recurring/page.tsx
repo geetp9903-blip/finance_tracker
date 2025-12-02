@@ -138,7 +138,7 @@ export default function RecurringPage() {
     return (
         <div className="space-y-8">
             <div className="flex items-center justify-between">
-                <h1 className="text-3xl font-bold text-foreground bg-accent/50 backdrop-blur-md border border-white/10 rounded-full px-6 py-2 shadow-sm w-fit">Recurring Expenses</h1>
+                <h1 className="text-3xl font-bold text-foreground bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl px-6 py-2 shadow-sm w-fit">Recurring Expenses</h1>
                 <div className="flex gap-2">
                     <Button variant="secondary" onClick={processRules}>
                         <RefreshCw className="h-4 w-4 mr-2" /> Check Due
@@ -155,14 +155,20 @@ export default function RecurringPage() {
                         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
                     </div>
                 ) : rules.map((rule) => (
-                    <div key={rule.id} className="relative h-40 group perspective-1000">
+                    <motion.div
+                        key={rule.id}
+                        className="relative h-40 group perspective-1000"
+                        initial="rest"
+                        whileHover="hover"
+                        animate="rest"
+                    >
                         {/* Back Card (Delete Action) */}
-                        <div className="absolute inset-0 rounded-2xl bg-destructive/20 border border-destructive/30 flex items-center justify-center z-0">
+                        <div className="absolute inset-0 rounded-2xl bg-accent/10 border border-white/5 flex items-center justify-center z-0 group-hover:bg-destructive/20 group-hover:border-destructive/30 transition-all duration-300">
                             <button
                                 onClick={() => deleteRule(rule.id)}
-                                className="flex flex-col items-center gap-2 text-red-400 hover:text-red-300 transition-colors p-4"
+                                className="flex flex-col items-center gap-2 text-muted-foreground group-hover:text-red-400 transition-colors p-4"
                             >
-                                <div className="p-3 rounded-full bg-destructive/20">
+                                <div className="p-3 rounded-full bg-white/5 group-hover:bg-destructive/20 transition-colors">
                                     <Trash2 className="h-6 w-6" />
                                 </div>
                                 <span className="font-medium text-sm">Delete Rule</span>
@@ -171,8 +177,11 @@ export default function RecurringPage() {
 
                         {/* Front Card (Content) */}
                         <motion.div
-                            className="glass-card relative h-full z-10 p-0 overflow-hidden cursor-pointer bg-card" // Use bg-card
-                            whileHover={{ x: -80, rotateY: -5 }}
+                            className="glass-card relative h-full z-10 p-0 overflow-hidden cursor-pointer bg-card"
+                            variants={{
+                                rest: { scale: 1, opacity: 1 },
+                                hover: { scale: 0.05, opacity: 0 }
+                            }}
                             transition={{ type: "spring", stiffness: 300, damping: 20 }}
                         >
                             <div className={cn("absolute top-0 left-0 w-1 h-full", rule.type === 'income' ? "bg-emerald-500" : "bg-destructive")} />
@@ -198,7 +207,7 @@ export default function RecurringPage() {
                                 </div>
                             </div>
                         </motion.div>
-                    </div>
+                    </motion.div>
                 ))}
                 {!isLoading && rules.length === 0 && (
                     <div className="col-span-full text-center py-12 text-muted-foreground">
