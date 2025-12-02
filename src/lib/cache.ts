@@ -3,6 +3,7 @@ type CacheEntry<T> = {
     timestamp: number;
 };
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const cache = new Map<string, CacheEntry<any>>();
 const TTL = 60 * 1000; // 1 minute default TTL
 

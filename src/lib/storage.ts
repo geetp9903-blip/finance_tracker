@@ -12,6 +12,7 @@ export async function getTransactions(userId?: string): Promise<Transaction[]> {
     // Our schema uses 'id' as a string field, so it should be fine.
     // We strip internal mongoose fields like _id and __v
     return docs.map(doc => {
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars, @typescript-eslint/no-explicit-any
         const { _id, __v, ...rest } = doc as any;
         return rest as Transaction;
     });
@@ -45,6 +46,7 @@ export async function getUsers(): Promise<User[]> {
     await dbConnect();
     const docs = await UserModel.find({}).lean();
     return docs.map(doc => {
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars, @typescript-eslint/no-explicit-any
         const { _id, __v, ...rest } = doc as any;
         return rest as User;
     });
@@ -69,6 +71,7 @@ export async function getBudget(userId?: string): Promise<Record<string, Budget>
     if (userId) {
         const doc = await BudgetModel.findOne({ userId }).lean();
         if (doc) {
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars, @typescript-eslint/no-explicit-any
             const { _id, __v, userId: uid, ...budget } = doc as any;
             return { [uid]: budget as Budget };
         }
@@ -78,6 +81,7 @@ export async function getBudget(userId?: string): Promise<Record<string, Budget>
     const docs = await BudgetModel.find({}).lean();
     const result: Record<string, Budget> = {};
     for (const doc of docs) {
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars, @typescript-eslint/no-explicit-any
         const { _id, __v, userId: uid, ...budget } = doc as any;
         result[uid] = budget as Budget;
     }
@@ -104,6 +108,7 @@ export async function getRecurringRules(userId?: string): Promise<RecurringRule[
     const query = userId ? { userId } : {};
     const docs = await RecurringRuleModel.find(query).lean();
     return docs.map(doc => {
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars, @typescript-eslint/no-explicit-any
         const { _id, __v, ...rest } = doc as any;
         return rest as RecurringRule;
     });
@@ -138,6 +143,7 @@ export async function getBudgetPeriods(userId?: string): Promise<BudgetPeriod[]>
     const query = userId ? { userId } : {};
     const docs = await BudgetPeriodModel.find(query).lean();
     return docs.map(doc => {
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars, @typescript-eslint/no-explicit-any
         const { _id, __v, ...rest } = doc as any;
         return rest as BudgetPeriod;
     });

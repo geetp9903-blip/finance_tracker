@@ -17,7 +17,7 @@ export async function POST(request: Request) {
             }
 
             const hashedPin = hashPin(pin);
-            users.push({ username, pin: hashedPin });
+            users.push({ id: crypto.randomUUID(), username, pin: hashedPin });
             await saveUsers(users);
             return NextResponse.json({ success: true });
         }

@@ -1,5 +1,5 @@
-import mongoose, { Schema, model, models } from 'mongoose';
-import { User, Transaction, Budget, RecurringRule, BudgetPeriod } from './types';
+import { Schema, model, models } from 'mongoose';
+import { User, Transaction, RecurringRule, BudgetPeriod } from './types';
 
 // User Schema
 const UserSchema = new Schema<User>({

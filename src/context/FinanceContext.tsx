@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { createContext, useContext, useState, useEffect, ReactNode, useCallback } from 'react';
 import { Transaction, Budget, AppData } from '@/lib/types';
 import { useAuth } from './AuthContext';
 
@@ -24,7 +24,7 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
     const [budget, setBudget] = useState<Budget>({ fixedExpenses: [], allocations: [] });
     const [currency, setCurrency] = useState('INR');
 
-    const refreshData = async () => {
+    const refreshData = useCallback(async () => {
         if (!user) return;
         try {
             const res = await fetch('/api/finance', {
@@ -36,11 +36,12 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
         } catch (error) {
             console.error("Failed to fetch data", error);
         }
-    };
+    }, [user]);
 
     useEffect(() => {
+        // eslint-disable-next-line react-hooks/exhaustive-deps
         refreshData();
-    }, [user]);
+    }, [refreshData]);
 
     const generateId = () => {
         if (typeof crypto !== 'undefined' && crypto.randomUUID) {

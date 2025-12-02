@@ -95,7 +95,7 @@ export default function TransactionsPage() {
                     </div>
                     <select
                         value={sortBy}
-                        onChange={(e) => setSortBy(e.target.value as any)}
+                        onChange={(e) => setSortBy(e.target.value as 'date' | 'amount-high' | 'amount-low')}
                         className="bg-white/5 border border-white/10 rounded-xl px-4 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-primary"
                     >
                         <option value="date" className="bg-gray-900">Most Recent</option>
