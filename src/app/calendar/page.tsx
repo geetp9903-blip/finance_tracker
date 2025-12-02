@@ -41,18 +41,32 @@ export default function CalendarPage() {
         }
     };
 
+    const normalizeDate = (date: Date) => {
+        return new Date(date.getFullYear(), date.getMonth(), date.getDate()).getTime();
+    };
+
     const getTileContent = ({ date, view }: { date: Date; view: string }) => {
         if (view !== 'month') return null;
 
-        const dateStr = date.toDateString();
-        const hasTransaction = transactions.some(t => new Date(t.date).toDateString() === dateStr);
-        const hasPending = recurringRules.some(r => r.active && new Date(r.nextDueDate).toDateString() === dateStr);
+        const normalizedTileDate = normalizeDate(date);
 
-        if (!hasTransaction && !hasPending) return null;
+        const dayTransactions = transactions.filter(t => normalizeDate(new Date(t.date)) === normalizedTileDate);
+        const hasIncome = dayTransactions.some(t => t.type === 'income');
+        const hasExpense = dayTransactions.some(t => t.type === 'expense');
+
+        const hasPending = recurringRules.some(r => {
+            if (!r.active) return false;
+            const ruleDate = new Date(r.nextDueDate);
+            // Compare using local date strings to handle timezone offsets correctly
+            return ruleDate.toLocaleDateString() === date.toLocaleDateString();
+        });
+
+        if (!hasIncome && !hasExpense && !hasPending) return null;
 
         return (
             <div className="flex justify-center mt-1 gap-1">
-                {hasTransaction && <div className="h-1.5 w-1.5 rounded-full bg-emerald-500" />}
+                {hasIncome && <div className="h-1.5 w-1.5 rounded-full bg-emerald-500" />}
+                {hasExpense && <div className="h-1.5 w-1.5 rounded-full bg-red-500" />}
                 {hasPending && <div className="h-1.5 w-1.5 rounded-full bg-yellow-500" />}
             </div>
         );
@@ -60,14 +74,17 @@ export default function CalendarPage() {
 
     // Derived state for the selected date
     const selectedDate = date instanceof Date ? date : new Date();
+    const normalizedSelectedDate = normalizeDate(selectedDate);
 
     const selectedDateTransactions = transactions.filter(t =>
-        new Date(t.date).toDateString() === selectedDate.toDateString()
+        normalizeDate(new Date(t.date)) === normalizedSelectedDate
     );
 
-    const selectedDatePendingRules = recurringRules.filter(r =>
-        r.active && new Date(r.nextDueDate).toDateString() === selectedDate.toDateString()
-    );
+    const selectedDatePendingRules = recurringRules.filter(r => {
+        if (!r.active) return false;
+        const ruleDate = new Date(r.nextDueDate);
+        return ruleDate.toLocaleDateString() === selectedDate.toLocaleDateString();
+    });
 
     return (
         <div className="p-8 max-w-7xl mx-auto space-y-8">
@@ -85,7 +102,7 @@ export default function CalendarPage() {
 
                 <Card className="p-6 h-fit">
                     <h2 className="text-xl font-semibold text-white mb-4">
-                        {selectedDate.toDateString()}
+                        {selectedDate.toLocaleDateString('en-GB')}
                     </h2>
 
                     <div className="space-y-4">

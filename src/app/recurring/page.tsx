@@ -147,9 +147,9 @@ export default function RecurringPage() {
                         </div>
                         <button
                             onClick={() => deleteRule(rule.id)}
-                            className="absolute top-2 right-2 p-2 text-white/20 hover:text-red-400 transition-colors"
+                            className="absolute top-4 right-4 p-2 text-white/40 hover:text-red-400 hover:bg-white/10 rounded-lg transition-all cursor-pointer"
                         >
-                            <Trash2 className="h-4 w-4" />
+                            <Trash2 className="h-5 w-5" />
                         </button>
                     </Card>
                 ))}
@@ -166,14 +166,14 @@ export default function RecurringPage() {
                         <button
                             type="button"
                             onClick={() => setType('expense')}
-                            className={cn("flex-1 py-2 rounded-lg transition-colors", type === 'expense' ? "bg-red-500/20 text-red-400 border border-red-500/50" : "bg-white/5 text-white/60")}
+                            className={cn("flex-1 py-2 rounded-lg transition-colors cursor-pointer", type === 'expense' ? "bg-red-500/20 text-red-400 border border-red-500/50" : "bg-white/5 text-white/60")}
                         >
                             Expense
                         </button>
                         <button
                             type="button"
                             onClick={() => setType('income')}
-                            className={cn("flex-1 py-2 rounded-lg transition-colors", type === 'income' ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/50" : "bg-white/5 text-white/60")}
+                            className={cn("flex-1 py-2 rounded-lg transition-colors cursor-pointer", type === 'income' ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/50" : "bg-white/5 text-white/60")}
                         >
                             Income
                         </button>

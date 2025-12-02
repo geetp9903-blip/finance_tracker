@@ -9,6 +9,7 @@ import { Plus, Search, Trash2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ExportMenu } from "@/components/ExportMenu";
 import { CategorySelector } from "@/components/ui/CategorySelector";
+import { MonthYearPicker } from "@/components/ui/MonthYearPicker";
 
 export default function TransactionsPage() {
     const { transactions, addTransaction, deleteTransaction, formatAmount } = useFinance();
@@ -16,6 +17,7 @@ export default function TransactionsPage() {
     const [filter, setFilter] = useState<'all' | 'income' | 'expense'>('all');
     const [sortBy, setSortBy] = useState<'date' | 'amount-high' | 'amount-low'>('date');
     const [search, setSearch] = useState("");
+    const [selectedDate, setSelectedDate] = useState(new Date());
 
     // Form State
     const [amount, setAmount] = useState("");
@@ -24,6 +26,10 @@ export default function TransactionsPage() {
     const [type, setType] = useState<'income' | 'expense'>('expense');
 
     const filteredTransactions = transactions
+        .filter(t => {
+            const d = new Date(t.date);
+            return d.getMonth() === selectedDate.getMonth() && d.getFullYear() === selectedDate.getFullYear();
+        })
         .filter(t => filter === 'all' || t.type === filter)
         .filter(t => t.description.toLowerCase().includes(search.toLowerCase()) || t.category.toLowerCase().includes(search.toLowerCase()))
         .sort((a, b) => {
@@ -50,9 +56,12 @@ export default function TransactionsPage() {
     return (
         <div className="space-y-8">
             <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-                <h1 className="text-3xl font-bold text-white">Transactions</h1>
+                <div className="flex items-center gap-4">
+                    <h1 className="text-3xl font-bold text-white">Transactions</h1>
+                    <MonthYearPicker selectedDate={selectedDate} onChange={setSelectedDate} />
+                </div>
                 <div className="flex gap-2">
-                    <ExportMenu transactions={transactions} />
+                    <ExportMenu transactions={filteredTransactions} />
                     <Button onClick={() => setIsModalOpen(true)}>
                         <Plus className="h-4 w-4 mr-2" /> Add Transaction
                     </Button>

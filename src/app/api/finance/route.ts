@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { getTransactions, createTransaction, deleteTransaction, getBudget, updateUserBudget } from '@/lib/storage';
+import { cacheService } from '@/lib/cache';
 
 export async function GET(request: Request) {
     try {
@@ -8,13 +9,23 @@ export async function GET(request: Request) {
             return NextResponse.json({ error: 'User ID required' }, { status: 400 });
         }
 
+        const cacheKey = `finance_data_${userId}`;
+        const cachedData = cacheService.get(cacheKey);
+
+        if (cachedData) {
+            return NextResponse.json(cachedData);
+        }
+
         const allTransactions = await getTransactions();
         const transactions = allTransactions.filter(t => t.userId === userId);
 
         const budgetData = await getBudget(userId);
         const budget = budgetData[userId] || { fixedExpenses: [], allocations: [], entries: [] };
 
-        return NextResponse.json({ transactions, budget });
+        const responseData = { transactions, budget };
+        cacheService.set(cacheKey, responseData);
+
+        return NextResponse.json(responseData);
     } catch (error) {
         return NextResponse.json({ error: 'Failed to fetch data' }, { status: 500 });
     }
@@ -41,6 +52,9 @@ export async function POST(request: Request) {
             await createTransaction(newTransaction);
             console.log('[Finance API] Transaction created');
 
+            // Invalidate cache
+            cacheService.invalidate(`finance_data_${userId}`);
+
             // Return updated list
             const transactions = await getTransactions(userId);
             return NextResponse.json({ success: true, transactions });
@@ -50,6 +64,10 @@ export async function POST(request: Request) {
             console.log('[Finance API] Updating budget...');
             await updateUserBudget(userId, data);
             console.log('[Finance API] Budget saved');
+
+            // Invalidate cache
+            cacheService.invalidate(`finance_data_${userId}`);
+
             return NextResponse.json({ success: true, budget: data });
         }
 
@@ -57,6 +75,9 @@ export async function POST(request: Request) {
             console.log('[Finance API] Deleting transaction:', data.id);
             await deleteTransaction(data.id, userId);
             console.log('[Finance API] Transaction deleted');
+
+            // Invalidate cache
+            cacheService.invalidate(`finance_data_${userId}`);
 
             // Return updated list
             const transactions = await getTransactions(userId);

@@ -13,6 +13,7 @@ export interface Transaction {
 }
 
 export interface User {
+    id: string;
     username: string;
     pin: string;
 }
