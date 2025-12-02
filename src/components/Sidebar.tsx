@@ -1,7 +1,7 @@
 "use client";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, Receipt, PiggyBank, LogOut, RefreshCw, Calendar } from "lucide-react";
+import { LayoutDashboard, Receipt, PiggyBank, LogOut, RefreshCw, Calendar, Settings } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/context/AuthContext";
 
@@ -11,6 +11,7 @@ const navItems = [
     { name: "Budget", href: "/budget", icon: PiggyBank },
     { name: "Recurring", href: "/recurring", icon: RefreshCw },
     { name: "Calendar", href: "/calendar", icon: Calendar },
+    { name: "Settings", href: "/settings", icon: Settings },
 ];
 
 import { X } from "lucide-react";
@@ -31,14 +32,14 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
             {/* Mobile Overlay */}
             {isOpen && (
                 <div
-                    className="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm md:hidden"
+                    className="fixed inset-0 z-40 bg-background/80 backdrop-blur-sm md:hidden"
                     onClick={onClose}
                 />
             )}
 
             {/* Sidebar */}
             <aside className={cn(
-                "fixed left-0 top-0 z-50 h-screen w-64 border-r border-white/10 bg-[#0a0a0a] transition-transform duration-300 ease-in-out md:translate-x-0",
+                "fixed left-0 top-0 z-50 h-screen w-64 border-r border-border bg-card/95 backdrop-blur-xl transition-transform duration-300 ease-in-out md:translate-x-0",
                 isOpen ? "translate-x-0" : "-translate-x-full"
             )}>
                 <div className="flex h-full flex-col px-3 py-4">
@@ -47,13 +48,13 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
                             <div className="h-10 w-10 relative mr-3">
                                 <img src="/Prospera_1_icon.png" alt="Prospera Logo" className="object-contain w-full h-full" />
                             </div>
-                            <span className="self-center whitespace-nowrap text-xl font-semibold text-white">
+                            <span className="self-center whitespace-nowrap text-xl font-semibold text-foreground">
                                 Prospera
                             </span>
                         </div>
                         <button
                             onClick={onClose}
-                            className="p-2 text-white/60 hover:text-white md:hidden"
+                            className="p-2 text-muted-foreground hover:text-foreground md:hidden"
                         >
                             <X className="h-5 w-5" />
                         </button>
@@ -68,11 +69,11 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
                                         href={item.href}
                                         onClick={() => onClose()} // Close sidebar on navigation (mobile)
                                         className={cn(
-                                            "flex items-center rounded-xl p-3 text-white transition-all hover:bg-white/10 group",
-                                            isActive && "bg-white/10 shadow-lg shadow-primary/5 ring-1 ring-white/20"
+                                            "flex items-center rounded-xl p-3 text-foreground transition-all duration-200 ease-in-out hover:bg-accent hover:scale-105 active:scale-95 group",
+                                            isActive && "bg-accent shadow-lg shadow-primary/5 ring-1 ring-border"
                                         )}
                                     >
-                                        <Icon className={cn("h-5 w-5 transition-colors", isActive ? "text-primary" : "text-white/70 group-hover:text-white")} />
+                                        <Icon className={cn("h-5 w-5 transition-colors duration-200", isActive ? "text-primary" : "text-muted-foreground group-hover:text-foreground")} />
                                         <span className="ml-3">{item.name}</span>
                                     </Link>
                                 </li>
@@ -80,13 +81,13 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
                         })}
                     </ul>
                     <div className="mt-auto mb-4">
-                        <div className="mb-4 px-3 py-2 rounded-xl bg-white/5 border border-white/5">
-                            <p className="text-xs text-white/50">Logged in as</p>
-                            <p className="text-sm font-medium text-white">{user.username}</p>
+                        <div className="mb-4 px-3 py-2 rounded-xl bg-accent/50 border border-border">
+                            <p className="text-xs text-muted-foreground">Logged in as</p>
+                            <p className="text-sm font-medium text-foreground">{user.username}</p>
                         </div>
                         <button
                             onClick={logout}
-                            className="flex w-full items-center rounded-xl p-3 text-white transition-colors hover:bg-red-500/20 hover:text-red-400 border border-transparent hover:border-red-500/20 cursor-pointer"
+                            className="flex w-full items-center rounded-xl p-3 text-foreground transition-all duration-200 ease-in-out hover:bg-destructive/10 hover:text-destructive hover:scale-105 active:scale-95 border border-transparent hover:border-destructive/20 cursor-pointer hover:shadow-[0_0_15px_rgba(239,68,68,0.2)]"
                         >
                             <LogOut className="h-5 w-5" />
                             <span className="ml-3">Logout</span>

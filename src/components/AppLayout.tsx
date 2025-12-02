@@ -23,14 +23,14 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
             </div>
             {/* Mobile Header */}
             {user && (
-                <div className="fixed top-0 left-0 right-0 z-30 flex items-center p-4 bg-[#0a0a0a]/80 backdrop-blur-xl border-b border-white/10 md:hidden">
+                <div className="fixed top-0 left-0 right-0 z-30 flex items-center p-4 bg-background/80 backdrop-blur-xl border-b border-border md:hidden">
                     <button
                         onClick={() => setIsSidebarOpen(true)}
-                        className="p-2 -ml-2 text-white/60 hover:text-white"
+                        className="p-2 -ml-2 text-muted-foreground hover:text-foreground"
                     >
                         <Menu className="h-6 w-6" />
                     </button>
-                    <span className="ml-3 text-lg font-semibold text-white">Prospera</span>
+                    <span className="ml-3 text-lg font-semibold text-foreground">Prospera</span>
                 </div>
             )}
 

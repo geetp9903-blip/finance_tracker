@@ -27,14 +27,14 @@ export function MonthYearPicker({ selectedDate, onChange }: MonthYearPickerProps
     const years = Array.from({ length: 10 }, (_, i) => currentYear - 5 + i);
 
     return (
-        <div className="flex items-center gap-2 bg-white/5 rounded-lg p-1 border border-white/10">
+        <div className="flex items-center gap-2 bg-accent/50 rounded-lg p-1 border border-border transition-all duration-200 hover:bg-accent hover:border-accent hover:shadow-lg hover:shadow-primary/5">
             <select
                 value={selectedDate.getMonth()}
                 onChange={handleMonthChange}
-                className="bg-transparent text-sm font-medium text-white/80 hover:text-white focus:outline-none cursor-pointer p-1"
+                className="bg-transparent text-sm font-medium text-muted-foreground hover:text-foreground focus:outline-none cursor-pointer p-1 transition-colors duration-200"
             >
                 {months.map((month, index) => (
-                    <option key={month} value={index} className="bg-gray-900 text-white">
+                    <option key={month} value={index} className="bg-card text-foreground">
                         {month}
                     </option>
                 ))}
@@ -42,10 +42,10 @@ export function MonthYearPicker({ selectedDate, onChange }: MonthYearPickerProps
             <select
                 value={selectedDate.getFullYear()}
                 onChange={handleYearChange}
-                className="bg-transparent text-sm font-medium text-white/80 hover:text-white focus:outline-none cursor-pointer p-1 border-l border-white/10 pl-2"
+                className="bg-transparent text-sm font-medium text-muted-foreground hover:text-foreground focus:outline-none cursor-pointer p-1 border-l border-border pl-2 transition-colors duration-200"
             >
                 {years.map(year => (
-                    <option key={year} value={year} className="bg-gray-900 text-white">
+                    <option key={year} value={year} className="bg-card text-foreground">
                         {year}
                     </option>
                 ))}

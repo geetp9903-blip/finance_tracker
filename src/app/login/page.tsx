@@ -40,16 +40,16 @@ export default function LoginPage() {
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.5 }}
                 >
-                    <h1 className="mb-2 text-3xl font-bold text-white text-center">
+                    <h1 className="mb-2 text-3xl font-bold text-foreground text-center">
                         {isRegistering ? "Create Account" : "Welcome Back"}
                     </h1>
-                    <p className="mb-8 text-white/60 text-center">
+                    <p className="mb-8 text-muted-foreground text-center">
                         {isRegistering ? "Set up your finance tracker" : "Enter your credentials to access"}
                     </p>
 
                     <form onSubmit={handleSubmit} className="space-y-4">
                         <div>
-                            <label className="mb-2 block text-sm font-medium text-white">Username</label>
+                            <label className="mb-2 block text-sm font-medium text-foreground">Username</label>
                             <Input
                                 type="text"
                                 placeholder="Enter username"
@@ -59,7 +59,7 @@ export default function LoginPage() {
                             />
                         </div>
                         <div>
-                            <label className="mb-2 block text-sm font-medium text-white">PIN</label>
+                            <label className="mb-2 block text-sm font-medium text-foreground">PIN</label>
                             <Input
                                 type="password"
                                 placeholder="Enter 4-6 digit PIN"
@@ -70,7 +70,7 @@ export default function LoginPage() {
                             />
                         </div>
 
-                        {error && <p className="text-red-400 text-sm text-center">{error}</p>}
+                        {error && <p className="text-destructive text-sm text-center">{error}</p>}
 
                         <Button type="submit" className="w-full" variant="primary">
                             {isRegistering ? "Register" : "Login"}
@@ -80,7 +80,7 @@ export default function LoginPage() {
                     <div className="mt-6 text-center">
                         <button
                             onClick={() => setIsRegistering(!isRegistering)}
-                            className="text-sm text-white/60 hover:text-white transition-colors cursor-pointer"
+                            className="text-sm text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
                         >
                             {isRegistering ? "Already have an account? Login" : "Don't have an account? Register"}
                         </button>

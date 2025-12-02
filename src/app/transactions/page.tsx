@@ -18,6 +18,7 @@ export default function TransactionsPage() {
     const [sortBy, setSortBy] = useState<'date' | 'amount-high' | 'amount-low'>('date');
     const [search, setSearch] = useState("");
     const [selectedDate, setSelectedDate] = useState(new Date());
+    const [viewMode, setViewMode] = useState<'month' | 'year'>('month');
 
     // Form State
     const [amount, setAmount] = useState("");
@@ -28,7 +29,9 @@ export default function TransactionsPage() {
     const filteredTransactions = transactions
         .filter(t => {
             const d = new Date(t.date);
-            return d.getMonth() === selectedDate.getMonth() && d.getFullYear() === selectedDate.getFullYear();
+            const isSameYear = d.getFullYear() === selectedDate.getFullYear();
+            if (viewMode === 'year') return isSameYear;
+            return isSameYear && d.getMonth() === selectedDate.getMonth();
         })
         .filter(t => filter === 'all' || t.type === filter)
         .filter(t => t.description.toLowerCase().includes(search.toLowerCase()) || t.category.toLowerCase().includes(search.toLowerCase()))
@@ -57,7 +60,27 @@ export default function TransactionsPage() {
         <div className="space-y-8">
             <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
                 <div className="flex items-center gap-4">
-                    <h1 className="text-3xl font-bold text-white">Transactions</h1>
+                    <h1 className="text-3xl font-bold text-foreground bg-accent/50 backdrop-blur-md border border-white/10 rounded-full px-6 py-2 shadow-sm w-fit">Transactions</h1>
+                    <div className="flex gap-2 bg-accent/50 rounded-lg p-1">
+                        <button
+                            onClick={() => setViewMode('month')}
+                            className={cn(
+                                "px-3 py-1 rounded-md text-sm transition-all duration-200 ease-in-out cursor-pointer hover:scale-105 active:scale-95",
+                                viewMode === 'month' ? "bg-gradient-to-r from-primary to-blue-500 text-white shadow-lg shadow-primary/20" : "text-muted-foreground hover:text-foreground hover:bg-accent"
+                            )}
+                        >
+                            Month
+                        </button>
+                        <button
+                            onClick={() => setViewMode('year')}
+                            className={cn(
+                                "px-3 py-1 rounded-md text-sm transition-all duration-200 ease-in-out cursor-pointer hover:scale-105 active:scale-95",
+                                viewMode === 'year' ? "bg-gradient-to-r from-primary to-blue-500 text-white shadow-lg shadow-primary/20" : "text-muted-foreground hover:text-foreground hover:bg-accent"
+                            )}
+                        >
+                            Year
+                        </button>
+                    </div>
                     <MonthYearPicker selectedDate={selectedDate} onChange={setSelectedDate} />
                 </div>
                 <div className="flex gap-2">
@@ -70,7 +93,7 @@ export default function TransactionsPage() {
 
             <div className="flex flex-col md:flex-row gap-4">
                 <div className="relative flex-1">
-                    <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-white/50" />
+                    <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                     <Input
                         placeholder="Search transactions..."
                         className="pl-10"
@@ -79,14 +102,14 @@ export default function TransactionsPage() {
                     />
                 </div>
                 <div className="flex gap-2 overflow-x-auto pb-2 md:pb-0">
-                    <div className="flex gap-2 bg-white/5 p-1 rounded-xl">
+                    <div className="flex gap-2 bg-accent/50 p-1 rounded-xl">
                         {(['all', 'income', 'expense'] as const).map((f) => (
                             <button
                                 key={f}
                                 onClick={() => setFilter(f)}
                                 className={cn(
                                     "px-4 py-2 rounded-lg text-sm font-medium transition-all whitespace-nowrap",
-                                    filter === f ? "bg-white/10 text-white shadow-sm" : "text-white/60 hover:text-white"
+                                    filter === f ? "bg-accent text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"
                                 )}
                             >
                                 {f.charAt(0).toUpperCase() + f.slice(1)}
@@ -96,11 +119,11 @@ export default function TransactionsPage() {
                     <select
                         value={sortBy}
                         onChange={(e) => setSortBy(e.target.value as 'date' | 'amount-high' | 'amount-low')}
-                        className="bg-white/5 border border-white/10 rounded-xl px-4 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-primary"
+                        className="bg-accent/50 border border-border rounded-xl px-4 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
                     >
-                        <option value="date" className="bg-gray-900">Most Recent</option>
-                        <option value="amount-high" className="bg-gray-900">Highest Amount</option>
-                        <option value="amount-low" className="bg-gray-900">Lowest Amount</option>
+                        <option value="date" className="bg-card text-foreground">Most Recent</option>
+                        <option value="amount-high" className="bg-card text-foreground">Highest Amount</option>
+                        <option value="amount-low" className="bg-card text-foreground">Lowest Amount</option>
                     </select>
                 </div>
             </div>
@@ -111,22 +134,22 @@ export default function TransactionsPage() {
                         <div className="flex items-center gap-4">
                             <div className={cn(
                                 "h-10 w-10 rounded-full flex items-center justify-center text-lg font-bold",
-                                t.type === 'income' ? "bg-emerald-500/20 text-emerald-400" : "bg-red-500/20 text-red-400"
+                                t.type === 'income' ? "bg-emerald-500/20 text-emerald-500" : "bg-destructive/20 text-destructive"
                             )}>
                                 {t.category.charAt(0).toUpperCase()}
                             </div>
                             <div>
-                                <p className="font-medium text-white">{t.description}</p>
-                                <p className="text-sm text-white/50">{t.category} • {new Date(t.date).toLocaleDateString()}</p>
+                                <p className="font-medium text-foreground">{t.description}</p>
+                                <p className="text-sm text-muted-foreground">{t.category} • {new Date(t.date).toLocaleDateString()}</p>
                             </div>
                         </div>
                         <div className="flex items-center gap-4">
-                            <span className={cn("font-semibold", t.type === 'income' ? "text-emerald-400" : "text-red-400")}>
+                            <span className={cn("font-semibold", t.type === 'income' ? "text-emerald-500" : "text-destructive")}>
                                 {t.type === 'income' ? '+' : '-'}{formatAmount(t.amount)}
                             </span>
                             <button
                                 onClick={() => deleteTransaction(t.id)}
-                                className="p-2 text-white/40 hover:text-red-400 transition-colors"
+                                className="p-2 text-muted-foreground hover:text-destructive transition-colors"
                             >
                                 <Trash2 className="h-4 w-4" />
                             </button>
@@ -134,7 +157,7 @@ export default function TransactionsPage() {
                     </Card>
                 ))}
                 {filteredTransactions.length === 0 && (
-                    <p className="text-center text-white/40 py-12">No transactions found</p>
+                    <p className="text-center text-muted-foreground py-12">No transactions found</p>
                 )}
             </div>
 
@@ -144,29 +167,29 @@ export default function TransactionsPage() {
                         <button
                             type="button"
                             onClick={() => setType('expense')}
-                            className={cn("flex-1 py-2 rounded-lg transition-colors", type === 'expense' ? "bg-red-500/20 text-red-400 border border-red-500/50" : "bg-white/5 text-white/60")}
+                            className={cn("flex-1 py-2 rounded-lg transition-colors", type === 'expense' ? "bg-destructive/20 text-destructive border border-destructive/50" : "bg-accent/50 text-muted-foreground")}
                         >
                             Expense
                         </button>
                         <button
                             type="button"
                             onClick={() => setType('income')}
-                            className={cn("flex-1 py-2 rounded-lg transition-colors", type === 'income' ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/50" : "bg-white/5 text-white/60")}
+                            className={cn("flex-1 py-2 rounded-lg transition-colors", type === 'income' ? "bg-emerald-500/20 text-emerald-500 border border-emerald-500/50" : "bg-accent/50 text-muted-foreground")}
                         >
                             Income
                         </button>
                     </div>
 
                     <div>
-                        <label className="block text-sm text-white/70 mb-1">Amount</label>
+                        <label className="block text-sm text-muted-foreground mb-1">Amount</label>
                         <Input type="number" required value={amount} onChange={(e) => setAmount(e.target.value)} placeholder="0.00" />
                     </div>
                     <div>
-                        <label className="block text-sm text-white/70 mb-1">Description</label>
+                        <label className="block text-sm text-muted-foreground mb-1">Description</label>
                         <Input type="text" required value={description} onChange={(e) => setDescription(e.target.value)} placeholder="e.g. Grocery" />
                     </div>
                     <div>
-                        <label className="block text-sm text-white/70 mb-1">Category</label>
+                        <label className="block text-sm text-muted-foreground mb-1">Category</label>
                         <CategorySelector
                             value={category}
                             onChange={setCategory}

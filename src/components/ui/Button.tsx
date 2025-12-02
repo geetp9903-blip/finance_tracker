@@ -24,6 +24,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
 
         return (
             <motion.button
+                whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.95 }}
                 ref={ref}
                 className={cn(

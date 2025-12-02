@@ -27,31 +27,11 @@
 
 @layer base {
   :root {
-    --background: 210 40% 98%;
-    --foreground: 222.2 84% 4.9%;
-    --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
-    --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
-    --primary: 221.2 83.2% 53.3%;
-    --primary-foreground: 210 40% 98%;
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 221.2 83.2% 53.3%;
-    --radius: 0.5rem;
-  }
-
-  .dark {
+    /* Dark Mode Variables - Deep, Rich, Nebula Vibes (Default) */
     --background: 222.2 84% 4.9%;
+    /* Slate-950 */
     --foreground: 210 40% 98%;
+    /* Slate-50 */
     --card: 222.2 84% 4.9%;
     --card-foreground: 210 40% 98%;
     --popover: 222.2 84% 4.9%;
@@ -64,11 +44,30 @@
     --muted-foreground: 215 20.2% 65.1%;
     --accent: 217.2 32.6% 17.5%;
     --accent-foreground: 210 40% 98%;
-    --destructive: 0 62.8% 30.6%;
+    --destructive: 0 84.2% 60.2%;
+    /* Original Red-500 */
     --destructive-foreground: 210 40% 98%;
     --border: 217.2 32.6% 17.5%;
     --input: 217.2 32.6% 17.5%;
     --ring: 224.3 76.3% 48%;
+
+    /* Dark Mode Liquid Colors (Nebula - Purple/Pink/Blue) */
+    --liquid-color-1: rgba(168, 85, 247, 0.5);
+    /* Purple */
+    --liquid-color-2: rgba(236, 72, 153, 0.5);
+    /* Pink */
+    --liquid-color-3: rgba(59, 130, 246, 0.5);
+    /* Blue */
+
+    /* Dark Mode Static Gradient */
+    --bg-gradient-start: #020617;
+    --bg-gradient-mid: #0f172a;
+    --bg-gradient-end: #1e293b;
+
+    /* Dark Mode Glass Settings (Low Opacity for Glow) */
+    --glass-bg: rgba(255, 255, 255, 0.08);
+    --glass-border: rgba(255, 255, 255, 0.1);
+    --glass-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
   }
 }
 
@@ -79,25 +78,141 @@
 
   body {
     @apply bg-background text-foreground;
-    background-image: radial-gradient(at 0% 0%, hsla(253, 16%, 7%, 1) 0, transparent 50%), radial-gradient(at 50% 0%, hsla(225, 39%, 30%, 1) 0, transparent 50%), radial-gradient(at 100% 0%, hsla(339, 49%, 30%, 1) 0, transparent 50%);
+    overflow-x: hidden;
+    /* Prevent horizontal scroll */
+  }
+
+  /* Static Background Implementation */
+  body[data-bg="static"] {
+    background: linear-gradient(to bottom right, var(--bg-gradient-start), var(--bg-gradient-mid), var(--bg-gradient-end));
     background-attachment: fixed;
   }
 }
 
-@layer utilities {
-  .glass {
-    @apply bg-white/10 backdrop-blur-lg border border-white/20 shadow-xl;
+/* --- THE LIQUID BACKGROUND --- */
+.liquid-bg {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  /* Changed from 100vw to prevent scrollbar overflow */
+  height: 100vh;
+  z-index: -1;
+  /* Use the base background color as the canvas */
+  background-color: hsl(var(--background));
+  background:
+    radial-gradient(circle at 15% 50%, var(--liquid-color-1), transparent 50%),
+    radial-gradient(circle at 85% 30%, var(--liquid-color-2), transparent 50%),
+    radial-gradient(circle at 50% 80%, var(--liquid-color-3), transparent 50%);
+  background-size: 150% 150%;
+  filter: blur(60px);
+  animation: move-liquid 15s ease-in-out infinite alternate;
+}
+
+@keyframes move-liquid {
+  0% {
+    background-position: 0% 50%;
   }
 
+  50% {
+    background-position: 100% 50%;
+  }
+
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+@layer utilities {
+
+  /* --- STYLE 1: CLASSIC FROST --- */
+  .glass-frost,
+  body[data-glass="frost"] .glass-card,
+  body:not([data-glass]) .glass-card {
+    background: var(--glass-bg);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid var(--glass-border);
+    box-shadow: var(--glass-shadow);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .glass-frost::after,
+  body[data-glass="frost"] .glass-card::after,
+  body:not([data-glass]) .glass-card::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    padding: 1px;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.4), rgba(255, 255, 255, 0.1) 50%, rgba(255, 255, 255, 0));
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    pointer-events: none;
+  }
+
+  /* --- STYLE 2: LIQUID GLOSS (Wet Look) --- */
+  .glass-liquid,
+  body[data-glass="liquid"] .glass-card {
+    background: linear-gradient(135deg, var(--glass-bg), rgba(255, 255, 255, 0));
+    backdrop-filter: blur(12px) saturate(160%);
+    -webkit-backdrop-filter: blur(12px) saturate(160%);
+    box-shadow:
+      inset 0 1px 1px 0 rgba(255, 255, 255, 0.6),
+      inset 0 -1px 1px 0 rgba(0, 0, 0, 0.15),
+      inset 0 0 30px rgba(255, 255, 255, 0.15),
+      0 20px 40px rgba(0, 0, 0, 0.4);
+    border: 0;
+    position: relative;
+  }
+
+  /* Refractive Edge */
+  .glass-liquid::after,
+  body[data-glass="liquid"] .glass-card::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    border: 1.5px solid transparent;
+    background: linear-gradient(145deg, rgba(255, 255, 255, 0.5) 0%, rgba(255, 255, 255, 0.1) 40%, rgba(255, 255, 255, 0) 100%) border-box;
+    -webkit-mask: linear-gradient(#fff 0 0) padding-box, linear-gradient(#fff 0 0);
+    mask: linear-gradient(#fff 0 0) padding-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    mix-blend-mode: overlay;
+    pointer-events: none;
+    z-index: 2;
+  }
+
+  /* Glare */
+  .glass-liquid::before,
+  body[data-glass="liquid"] .glass-card::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.3) 0%, transparent 60%);
+    transform: rotate(45deg);
+    pointer-events: none;
+    opacity: 0.4;
+    mix-blend-mode: soft-light;
+  }
+
+  /* --- CONDITIONAL GLASS CARD BASE --- */
   .glass-card {
-    @apply bg-white/5 backdrop-blur-md border border-white/10 shadow-lg rounded-2xl;
+    @apply rounded-2xl transition-all duration-300;
   }
 
   .glass-input {
-    @apply bg-black/20 backdrop-blur-sm border border-white/10 text-white placeholder:text-white/50 focus:ring-2 focus:ring-primary/50 focus:border-transparent transition-all duration-300;
+    @apply bg-black/20 backdrop-blur-sm border border-white/10 text-foreground placeholder:text-muted-foreground focus:ring-2 focus:ring-primary/50 focus:border-transparent transition-all duration-300;
   }
 
   .glass-button {
-    @apply bg-white/10 hover:bg-white/20 backdrop-blur-md border border-white/20 text-white transition-all duration-300 active:scale-95;
+    @apply bg-white/10 hover:bg-white/20 backdrop-blur-md border border-white/20 text-foreground transition-all duration-300 active:scale-95;
   }
 }

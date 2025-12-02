@@ -1,6 +1,7 @@
 "use client";
 import { useFinance } from "@/context/FinanceContext";
 import { useAuth } from "@/context/AuthContext";
+import { useTheme } from "@/context/ThemeContext";
 import { Card } from "@/components/ui/Card";
 import { CurrencySelector } from "@/components/ui/CurrencySelector";
 import { ArrowUpRight, ArrowDownRight, Wallet } from "lucide-react";
@@ -12,9 +13,15 @@ import { useEffect, useState } from "react";
 export default function Dashboard() {
   const { transactions, formatAmount, budget, currency, setCurrency } = useFinance();
   const { user, loading } = useAuth();
+
   const router = useRouter();
   const [budgetLimits, setBudgetLimits] = useState<Record<string, number>>({});
   const [recentSort, setRecentSort] = useState<'date' | 'amount-high' | 'amount-low'>('date');
+
+  // Chart Colors (Dark Mode Default)
+  const axisColor = '#fff';
+  const tooltipBg = 'rgba(0,0,0,0.8)';
+  const tooltipColor = '#fff';
 
   // Independent States
   const [summaryDate, setSummaryDate] = useState(new Date());
@@ -178,8 +185,8 @@ export default function Dashboard() {
     <div className="space-y-8">
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-white">Dashboard</h1>
-          <p className="text-white/60">Welcome back, {user.username}</p>
+          <h1 className="text-3xl font-bold text-foreground bg-accent/50 backdrop-blur-md border border-white/10 rounded-full px-6 py-2 shadow-sm w-fit">Dashboard</h1>
+          <p className="text-muted-foreground mt-2 bg-accent/30 backdrop-blur-sm border border-white/5 rounded-full px-4 py-1 w-fit text-sm">Welcome back, {user.username}</p>
         </div>
         <CurrencySelector currentCurrency={currency} onSelect={setCurrency} />
       </div>
@@ -188,17 +195,17 @@ export default function Dashboard() {
       <div className="space-y-4">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div className="flex items-center gap-4">
-            <h2 className="text-xl font-semibold text-white">Summary</h2>
-            <div className="flex gap-2 bg-white/5 rounded-lg p-1">
+            <h2 className="text-xl font-semibold text-foreground bg-accent/50 backdrop-blur-md border border-white/10 rounded-full px-4 py-1.5 shadow-sm w-fit">Summary</h2>
+            <div className="flex gap-2 bg-accent/50 rounded-lg p-1">
               <button
                 onClick={() => setSummaryViewMode('month')}
-                className={`px-3 py-1 rounded-md text-sm transition-all cursor-pointer ${summaryViewMode === 'month' ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-lg' : 'text-white/60 hover:text-white'}`}
+                className={`px-3 py-1 rounded-md text-sm transition-all duration-200 ease-in-out cursor-pointer hover:scale-105 active:scale-95 ${summaryViewMode === 'month' ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-lg shadow-purple-500/20' : 'text-muted-foreground hover:text-foreground hover:bg-accent'}`}
               >
                 Month
               </button>
               <button
                 onClick={() => setSummaryViewMode('year')}
-                className={`px-3 py-1 rounded-md text-sm transition-all cursor-pointer ${summaryViewMode === 'year' ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-lg' : 'text-white/60 hover:text-white'}`}
+                className={`px-3 py-1 rounded-md text-sm transition-all duration-200 ease-in-out cursor-pointer hover:scale-105 active:scale-95 ${summaryViewMode === 'year' ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-lg shadow-purple-500/20' : 'text-muted-foreground hover:text-foreground hover:bg-accent'}`}
               >
                 Year
               </button>
@@ -206,36 +213,42 @@ export default function Dashboard() {
           </div>
           <MonthYearPicker selectedDate={summaryDate} onChange={setSummaryDate} />
         </div>
-        <div className="grid gap-4 md:grid-cols-3">
-          <Card className="glass-card p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-white/60">Total Balance</p>
-                <h2 className="mt-2 text-3xl font-bold text-white">{formatAmount(balance)}</h2>
+        <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
+          <Card className="glass-card p-6 transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_8px_30px_rgb(0,0,0,0.12)] hover:bg-accent/10">
+            <div className="flex items-center justify-between gap-4">
+              <div className="min-w-0 flex-1">
+                <p className="text-sm font-medium text-muted-foreground">Total Balance</p>
+                <h2 className="mt-2 text-2xl lg:text-3xl font-bold text-foreground truncate" title={formatAmount(balance)}>
+                  {formatAmount(balance)}
+                </h2>
               </div>
-              <div className="rounded-full bg-primary/20 p-3 text-primary">
+              <div className="rounded-full bg-primary/20 p-3 text-primary shrink-0">
                 <Wallet className="h-6 w-6" />
               </div>
             </div>
           </Card>
-          <Card className="glass-card p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-white/60">Total Income</p>
-                <h2 className="mt-2 text-3xl font-bold text-emerald-400">{formatAmount(totalIncome)}</h2>
+          <Card className="glass-card p-6 transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_8px_30px_rgb(0,0,0,0.12)] hover:bg-accent/10">
+            <div className="flex items-center justify-between gap-4">
+              <div className="min-w-0 flex-1">
+                <p className="text-sm font-medium text-muted-foreground">Total Income</p>
+                <h2 className="mt-2 text-2xl lg:text-3xl font-bold text-emerald-500 truncate" title={formatAmount(totalIncome)}>
+                  {formatAmount(totalIncome)}
+                </h2>
               </div>
-              <div className="rounded-full bg-emerald-500/20 p-3 text-emerald-400">
+              <div className="rounded-full bg-emerald-500/20 p-3 text-emerald-500 shrink-0">
                 <ArrowUpRight className="h-6 w-6" />
               </div>
             </div>
           </Card>
-          <Card className="glass-card p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-white/60">Total Expenses</p>
-                <h2 className="mt-2 text-3xl font-bold text-red-400">{formatAmount(totalExpense)}</h2>
+          <Card className="glass-card p-6 transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_8px_30px_rgb(0,0,0,0.12)] hover:bg-accent/10">
+            <div className="flex items-center justify-between gap-4">
+              <div className="min-w-0 flex-1">
+                <p className="text-sm font-medium text-muted-foreground">Total Expenses</p>
+                <h2 className="mt-2 text-2xl lg:text-3xl font-bold text-destructive truncate" title={formatAmount(totalExpense)}>
+                  {formatAmount(totalExpense)}
+                </h2>
               </div>
-              <div className="rounded-full bg-red-500/20 p-3 text-red-400">
+              <div className="rounded-full bg-destructive/20 p-3 text-destructive shrink-0">
                 <ArrowDownRight className="h-6 w-6" />
               </div>
             </div>
@@ -249,17 +262,17 @@ export default function Dashboard() {
         <Card className="glass-card p-6">
           <div className="flex flex-col gap-4 mb-6">
             <div className="flex items-center justify-between">
-              <h3 className="text-lg font-semibold text-white">Income vs Expenses</h3>
-              <div className="flex gap-2 bg-white/5 rounded-lg p-1">
+              <h3 className="text-lg font-semibold text-foreground bg-accent/50 backdrop-blur-md border border-white/10 rounded-full px-4 py-1.5 shadow-sm w-fit">Income vs Expenses</h3>
+              <div className="flex gap-2 bg-accent/50 rounded-lg p-1">
                 <button
                   onClick={() => setIncomeViewMode('month')}
-                  className={`px-3 py-1 rounded-md text-sm transition-all cursor-pointer ${incomeViewMode === 'month' ? 'bg-gradient-to-r from-emerald-500 to-teal-500 text-white shadow-lg' : 'text-white/60 hover:text-white'}`}
+                  className={`px-3 py-1 rounded-md text-sm transition-all duration-200 ease-in-out cursor-pointer hover:scale-105 active:scale-95 ${incomeViewMode === 'month' ? 'bg-gradient-to-r from-emerald-500 to-teal-500 text-white shadow-lg shadow-emerald-500/20' : 'text-muted-foreground hover:text-foreground hover:bg-accent'}`}
                 >
                   Month
                 </button>
                 <button
                   onClick={() => setIncomeViewMode('year')}
-                  className={`px-3 py-1 rounded-md text-sm transition-all cursor-pointer ${incomeViewMode === 'year' ? 'bg-gradient-to-r from-emerald-500 to-teal-500 text-white shadow-lg' : 'text-white/60 hover:text-white'}`}
+                  className={`px-3 py-1 rounded-md text-sm transition-all duration-200 ease-in-out cursor-pointer hover:scale-105 active:scale-95 ${incomeViewMode === 'year' ? 'bg-gradient-to-r from-emerald-500 to-teal-500 text-white shadow-lg shadow-emerald-500/20' : 'text-muted-foreground hover:text-foreground hover:bg-accent'}`}
                 >
                   Year
                 </button>
@@ -278,18 +291,18 @@ export default function Dashboard() {
                     <stop offset="95%" stopColor="#10b981" stopOpacity={0} />
                   </linearGradient>
                   <linearGradient id="colorExpense" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#ef4444" stopOpacity={0.3} />
-                    <stop offset="95%" stopColor="#ef4444" stopOpacity={0} />
+                    <stop offset="5%" stopColor="hsl(var(--destructive))" stopOpacity={0.3} />
+                    <stop offset="95%" stopColor="hsl(var(--destructive))" stopOpacity={0} />
                   </linearGradient>
                 </defs>
-                <XAxis dataKey="name" stroke="#fff" tick={{ fill: '#fff', opacity: 0.5 }} />
-                <YAxis stroke="#fff" tick={{ fill: '#fff', opacity: 0.5 }} />
+                <XAxis dataKey="name" stroke={axisColor} tick={{ fill: axisColor, opacity: 1 }} />
+                <YAxis stroke={axisColor} tick={{ fill: axisColor, opacity: 1 }} />
                 <Tooltip
-                  contentStyle={{ backgroundColor: 'rgba(0,0,0,0.8)', border: 'none', borderRadius: '8px', color: '#fff' }}
+                  contentStyle={{ backgroundColor: tooltipBg, border: 'none', borderRadius: '8px', color: tooltipColor, boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)' }}
                   formatter={(value: number) => formatAmount(value)}
                   labelFormatter={(label) => incomeViewMode === 'month' ? `Day ${label}` : label}
                 />
-                <Legend />
+                <Legend wrapperStyle={{ color: axisColor }} />
                 <Area
                   type="monotone"
                   dataKey="income"
@@ -303,7 +316,7 @@ export default function Dashboard() {
                 <Area
                   type="monotone"
                   dataKey="expense"
-                  stroke="#ef4444"
+                  stroke="hsl(var(--destructive))"
                   fillOpacity={1}
                   fill="url(#colorExpense)"
                   name="Expense"
@@ -319,17 +332,17 @@ export default function Dashboard() {
         <Card className="glass-card p-6">
           <div className="flex flex-col gap-4 mb-6">
             <div className="flex items-center justify-between">
-              <h3 className="text-lg font-semibold text-white">Balance Trend</h3>
-              <div className="flex gap-2 bg-white/5 rounded-lg p-1">
+              <h3 className="text-lg font-semibold text-foreground bg-accent/50 backdrop-blur-md border border-white/10 rounded-full px-4 py-1.5 shadow-sm w-fit">Balance Trend</h3>
+              <div className="flex gap-2 bg-accent/50 rounded-lg p-1">
                 <button
                   onClick={() => setBalanceViewMode('month')}
-                  className={`px-3 py-1 rounded-md text-sm transition-all cursor-pointer ${balanceViewMode === 'month' ? 'bg-gradient-to-r from-blue-500 to-cyan-500 text-white shadow-lg' : 'text-white/60 hover:text-white'}`}
+                  className={`px-3 py-1 rounded-md text-sm transition-all duration-200 ease-in-out cursor-pointer hover:scale-105 active:scale-95 ${balanceViewMode === 'month' ? 'bg-gradient-to-r from-blue-500 to-cyan-500 text-white shadow-lg shadow-blue-500/20' : 'text-muted-foreground hover:text-foreground hover:bg-accent'}`}
                 >
                   Month
                 </button>
                 <button
                   onClick={() => setBalanceViewMode('year')}
-                  className={`px-3 py-1 rounded-md text-sm transition-all cursor-pointer ${balanceViewMode === 'year' ? 'bg-gradient-to-r from-blue-500 to-cyan-500 text-white shadow-lg' : 'text-white/60 hover:text-white'}`}
+                  className={`px-3 py-1 rounded-md text-sm transition-all duration-200 ease-in-out cursor-pointer hover:scale-105 active:scale-95 ${balanceViewMode === 'year' ? 'bg-gradient-to-r from-blue-500 to-cyan-500 text-white shadow-lg shadow-blue-500/20' : 'text-muted-foreground hover:text-foreground hover:bg-accent'}`}
                 >
                   Year
                 </button>
@@ -348,17 +361,17 @@ export default function Dashboard() {
                     <stop offset="95%" stopColor="#3b82f6" stopOpacity={0} />
                   </linearGradient>
                 </defs>
-                <XAxis dataKey="name" stroke="#fff" tick={{ fill: '#fff', opacity: 0.5 }} />
-                <YAxis stroke="#fff" tick={{ fill: '#fff', opacity: 0.5 }} domain={[0, 'auto']} />
+                <XAxis dataKey="name" stroke={axisColor} tick={{ fill: axisColor, opacity: 1 }} />
+                <YAxis stroke={axisColor} tick={{ fill: axisColor, opacity: 1 }} domain={[0, 'auto']} />
                 <Tooltip
-                  contentStyle={{ backgroundColor: 'rgba(0,0,0,0.8)', border: 'none', borderRadius: '8px', color: '#fff' }}
+                  contentStyle={{ backgroundColor: tooltipBg, border: 'none', borderRadius: '8px', color: tooltipColor, boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)' }}
                   formatter={(value: number, name: string) => {
                     if (name === "balance") return [formatAmount(value), "Balance"];
                     return [formatAmount(value), name];
                   }}
                   labelFormatter={(label) => balanceViewMode === 'month' ? `Day ${label}` : label}
                 />
-                <Legend />
+                <Legend wrapperStyle={{ color: axisColor }} />
                 <Area
                   type="monotone"
                   dataKey="balance"
@@ -378,39 +391,39 @@ export default function Dashboard() {
       {/* Recent Transactions Section */}
       <Card className="glass-card p-6">
         <div className="flex items-center justify-between mb-6">
-          <h3 className="text-lg font-semibold text-white">Recent Transactions</h3>
+          <h3 className="text-lg font-semibold text-foreground bg-accent/50 backdrop-blur-md border border-white/10 rounded-full px-4 py-1.5 shadow-sm w-fit">Recent Transactions</h3>
           <div className="flex gap-2">
             <select
               value={recentSort}
               onChange={(e) => setRecentSort(e.target.value as any)}
-              className="bg-white/5 border border-white/10 rounded-lg px-3 py-1 text-sm text-white focus:outline-none focus:ring-2 focus:ring-primary"
+              className="bg-accent/50 border border-border rounded-lg px-3 py-1 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
             >
-              <option value="date" className="bg-gray-900">Most Recent</option>
-              <option value="amount-high" className="bg-gray-900">Highest Amount</option>
-              <option value="amount-low" className="bg-gray-900">Lowest Amount</option>
+              <option value="date" className="bg-card text-foreground">Most Recent</option>
+              <option value="amount-high" className="bg-card text-foreground">Highest Amount</option>
+              <option value="amount-low" className="bg-card text-foreground">Lowest Amount</option>
             </select>
           </div>
         </div>
         <div className="space-y-4">
           {sortedTransactions.map((t, index) => (
-            <div key={t.id} className="flex items-center justify-between p-3 rounded-xl hover:bg-white/5 transition-colors">
+            <div key={t.id} className="flex items-center justify-between p-3 rounded-xl transition-all duration-200 hover:bg-accent/30 hover:scale-[1.01] hover:shadow-lg cursor-default">
               <div className="flex items-center gap-4">
-                <div className={`h-10 w-10 rounded-full flex items-center justify-center text-lg font-bold ${t.type === 'income' ? "bg-emerald-500/20 text-emerald-400" : "bg-red-500/20 text-red-400"
+                <div className={`h-10 w-10 rounded-full flex items-center justify-center text-lg font-bold ${t.type === 'income' ? "bg-emerald-500/20 text-emerald-500" : "bg-destructive/20 text-destructive"
                   }`}>
                   {t.category.charAt(0).toUpperCase()}
                 </div>
                 <div>
-                  <p className="font-medium text-white">{t.description}</p>
-                  <p className="text-sm text-white/50">{t.category} • {new Date(t.date).toLocaleDateString()}</p>
+                  <p className="font-medium text-foreground">{t.description}</p>
+                  <p className="text-sm text-muted-foreground">{t.category} • {new Date(t.date).toLocaleDateString()}</p>
                 </div>
               </div>
-              <span className={`font-semibold ${t.type === 'income' ? "text-emerald-400" : "text-red-400"}`}>
+              <span className={`font-semibold ${t.type === 'income' ? "text-emerald-500" : "text-destructive"}`}>
                 {t.type === 'income' ? '+' : '-'}{formatAmount(t.amount)}
               </span>
             </div>
           ))}
           {sortedTransactions.length === 0 && (
-            <p className="text-center text-white/40 py-4">No recent transactions</p>
+            <p className="text-center text-muted-foreground py-4">No recent transactions</p>
           )}
         </div>
       </Card>

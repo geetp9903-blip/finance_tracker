@@ -66,7 +66,7 @@ export default function CalendarPage() {
         return (
             <div className="flex justify-center mt-1 gap-1">
                 {hasIncome && <div className="h-1.5 w-1.5 rounded-full bg-emerald-500" />}
-                {hasExpense && <div className="h-1.5 w-1.5 rounded-full bg-red-500" />}
+                {hasExpense && <div className="h-1.5 w-1.5 rounded-full bg-destructive" />}
                 {hasPending && <div className="h-1.5 w-1.5 rounded-full bg-yellow-500" />}
             </div>
         );
@@ -88,7 +88,7 @@ export default function CalendarPage() {
 
     return (
         <div className="p-8 max-w-7xl mx-auto space-y-8">
-            <h1 className="text-3xl font-bold text-white">Calendar</h1>
+            <h1 className="text-3xl font-bold text-foreground bg-accent/50 backdrop-blur-md border border-white/10 rounded-full px-6 py-2 shadow-sm w-fit">Calendar</h1>
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                 <Card className="lg:col-span-2 p-6">
@@ -96,24 +96,24 @@ export default function CalendarPage() {
                         onChange={setDate}
                         value={date}
                         tileContent={getTileContent}
-                        className="w-full bg-transparent border-none text-white"
+                        className="w-full bg-transparent border-none text-foreground"
                     />
                 </Card>
 
                 <Card className="p-6 h-fit">
-                    <h2 className="text-xl font-semibold text-white mb-4">
+                    <h2 className="text-xl font-semibold text-foreground mb-4">
                         {selectedDate.toLocaleDateString('en-GB')}
                     </h2>
 
                     <div className="space-y-4">
                         {/* Actual Transactions */}
                         {selectedDateTransactions.map(t => (
-                            <div key={t.id} className="flex items-center justify-between p-3 rounded-xl bg-white/5">
+                            <div key={t.id} className="flex items-center justify-between p-3 rounded-xl bg-accent/50">
                                 <div>
-                                    <p className="font-medium text-white">{t.description}</p>
-                                    <p className="text-xs text-white/50">{t.category}</p>
+                                    <p className="font-medium text-foreground">{t.description}</p>
+                                    <p className="text-xs text-muted-foreground">{t.category}</p>
                                 </div>
-                                <span className={cn("font-semibold", t.type === 'income' ? "text-emerald-400" : "text-red-400")}>
+                                <span className={cn("font-semibold", t.type === 'income' ? "text-emerald-500" : "text-destructive")}>
                                     {t.type === 'income' ? '+' : '-'}{formatAmount(t.amount)}
                                 </span>
                             </div>
@@ -121,22 +121,22 @@ export default function CalendarPage() {
 
                         {/* Pending Recurring Expenses */}
                         {selectedDatePendingRules.map(r => (
-                            <div key={r.id} className="flex items-center justify-between p-3 rounded-xl bg-white/5 border border-white/10 border-dashed">
+                            <div key={r.id} className="flex items-center justify-between p-3 rounded-xl bg-accent/50 border border-border border-dashed">
                                 <div className="flex items-center gap-2">
-                                    <Clock className="h-4 w-4 text-white/40" />
+                                    <Clock className="h-4 w-4 text-muted-foreground" />
                                     <div>
-                                        <p className="font-medium text-white/80">{r.description}</p>
-                                        <p className="text-xs text-white/40">{r.category} • Pending</p>
+                                        <p className="font-medium text-foreground">{r.description}</p>
+                                        <p className="text-xs text-muted-foreground">{r.category} • Pending</p>
                                     </div>
                                 </div>
-                                <span className={cn("font-semibold opacity-60", r.type === 'income' ? "text-emerald-400" : "text-red-400")}>
+                                <span className={cn("font-semibold opacity-60", r.type === 'income' ? "text-emerald-500" : "text-destructive")}>
                                     {r.type === 'income' ? '+' : '-'}{formatAmount(r.amount)}
                                 </span>
                             </div>
                         ))}
 
                         {selectedDateTransactions.length === 0 && selectedDatePendingRules.length === 0 && (
-                            <p className="text-center text-white/40 py-8">No transactions or pending items on this day</p>
+                            <p className="text-center text-muted-foreground py-8">No transactions or pending items on this day</p>
                         )}
                     </div>
                 </Card>

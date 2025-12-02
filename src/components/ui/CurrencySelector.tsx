@@ -24,7 +24,7 @@ export function CurrencySelector({ currentCurrency, onSelect }: CurrencySelector
         <div className="relative">
             <button
                 onClick={() => setIsOpen(!isOpen)}
-                className="flex items-center gap-2 rounded-full glass-button px-4 py-2 text-sm font-medium"
+                className="flex items-center gap-2 rounded-full glass-button px-4 py-2 text-sm font-medium transition-all duration-200 ease-in-out hover:scale-105 active:scale-95 hover:shadow-lg hover:shadow-primary/10"
             >
                 <Globe className="h-4 w-4" />
                 <span>{selected.symbol} {selected.code}</span>
@@ -49,12 +49,12 @@ export function CurrencySelector({ currentCurrency, onSelect }: CurrencySelector
                                         setIsOpen(false);
                                     }}
                                     className={cn(
-                                        "flex w-full items-center justify-between rounded-lg px-3 py-2 text-sm text-white transition-colors hover:bg-white/10 cursor-pointer",
-                                        currentCurrency === currency.code && "bg-white/20"
+                                        "flex w-full items-center justify-between rounded-lg px-3 py-2 text-sm text-foreground transition-all duration-200 ease-in-out hover:bg-accent hover:translate-x-1 cursor-pointer",
+                                        currentCurrency === currency.code && "bg-accent"
                                     )}
                                 >
                                     <span className="flex items-center gap-2">
-                                        <span className="text-white/60">{currency.symbol}</span>
+                                        <span className="text-muted-foreground">{currency.symbol}</span>
                                         {currency.name}
                                     </span>
                                     {currentCurrency === currency.code && <Check className="h-4 w-4" />}
