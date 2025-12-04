@@ -11,11 +11,15 @@ import { CategorySelector } from "@/components/ui/CategorySelector";
 import { motion } from "framer-motion";
 
 import { useAuth } from "@/context/AuthContext";
+import { useFinance } from "@/context/FinanceContext";
 
 import { cacheService } from "@/lib/cache";
 
+import { PageLoader } from "@/components/ui/PageLoader";
+
 export default function RecurringPage() {
     const { user } = useAuth();
+    const { isLoading: isGlobalLoading } = useFinance(); // Use global loading state
     const [rules, setRules] = useState<RecurringRule[]>([]);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
@@ -135,15 +139,17 @@ export default function RecurringPage() {
         }
     };
 
+    if (isGlobalLoading) return <PageLoader />;
+
     return (
         <div className="space-y-8">
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <h1 className="text-3xl font-bold text-foreground bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl px-6 py-2 shadow-sm w-fit">Recurring Expenses</h1>
-                <div className="flex gap-2">
-                    <Button variant="secondary" onClick={processRules}>
+                <div className="flex gap-2 w-full md:w-auto">
+                    <Button variant="secondary" onClick={processRules} className="flex-1 md:flex-none">
                         <RefreshCw className="h-4 w-4 mr-2" /> Check Due
                     </Button>
-                    <Button onClick={() => setIsModalOpen(true)}>
+                    <Button onClick={() => setIsModalOpen(true)} className="flex-1 md:flex-none">
                         <Plus className="h-4 w-4 mr-2" /> Add Rule
                     </Button>
                 </div>

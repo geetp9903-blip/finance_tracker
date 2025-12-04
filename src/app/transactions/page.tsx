@@ -10,11 +10,13 @@ import { cn } from "@/lib/utils";
 import { ExportMenu } from "@/components/ExportMenu";
 import { CategorySelector } from "@/components/ui/CategorySelector";
 import { MonthYearPicker } from "@/components/ui/MonthYearPicker";
+import { PageLoader } from "@/components/ui/PageLoader";
 
 export default function TransactionsPage() {
-    const { transactions, addTransaction, deleteTransaction, formatAmount } = useFinance();
+    const { transactions, addTransaction, deleteTransaction, formatAmount, isLoading } = useFinance();
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [filter, setFilter] = useState<'all' | 'income' | 'expense'>('all');
+    const [categoryFilter, setCategoryFilter] = useState<string>('all');
     const [sortBy, setSortBy] = useState<'date' | 'amount-high' | 'amount-low'>('date');
     const [search, setSearch] = useState("");
     const [selectedDate, setSelectedDate] = useState(new Date());
@@ -26,6 +28,8 @@ export default function TransactionsPage() {
     const [category, setCategory] = useState("");
     const [type, setType] = useState<'income' | 'expense'>('expense');
 
+    const uniqueCategories = Array.from(new Set(transactions.map(t => t.category)));
+
     const filteredTransactions = transactions
         .filter(t => {
             const d = new Date(t.date);
@@ -34,6 +38,7 @@ export default function TransactionsPage() {
             return isSameYear && d.getMonth() === selectedDate.getMonth();
         })
         .filter(t => filter === 'all' || t.type === filter)
+        .filter(t => categoryFilter === 'all' || t.category === categoryFilter)
         .filter(t => t.description.toLowerCase().includes(search.toLowerCase()) || t.category.toLowerCase().includes(search.toLowerCase()))
         .sort((a, b) => {
             if (sortBy === 'amount-high') return b.amount - a.amount;
@@ -56,12 +61,14 @@ export default function TransactionsPage() {
         setCategory("");
     };
 
+    if (isLoading) return <PageLoader />;
+
     return (
         <div className="space-y-8">
             <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-                <div className="flex items-center gap-4">
+                <div className="flex flex-col md:flex-row md:items-center gap-4">
                     <h1 className="text-3xl font-bold text-foreground bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl px-6 py-2 shadow-sm w-fit">Transactions</h1>
-                    <div className="flex gap-2 bg-white/5 backdrop-blur-md border border-white/10 rounded-xl p-1">
+                    <div className="flex gap-2 bg-white/5 backdrop-blur-md border border-white/10 rounded-xl p-1 w-fit">
                         <button
                             onClick={() => setViewMode('month')}
                             className={cn(
@@ -86,7 +93,8 @@ export default function TransactionsPage() {
                 <div className="flex gap-2">
                     <ExportMenu transactions={filteredTransactions} />
                     <Button onClick={() => setIsModalOpen(true)}>
-                        <Plus className="h-4 w-4 mr-2" /> Add Transaction
+                        <Plus className="h-4 w-4 mr-2" /> <span className="hidden md:inline">Add Transaction</span>
+                        <span className="md:hidden">Add</span>
                     </Button>
                 </div>
             </div>
@@ -101,7 +109,7 @@ export default function TransactionsPage() {
                         onChange={(e) => setSearch(e.target.value)}
                     />
                 </div>
-                <div className="flex gap-2 overflow-x-auto pb-2 md:pb-0">
+                <div className="flex flex-col sm:flex-row gap-2 overflow-x-auto pb-2 md:pb-0">
                     <div className="flex gap-2 bg-white/5 backdrop-blur-md border border-white/10 rounded-xl p-1">
                         {(['all', 'income', 'expense'] as const).map((f) => (
                             <button
@@ -117,6 +125,16 @@ export default function TransactionsPage() {
                         ))}
                     </div>
                     <select
+                        value={categoryFilter}
+                        onChange={(e) => setCategoryFilter(e.target.value)}
+                        className="bg-white/5 backdrop-blur-md border border-white/10 rounded-xl px-4 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+                    >
+                        <option value="all" className="bg-card text-foreground">All Categories</option>
+                        {uniqueCategories.map(c => (
+                            <option key={c} value={c} className="bg-card text-foreground">{c}</option>
+                        ))}
+                    </select>
+                    <select
                         value={sortBy}
                         onChange={(e) => setSortBy(e.target.value as 'date' | 'amount-high' | 'amount-low')}
                         className="bg-white/5 backdrop-blur-md border border-white/10 rounded-xl px-4 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
@@ -131,20 +149,20 @@ export default function TransactionsPage() {
             <div className="space-y-4">
                 {filteredTransactions.map((t) => (
                     <Card key={t.id} className="glass-card flex items-center justify-between p-4">
-                        <div className="flex items-center gap-4">
+                        <div className="flex items-center gap-4 min-w-0 flex-1">
                             <div className={cn(
-                                "h-10 w-10 rounded-full flex items-center justify-center text-lg font-bold",
+                                "h-10 w-10 shrink-0 rounded-full flex items-center justify-center text-lg font-bold",
                                 t.type === 'income' ? "bg-emerald-500/20 text-emerald-500" : "bg-destructive/20 text-destructive"
                             )}>
                                 {t.category.charAt(0).toUpperCase()}
                             </div>
-                            <div>
-                                <p className="font-medium text-foreground">{t.description}</p>
-                                <p className="text-sm text-muted-foreground">{t.category} • {new Date(t.date).toLocaleDateString()}</p>
+                            <div className="min-w-0 flex-1">
+                                <p className="font-medium text-foreground truncate">{t.description}</p>
+                                <p className="text-sm text-muted-foreground truncate">{t.category} • {new Date(t.date).toLocaleDateString()}</p>
                             </div>
                         </div>
-                        <div className="flex items-center gap-4">
-                            <span className={cn("font-semibold", t.type === 'income' ? "text-emerald-500" : "text-destructive")}>
+                        <div className="flex items-center gap-4 shrink-0">
+                            <span className={cn("font-semibold whitespace-nowrap", t.type === 'income' ? "text-emerald-500" : "text-destructive")}>
                                 {t.type === 'income' ? '+' : '-'}{formatAmount(t.amount)}
                             </span>
                             <button

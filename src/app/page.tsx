@@ -10,8 +10,10 @@ import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pi
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
+import { PageLoader } from "@/components/ui/PageLoader";
+
 export default function Dashboard() {
-  const { transactions, formatAmount, budget, currency, setCurrency } = useFinance();
+  const { transactions, formatAmount, budget, currency, setCurrency, isLoading } = useFinance();
   const { user, loading } = useAuth();
 
   const router = useRouter();
@@ -53,7 +55,8 @@ export default function Dashboard() {
     }
   }, [user, loading, router]);
 
-  if (loading || !user) return null;
+  if (loading || isLoading) return <PageLoader />;
+  if (!user) return null;
 
   // --- Summary Cards Data ---
   // Period for Income/Expense Calculation

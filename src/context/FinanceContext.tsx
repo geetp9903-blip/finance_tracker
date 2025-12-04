@@ -14,6 +14,7 @@ interface FinanceContextType {
     updateBudget: (budget: Budget) => Promise<void>;
     refreshData: () => Promise<void>;
     formatAmount: (amount: number) => string;
+    isLoading: boolean;
 }
 
 const FinanceContext = createContext<FinanceContextType | undefined>(undefined);
@@ -23,9 +24,11 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
     const [transactions, setTransactions] = useState<Transaction[]>([]);
     const [budget, setBudget] = useState<Budget>({ fixedExpenses: [], allocations: [] });
     const [currency, setCurrency] = useState('INR');
+    const [isLoading, setIsLoading] = useState(true);
 
     const refreshData = useCallback(async () => {
         if (!user) return;
+        setIsLoading(true);
         try {
             const res = await fetch('/api/finance', {
                 headers: { 'x-user-id': user.username }
@@ -35,6 +38,8 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
             if (data.budget) setBudget(data.budget);
         } catch (error) {
             console.error("Failed to fetch data", error);
+        } finally {
+            setIsLoading(false);
         }
     }, [user]);
 
@@ -130,7 +135,8 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
             deleteTransaction,
             updateBudget,
             refreshData,
-            formatAmount
+            formatAmount,
+            isLoading
         }}>
             {children}
         </FinanceContext.Provider>

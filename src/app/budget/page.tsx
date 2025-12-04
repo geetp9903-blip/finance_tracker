@@ -5,13 +5,15 @@ import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { Modal } from "@/components/ui/Modal";
-import { Plus, Edit2, Trash2 } from "lucide-react";
+import { Plus, Trash2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 import { BudgetEntry } from "@/lib/types";
 
+import { PageLoader } from "@/components/ui/PageLoader";
+
 export default function BudgetPage() {
-    const { transactions, formatAmount, budget, updateBudget } = useFinance();
+    const { transactions, formatAmount, budget, updateBudget, isLoading } = useFinance();
     const [budgetEntries, setBudgetEntries] = useState<BudgetEntry[]>([]);
     const [isModalOpen, setIsModalOpen] = useState(false);
 
@@ -64,12 +66,14 @@ export default function BudgetPage() {
     const actualExpenses = transactions.filter(t => t.type === 'expense').reduce((sum, t) => sum + t.amount, 0);
     const actualBalance = actualIncome - actualExpenses;
 
+    if (isLoading) return <PageLoader />;
+
     return (
         <div className="space-y-8">
             <div className="flex items-center justify-between">
                 <h1 className="text-3xl font-bold text-foreground bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl px-6 py-2 shadow-sm w-fit">Monthly Budget Plan</h1>
                 <Button onClick={() => setIsModalOpen(true)}>
-                    <Plus className="h-4 w-4 mr-2" /> Add Budget Item
+                    <Plus className="h-4 w-4 md:mr-2" /> <span className="hidden md:inline">Add Budget Item</span>
                 </Button>
             </div>
 

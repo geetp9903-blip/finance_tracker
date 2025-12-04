@@ -11,6 +11,13 @@ export const metadata: Metadata = {
   description: "Prosper with clarity. Track your finances with style.",
 };
 
+export const viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
+};
+
 export default function RootLayout({
   children,
 }: Readonly<{
