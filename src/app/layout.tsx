@@ -18,6 +18,8 @@ export const viewport = {
   userScalable: false,
 };
 
+import { SpeedInsights } from "@vercel/speed-insights/next";
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -30,6 +32,7 @@ export default function RootLayout({
           <AppLayout>
             {children}
           </AppLayout>
+          <SpeedInsights />
         </Providers>
       </body>
     </html>
