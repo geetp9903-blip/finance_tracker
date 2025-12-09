@@ -71,7 +71,7 @@ export default function BudgetPage() {
     return (
         <div className="space-y-8">
             <div className="flex items-center justify-between">
-                <h1 className="text-3xl font-bold text-foreground bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl px-6 py-2 shadow-sm w-fit">Monthly Budget Plan</h1>
+                <h1 className="text-2xl md:text-3xl font-bold text-foreground bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl px-4 md:px-6 py-2 shadow-sm w-fit">Monthly Budget Plan</h1>
                 <Button onClick={() => setIsModalOpen(true)}>
                     <Plus className="h-4 w-4 md:mr-2" /> <span className="hidden md:inline">Add Budget Item</span>
                 </Button>
@@ -103,16 +103,16 @@ export default function BudgetPage() {
                 <h2 className="text-xl font-semibold text-foreground bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl px-6 py-2 shadow-sm w-fit">Budget Entries</h2>
                 {budgetEntries.map((entry) => (
                     <Card key={entry.id} className="glass-card flex items-center justify-between p-4">
-                        <div className="flex items-center gap-4">
+                        <div className="flex items-center gap-4 min-w-0 flex-1">
                             <div className={cn(
                                 "h-10 w-10 rounded-full flex items-center justify-center text-lg font-bold",
                                 entry.type === 'income' ? "bg-emerald-500/20 text-emerald-500" : "bg-destructive/20 text-destructive"
                             )}>
                                 {entry.category ? entry.category.charAt(0).toUpperCase() : '?'}
                             </div>
-                            <div>
-                                <p className="font-medium text-foreground">{entry.description}</p>
-                                <p className="text-sm text-muted-foreground">{entry.category}</p>
+                            <div className="min-w-0 flex-1">
+                                <p className="font-medium text-foreground truncate">{entry.description}</p>
+                                <p className="text-sm text-muted-foreground truncate">{entry.category}</p>
                             </div>
                         </div>
                         <div className="flex items-center gap-4">

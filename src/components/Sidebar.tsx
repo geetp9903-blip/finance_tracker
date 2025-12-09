@@ -1,7 +1,7 @@
 "use client";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, Receipt, PiggyBank, LogOut, RefreshCw, Calendar, Settings } from "lucide-react";
+import { LayoutDashboard, Receipt, PiggyBank, LogOut, RefreshCw, Calendar, Settings, BarChart3 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/context/AuthContext";
 
@@ -11,6 +11,7 @@ const navItems = [
     { name: "Budget", href: "/budget", icon: PiggyBank },
     { name: "Recurring", href: "/recurring", icon: RefreshCw },
     { name: "Calendar", href: "/calendar", icon: Calendar },
+    { name: "Analytics", href: "/analytics", icon: BarChart3 },
     { name: "Settings", href: "/settings", icon: Settings },
 ];
 
@@ -42,8 +43,8 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
                 "fixed left-0 top-0 z-50 h-screen w-64 border-r border-border bg-card/95 backdrop-blur-xl transition-transform duration-300 ease-in-out md:translate-x-0",
                 isOpen ? "translate-x-0" : "-translate-x-full"
             )}>
-                <div className="flex h-full flex-col px-3 py-4">
-                    <div className="mb-10 flex items-center justify-between pl-2.5 mt-4">
+                <div className="flex h-full flex-col px-3 py-4 overflow-y-auto pb-20 md:pb-4">
+                    <div className="mb-10 flex items-center justify-between pl-2.5 mt-4 shrink-0">
                         <div className="flex items-center">
                             <div className="h-10 w-10 relative mr-3">
                                 <img src="/Prospera_1_icon.png" alt="Prospera Logo" className="object-contain w-full h-full" />
@@ -59,7 +60,7 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
                             <X className="h-5 w-5" />
                         </button>
                     </div>
-                    <ul className="space-y-2 font-medium">
+                    <ul className="space-y-2 font-medium flex-1">
                         {navItems.map((item) => {
                             const Icon = item.icon;
                             const isActive = pathname === item.href;
@@ -80,7 +81,7 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
                             );
                         })}
                     </ul>
-                    <div className="mt-auto mb-4">
+                    <div className="mt-auto mb-4 shrink-0">
                         <div className="mb-4 px-3 py-2 rounded-xl bg-accent/50 border border-border">
                             <p className="text-xs text-muted-foreground">Logged in as</p>
                             <p className="text-sm font-medium text-foreground">{user.username}</p>

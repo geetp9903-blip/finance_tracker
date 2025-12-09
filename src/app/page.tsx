@@ -11,6 +11,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
 import { PageLoader } from "@/components/ui/PageLoader";
+import { cn } from "@/lib/utils";
 
 export default function Dashboard() {
   const { transactions, formatAmount, budget, currency, setCurrency, isLoading } = useFinance();
@@ -188,7 +189,7 @@ export default function Dashboard() {
     <div className="space-y-8">
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-foreground bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl px-6 py-2 shadow-sm w-fit">Dashboard</h1>
+          <h1 className="text-2xl md:text-3xl font-bold text-foreground bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl px-4 md:px-6 py-2 shadow-sm w-fit">Dashboard</h1>
           <p className="text-muted-foreground mt-2 bg-white/5 backdrop-blur-sm border border-white/5 rounded-xl px-4 py-1 w-fit text-sm">Welcome back, {user.username}</p>
         </div>
         <CurrencySelector currentCurrency={currency} onSelect={setCurrency} />
@@ -197,8 +198,8 @@ export default function Dashboard() {
       {/* Summary Cards Section */}
       <div className="space-y-4">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-          <div className="flex items-center gap-4">
-            <h2 className="text-xl font-semibold text-foreground bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl px-6 py-2 shadow-sm w-fit">Summary</h2>
+          <h2 className="text-lg md:text-xl font-semibold text-foreground bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl px-4 md:px-6 py-2 shadow-sm w-fit">Summary</h2>
+          <div className="flex flex-wrap items-center gap-2">
             <div className="flex gap-2 bg-white/5 backdrop-blur-md border border-white/10 rounded-xl p-1">
               <button
                 onClick={() => setSummaryViewMode('month')}
@@ -213,8 +214,8 @@ export default function Dashboard() {
                 Year
               </button>
             </div>
+            <MonthYearPicker selectedDate={summaryDate} onChange={setSummaryDate} />
           </div>
-          <MonthYearPicker selectedDate={summaryDate} onChange={setSummaryDate} />
         </div>
         <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
           <Card className="glass-card p-6 transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_8px_30px_rgb(0,0,0,0.12)] hover:bg-accent/10">
@@ -264,25 +265,25 @@ export default function Dashboard() {
         {/* Income vs Expenses Chart */}
         <Card className="glass-card p-6">
           <div className="flex flex-col gap-4 mb-6">
-            <div className="flex items-center justify-between">
-              <h3 className="text-lg font-semibold text-foreground bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl px-6 py-2 shadow-sm w-fit">Income vs Expenses</h3>
-              <div className="flex gap-2 bg-white/5 backdrop-blur-md border border-white/10 rounded-xl p-1">
-                <button
-                  onClick={() => setIncomeViewMode('month')}
-                  className={`px-3 py-1 rounded-xl text-sm transition-all duration-200 ease-in-out cursor-pointer hover:scale-105 active:scale-95 ${incomeViewMode === 'month' ? 'bg-gradient-to-r from-emerald-500 to-teal-500 text-white shadow-lg shadow-emerald-500/20' : 'text-muted-foreground hover:text-foreground hover:bg-white/5'}`}
-                >
-                  Month
-                </button>
-                <button
-                  onClick={() => setIncomeViewMode('year')}
-                  className={`px-3 py-1 rounded-xl text-sm transition-all duration-200 ease-in-out cursor-pointer hover:scale-105 active:scale-95 ${incomeViewMode === 'year' ? 'bg-gradient-to-r from-emerald-500 to-teal-500 text-white shadow-lg shadow-emerald-500/20' : 'text-muted-foreground hover:text-foreground hover:bg-white/5'}`}
-                >
-                  Year
-                </button>
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+              <h3 className="text-lg font-semibold text-foreground bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl px-4 md:px-6 py-2 shadow-sm w-fit">Income vs Expenses</h3>
+              <div className="flex flex-wrap items-center gap-2">
+                <div className="flex gap-2 bg-white/5 backdrop-blur-md border border-white/10 rounded-xl p-1">
+                  <button
+                    onClick={() => setIncomeViewMode('month')}
+                    className={`px-3 py-1 rounded-xl text-sm transition-all duration-200 ease-in-out cursor-pointer hover:scale-105 active:scale-95 ${incomeViewMode === 'month' ? 'bg-gradient-to-r from-emerald-500 to-teal-500 text-white shadow-lg shadow-emerald-500/20' : 'text-muted-foreground hover:text-foreground hover:bg-white/5'}`}
+                  >
+                    Month
+                  </button>
+                  <button
+                    onClick={() => setIncomeViewMode('year')}
+                    className={`px-3 py-1 rounded-xl text-sm transition-all duration-200 ease-in-out cursor-pointer hover:scale-105 active:scale-95 ${incomeViewMode === 'year' ? 'bg-gradient-to-r from-emerald-500 to-teal-500 text-white shadow-lg shadow-emerald-500/20' : 'text-muted-foreground hover:text-foreground hover:bg-white/5'}`}
+                  >
+                    Year
+                  </button>
+                </div>
+                <MonthYearPicker selectedDate={incomeDate} onChange={setIncomeDate} />
               </div>
-            </div>
-            <div className="self-end">
-              <MonthYearPicker selectedDate={incomeDate} onChange={setIncomeDate} />
             </div>
           </div>
           <div className="h-[300px] w-full">
@@ -334,25 +335,25 @@ export default function Dashboard() {
         {/* Balance Trend Chart */}
         <Card className="glass-card p-6">
           <div className="flex flex-col gap-4 mb-6">
-            <div className="flex items-center justify-between">
-              <h3 className="text-lg font-semibold text-foreground bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl px-6 py-2 shadow-sm w-fit">Balance Trend</h3>
-              <div className="flex gap-2 bg-white/5 backdrop-blur-md border border-white/10 rounded-xl p-1">
-                <button
-                  onClick={() => setBalanceViewMode('month')}
-                  className={`px-3 py-1 rounded-xl text-sm transition-all duration-200 ease-in-out cursor-pointer hover:scale-105 active:scale-95 ${balanceViewMode === 'month' ? 'bg-gradient-to-r from-blue-500 to-cyan-500 text-white shadow-lg shadow-blue-500/20' : 'text-muted-foreground hover:text-foreground hover:bg-white/5'}`}
-                >
-                  Month
-                </button>
-                <button
-                  onClick={() => setBalanceViewMode('year')}
-                  className={`px-3 py-1 rounded-xl text-sm transition-all duration-200 ease-in-out cursor-pointer hover:scale-105 active:scale-95 ${balanceViewMode === 'year' ? 'bg-gradient-to-r from-blue-500 to-cyan-500 text-white shadow-lg shadow-blue-500/20' : 'text-muted-foreground hover:text-foreground hover:bg-white/5'}`}
-                >
-                  Year
-                </button>
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+              <h3 className="text-lg font-semibold text-foreground bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl px-4 md:px-6 py-2 shadow-sm w-fit">Balance Trend</h3>
+              <div className="flex flex-wrap items-center gap-2">
+                <div className="flex gap-2 bg-white/5 backdrop-blur-md border border-white/10 rounded-xl p-1">
+                  <button
+                    onClick={() => setBalanceViewMode('month')}
+                    className={`px-3 py-1 rounded-xl text-sm transition-all duration-200 ease-in-out cursor-pointer hover:scale-105 active:scale-95 ${balanceViewMode === 'month' ? 'bg-gradient-to-r from-blue-500 to-cyan-500 text-white shadow-lg shadow-blue-500/20' : 'text-muted-foreground hover:text-foreground hover:bg-white/5'}`}
+                  >
+                    Month
+                  </button>
+                  <button
+                    onClick={() => setBalanceViewMode('year')}
+                    className={`px-3 py-1 rounded-xl text-sm transition-all duration-200 ease-in-out cursor-pointer hover:scale-105 active:scale-95 ${balanceViewMode === 'year' ? 'bg-gradient-to-r from-blue-500 to-cyan-500 text-white shadow-lg shadow-blue-500/20' : 'text-muted-foreground hover:text-foreground hover:bg-white/5'}`}
+                  >
+                    Year
+                  </button>
+                </div>
+                <MonthYearPicker selectedDate={balanceDate} onChange={setBalanceDate} />
               </div>
-            </div>
-            <div className="self-end">
-              <MonthYearPicker selectedDate={balanceDate} onChange={setBalanceDate} />
             </div>
           </div>
           <div className="h-[300px] w-full">
@@ -392,14 +393,14 @@ export default function Dashboard() {
       </div>
 
       {/* Recent Transactions Section */}
-      <Card className="glass-card p-6">
-        <div className="flex items-center justify-between mb-6">
-          <h3 className="text-lg font-semibold text-foreground bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl px-6 py-2 shadow-sm w-fit">Recent Transactions</h3>
-          <div className="flex gap-2">
+      <Card className="glass-card p-4 sm:p-6">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4 sm:mb-6">
+          <h3 className="text-lg font-semibold text-foreground bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl px-4 sm:px-6 py-2 shadow-sm w-fit">Recent Transactions</h3>
+          <div className="flex gap-2 self-start sm:self-auto">
             <select
               value={recentSort}
               onChange={(e) => setRecentSort(e.target.value as any)}
-              className="bg-white/5 backdrop-blur-md border border-white/10 rounded-xl px-3 py-1 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+              className="bg-white/5 backdrop-blur-md border border-white/10 rounded-xl px-3 py-1 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary w-full sm:w-auto"
             >
               <option value="date" className="bg-card text-foreground">Most Recent</option>
               <option value="amount-high" className="bg-card text-foreground">Highest Amount</option>
@@ -407,20 +408,22 @@ export default function Dashboard() {
             </select>
           </div>
         </div>
-        <div className="space-y-4">
+        <div className="space-y-3">
           {sortedTransactions.map((t, index) => (
-            <div key={t.id} className="flex items-center justify-between p-3 rounded-xl transition-all duration-200 hover:bg-accent/30 hover:scale-[1.01] hover:shadow-lg cursor-default">
-              <div className="flex items-center gap-4">
-                <div className={`h-10 w-10 rounded-full flex items-center justify-center text-lg font-bold ${t.type === 'income' ? "bg-emerald-500/20 text-emerald-500" : "bg-destructive/20 text-destructive"
-                  }`}>
+            <div key={t.id} className="flex items-center justify-between p-2 sm:p-3 rounded-xl transition-all duration-200 hover:bg-accent/30 hover:scale-[1.01] hover:shadow-lg cursor-default gap-2 sm:gap-4 overflow-hidden">
+              <div className="flex items-center gap-2 sm:gap-4 min-w-0 flex-1">
+                <div className={cn(
+                  "h-8 w-8 sm:h-10 sm:w-10 shrink-0 rounded-full flex items-center justify-center text-lg font-bold",
+                  t.type === 'income' ? "bg-emerald-500/20 text-emerald-500" : "bg-destructive/20 text-destructive"
+                )}>
                   {t.category.charAt(0).toUpperCase()}
                 </div>
-                <div>
-                  <p className="font-medium text-foreground">{t.description}</p>
-                  <p className="text-sm text-muted-foreground">{t.category} • {new Date(t.date).toLocaleDateString()}</p>
+                <div className="min-w-0 flex-1">
+                  <p className="font-medium text-foreground truncate text-sm sm:text-base">{t.description}</p>
+                  <p className="text-xs sm:text-sm text-muted-foreground truncate">{t.category} • {new Date(t.date).toLocaleDateString()}</p>
                 </div>
               </div>
-              <span className={`font-semibold ${t.type === 'income' ? "text-emerald-500" : "text-destructive"}`}>
+              <span className={cn("font-semibold whitespace-nowrap text-sm sm:text-base", t.type === 'income' ? "text-emerald-500" : "text-destructive")}>
                 {t.type === 'income' ? '+' : '-'}{formatAmount(t.amount)}
               </span>
             </div>

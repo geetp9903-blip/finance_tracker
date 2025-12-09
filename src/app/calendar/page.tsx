@@ -88,16 +88,18 @@ export default function CalendarPage() {
 
     return (
         <div className="p-8 max-w-7xl mx-auto space-y-8">
-            <h1 className="text-3xl font-bold text-foreground bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl px-6 py-2 shadow-sm w-fit">Calendar</h1>
+            <h1 className="text-2xl md:text-3xl font-bold text-foreground bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl px-4 md:px-6 py-2 shadow-sm w-fit">Calendar</h1>
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                <Card className="lg:col-span-2 p-6">
-                    <Calendar
-                        onChange={setDate}
-                        value={date}
-                        tileContent={getTileContent}
-                        className="w-full bg-transparent border-none text-foreground"
-                    />
+                <Card className="lg:col-span-2 p-6 overflow-x-auto">
+                    <div className="min-w-[300px]">
+                        <Calendar
+                            onChange={setDate}
+                            value={date}
+                            tileContent={getTileContent}
+                            className="w-full bg-transparent border-none text-foreground"
+                        />
+                    </div>
                 </Card>
 
                 <Card className="p-6 h-fit">
@@ -109,9 +111,9 @@ export default function CalendarPage() {
                         {/* Actual Transactions */}
                         {selectedDateTransactions.map(t => (
                             <div key={t.id} className="flex items-center justify-between p-3 rounded-xl bg-accent/50">
-                                <div>
-                                    <p className="font-medium text-foreground">{t.description}</p>
-                                    <p className="text-xs text-muted-foreground">{t.category}</p>
+                                <div className="min-w-0 flex-1 mr-2">
+                                    <p className="font-medium text-foreground truncate">{t.description}</p>
+                                    <p className="text-xs text-muted-foreground truncate">{t.category}</p>
                                 </div>
                                 <span className={cn("font-semibold", t.type === 'income' ? "text-emerald-500" : "text-destructive")}>
                                     {t.type === 'income' ? '+' : '-'}{formatAmount(t.amount)}
@@ -124,9 +126,9 @@ export default function CalendarPage() {
                             <div key={r.id} className="flex items-center justify-between p-3 rounded-xl bg-accent/50 border border-border border-dashed">
                                 <div className="flex items-center gap-2">
                                     <Clock className="h-4 w-4 text-muted-foreground" />
-                                    <div>
-                                        <p className="font-medium text-foreground">{r.description}</p>
-                                        <p className="text-xs text-muted-foreground">{r.category} • Pending</p>
+                                    <div className="min-w-0 flex-1">
+                                        <p className="font-medium text-foreground truncate">{r.description}</p>
+                                        <p className="text-xs text-muted-foreground truncate">{r.category} • Pending</p>
                                     </div>
                                 </div>
                                 <span className={cn("font-semibold opacity-60", r.type === 'income' ? "text-emerald-500" : "text-destructive")}>
