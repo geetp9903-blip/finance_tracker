@@ -8,7 +8,7 @@ interface AuthContextType {
     user: User | null;
     loading: boolean;
     login: (username: string, pin: string) => Promise<boolean>;
-    register: (username: string, pin: string) => Promise<boolean>;
+    register: (username: string, pin: string, email?: string) => Promise<boolean>;
     logout: () => void;
 }
 
@@ -28,12 +28,27 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setLoading(false);
     }, []);
 
-    const login = async (username: string, pin: string) => {
+    const register = async (username: string, pin: string, email?: string) => {
         try {
-            const res = await fetch('/api/auth', {
+            const res = await fetch('/api/auth/register', { // Updated to use new route
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ action: 'login', username, pin }),
+                body: JSON.stringify({ username, pin, email }),
+            });
+            const data = await res.json();
+            return data.success;
+        } catch (error) {
+            console.error(error);
+            return false;
+        }
+    };
+
+    const login = async (username: string, pin: string) => {
+        try {
+            const res = await fetch('/api/auth/login', { // Updated to use new route
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username, pin }),
             });
             const data = await res.json();
             if (data.success) {
@@ -43,21 +58,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                 return true;
             }
             return false;
-        } catch (error) {
-            console.error(error);
-            return false;
-        }
-    };
-
-    const register = async (username: string, pin: string) => {
-        try {
-            const res = await fetch('/api/auth', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ action: 'register', username, pin }),
-            });
-            const data = await res.json();
-            return data.success;
         } catch (error) {
             console.error(error);
             return false;

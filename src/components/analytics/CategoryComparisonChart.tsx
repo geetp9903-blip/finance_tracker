@@ -112,32 +112,89 @@ export function CategoryComparisonChart({ transactions, formatAmount }: Category
                     </div>
                 </div>
 
-                {/* Quick Selects */}
-                <div className="flex flex-wrap gap-2">
-                    <button onClick={() => quickSelect('cost')} className="text-xs px-2 py-1 bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg transition-colors">Top 5 (Cost)</button>
-                    <button onClick={() => quickSelect('freq')} className="text-xs px-2 py-1 bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg transition-colors">Top 5 (Freq)</button>
-                    <button onClick={() => quickSelect('recent')} className="text-xs px-2 py-1 bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg transition-colors">Recent</button>
-                    <button onClick={() => quickSelect('clear')} className="text-xs px-2 py-1 bg-destructive/10 text-destructive border border-destructive/20 hover:bg-destructive/20 rounded-lg transition-colors">Clear</button>
-                </div>
-
-                {/* Category Toggles */}
-                <div className="flex flex-wrap gap-2">
-                    {uniqueCategories.map(c => (
+                {/* Controls */}
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 w-full">
+                    {/* View Mode Toggle */}
+                    <div className="flex items-center bg-white/5 rounded-lg p-1 border border-white/10">
                         <button
-                            key={c}
-                            onClick={() => handleCategoryToggle(c)}
-                            disabled={!selectedCategories.includes(c) && selectedCategories.length >= 5}
+                            onClick={() => setViewMode('year')}
                             className={cn(
-                                "px-3 py-1 rounded-full text-xs border transition-all flex items-center gap-1",
-                                selectedCategories.includes(c)
-                                    ? "bg-primary/20 border-primary text-primary"
-                                    : "bg-white/5 border-white/10 text-muted-foreground hover:bg-white/10 disabled:opacity-50 disabled:cursor-not-allowed"
+                                "px-3 py-1.5 text-xs font-medium rounded-md transition-all",
+                                viewMode === 'year' ? "bg-primary text-primary-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"
                             )}
                         >
-                            {c}
-                            {selectedCategories.includes(c) && <Check className="h-3 w-3" />}
+                            Year View
                         </button>
-                    ))}
+                        <button
+                            onClick={() => setViewMode('month')}
+                            className={cn(
+                                "px-3 py-1.5 text-xs font-medium rounded-md transition-all",
+                                viewMode === 'month' ? "bg-primary text-primary-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"
+                            )}
+                        >
+                            Month View
+                        </button>
+                    </div>
+
+                    {/* Date Selector */}
+                    <div className="flex items-center gap-2">
+                        {viewMode === 'year' ? (
+                            <select
+                                className="bg-white/5 border border-white/10 rounded-lg px-3 py-1.5 text-sm outline-none focus:border-primary transition-colors"
+                                value={selectedDate.getFullYear()}
+                                onChange={(e) => {
+                                    const newDate = new Date(selectedDate);
+                                    newDate.setFullYear(parseInt(e.target.value));
+                                    setSelectedDate(newDate);
+                                }}
+                            >
+                                {Array.from({ length: 5 }, (_, i) => new Date().getFullYear() - 2 + i).map(year => (
+                                    <option key={year} value={year} className="bg-slate-900">{year}</option>
+                                ))}
+                            </select>
+                        ) : (
+                            <input
+                                type="month"
+                                className="bg-white/5 border border-white/10 rounded-lg px-3 py-1.5 text-sm outline-none focus:border-primary transition-colors dark:[color-scheme:dark]"
+                                value={`${selectedDate.getFullYear()}-${String(selectedDate.getMonth() + 1).padStart(2, '0')}`}
+                                onChange={(e) => {
+                                    if (e.target.value) {
+                                        setSelectedDate(new Date(e.target.value));
+                                    }
+                                }}
+                            />
+                        )}
+                    </div>
+                </div>
+
+                {/* Quick Selects & Toggles */}
+                <div className="flex flex-col gap-2 w-full">
+                    <div className="flex flex-wrap gap-2">
+                        <span className="text-xs text-muted-foreground self-center mr-2">Quick Select:</span>
+                        <button onClick={() => quickSelect('cost')} className="text-xs px-2 py-1 bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg transition-colors">Top Cost</button>
+                        <button onClick={() => quickSelect('freq')} className="text-xs px-2 py-1 bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg transition-colors">Top Freq</button>
+                        <button onClick={() => quickSelect('recent')} className="text-xs px-2 py-1 bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg transition-colors">Recent</button>
+                        <button onClick={() => quickSelect('clear')} className="text-xs px-2 py-1 bg-destructive/10 text-destructive border border-destructive/20 hover:bg-destructive/20 rounded-lg transition-colors">Clear</button>
+                    </div>
+
+                    <div className="flex flex-wrap gap-2 pt-2 border-t border-white/5">
+                        {uniqueCategories.map(c => (
+                            <button
+                                key={c}
+                                onClick={() => handleCategoryToggle(c)}
+                                disabled={!selectedCategories.includes(c) && selectedCategories.length >= 5}
+                                className={cn(
+                                    "px-3 py-1 rounded-full text-xs border transition-all flex items-center gap-1",
+                                    selectedCategories.includes(c)
+                                        ? "bg-primary/20 border-primary text-primary"
+                                        : "bg-white/5 border-white/10 text-muted-foreground hover:bg-white/10 disabled:opacity-50 disabled:cursor-not-allowed"
+                                )}
+                            >
+                                {c}
+                                {selectedCategories.includes(c) && <Check className="h-3 w-3" />}
+                            </button>
+                        ))}
+                    </div>
                 </div>
             </div>
 

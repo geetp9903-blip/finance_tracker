@@ -5,6 +5,17 @@ import { User, Transaction, RecurringRule, BudgetPeriod } from './types';
 const UserSchema = new Schema<User>({
     username: { type: String, required: true, unique: true },
     pin: { type: String, required: true },
+    email: { type: String, unique: true, sparse: true },
+    totpSecret: { type: String },
+    refreshToken: { type: String },
+    otp: {
+        code: { type: String },
+        expires: { type: Number }
+    },
+    usernameUpdates: {
+        count: { type: Number, default: 0 },
+        lastReset: { type: Number, default: Date.now }
+    }
 });
 
 // Transaction Schema

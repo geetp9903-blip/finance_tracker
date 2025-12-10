@@ -16,6 +16,17 @@ export interface User {
     id: string;
     username: string;
     pin: string;
+    email?: string;
+    totpSecret?: string;
+    refreshToken?: string;
+    otp?: {
+        code: string;
+        expires: number;
+    };
+    usernameUpdates?: {
+        count: number;
+        lastReset: number; // timestamp
+    };
 }
 
 export interface RecurringRule {
