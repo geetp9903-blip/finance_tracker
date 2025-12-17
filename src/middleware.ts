@@ -40,6 +40,15 @@ export async function middleware(request: NextRequest) {
     const accessToken = request.cookies.get('accessToken')?.value;
 
     if (!accessToken) {
+        const refreshToken = request.cookies.get('refreshToken')?.value;
+        if (refreshToken) {
+            console.log('Middleware: No access token, attempting refresh.');
+            const url = request.nextUrl.clone();
+            url.pathname = '/api/auth/refresh-middleware';
+            url.searchParams.set('from', pathname);
+            return NextResponse.redirect(url);
+        }
+
         console.log('Middleware: No access token found. Redirecting to login.');
         const url = request.nextUrl.clone();
         url.pathname = '/login';
@@ -68,6 +77,17 @@ export async function middleware(request: NextRequest) {
         if (pathname.startsWith('/api/')) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }
+
+        // If verification fails, try refreshing
+        const refreshToken = request.cookies.get('refreshToken')?.value;
+        if (refreshToken) {
+            console.log('Middleware: Access token invalid, attempting refresh.');
+            const url = request.nextUrl.clone();
+            url.pathname = '/api/auth/refresh-middleware';
+            url.searchParams.set('from', pathname);
+            return NextResponse.redirect(url);
+        }
+
         const url = request.nextUrl.clone();
         url.pathname = '/login';
         return NextResponse.redirect(url);
