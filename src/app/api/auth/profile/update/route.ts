@@ -2,7 +2,7 @@
 import { NextResponse } from 'next/server';
 import { UserModel } from '@/lib/models';
 import dbConnect from '@/lib/db';
-import { verifyAccessToken } from '@/lib/auth-jwt';
+import { verifySessionToken } from '@/lib/auth-jwt';
 import { verifyEmailOTP } from '@/lib/otp';
 import crypto from 'crypto';
 
@@ -14,16 +14,14 @@ export async function POST(request: Request) {
     try {
         await dbConnect();
 
-        // 1. Auth Check (Access Token)
-        // We verify token manually here to get the userId securely or rely on Middleware headers.
-        // Middleware sets 'x-user-id'. Let's verify token again for max security on critical actions.
+        // 1. Auth Check (Session Token)
         const cookieStore = request.headers.get('cookie') || '';
-        const tokenMatch = cookieStore.match(/accessToken=([^;]+)/);
-        const accessToken = tokenMatch ? tokenMatch[1] : null;
+        const tokenMatch = cookieStore.match(/sessionToken=([^;]+)/);
+        const sessionToken = tokenMatch ? tokenMatch[1] : null;
 
-        if (!accessToken) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+        if (!sessionToken) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
-        const payload = await verifyAccessToken(accessToken);
+        const payload = await verifySessionToken(sessionToken);
         if (!payload || !payload.userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
         const user = await UserModel.findById(payload.userId);
