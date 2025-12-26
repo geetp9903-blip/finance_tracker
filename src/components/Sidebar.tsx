@@ -24,9 +24,13 @@ interface SidebarProps {
 
 export function Sidebar({ isOpen, onClose }: SidebarProps) {
     const pathname = usePathname();
-    const { user, logout } = useAuth();
+    const { user, logout, loading } = useAuth();
 
-    if (!user) return null;
+    // Always show sidebar unless we are on the login page
+    // This prevents the sidebar from disappearing on reload while auth is checking
+    const isLoginPage = pathname === '/login';
+
+    if (isLoginPage) return null;
 
     return (
         <>
@@ -84,7 +88,7 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
                     <div className="mt-auto mb-4 shrink-0">
                         <div className="mb-4 px-3 py-2 rounded-xl bg-accent/50 border border-border">
                             <p className="text-xs text-muted-foreground">Logged in as</p>
-                            <p className="text-sm font-medium text-foreground">{user.username}</p>
+                            <p className="text-sm font-medium text-foreground">{user?.username || 'Loading...'}</p>
                         </div>
                         <button
                             onClick={logout}

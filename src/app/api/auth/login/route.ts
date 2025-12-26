@@ -2,11 +2,11 @@
 import { NextResponse } from 'next/server';
 import { UserModel } from '@/lib/models';
 import dbConnect from '@/lib/db';
-import { signAccessToken, signRefreshToken } from '@/lib/auth-jwt';
+import { signSessionToken } from '@/lib/auth-jwt';
 import crypto from 'crypto';
 
 function hashPin(pin: string | number): string {
-    // Legacy hash format (SHA256 hex) - if changing to bcrypt, need migration or check
+    // Legacy hash format (SHA256 hex)
     return crypto.createHash('sha256').update(String(pin)).digest('hex');
 }
 
@@ -26,32 +26,28 @@ export async function POST(request: Request) {
             return NextResponse.json({ error: 'Invalid credentials' }, { status: 401 });
         }
 
-        // Generate Tokens
-        const accessToken = await signAccessToken({ userId: user.id, username: user.username });
-        const refreshToken = await signRefreshToken({ userId: user.id, username: user.username });
+        // Generate Session Token
+        const sessionToken = await signSessionToken({ userId: user.id, username: user.username });
 
-        // Update User with Refresh Token (Rotation)
-        user.refreshToken = refreshToken;
+        // We don't necessarily need to store sessionToken in DB unless we want invalidation features.
+        // For now, let's keep it simple as requested. We can clear refreshToken to avoid confusion.
+        user.refreshToken = "";
         await user.save();
 
         const response = NextResponse.json({ success: true, user: { id: user.id, username: user.username } });
 
-        // Set Cookies
-        response.cookies.set('accessToken', accessToken, {
+        // Set Single Session Cookie
+        response.cookies.set('sessionToken', sessionToken, {
             httpOnly: true,
-            secure: false,
+            secure: process.env.NODE_ENV === 'production',
             sameSite: 'lax',
             path: '/',
-            maxAge: 15 * 60
+            maxAge: 7 * 24 * 60 * 60 // 7 Days
         });
 
-        response.cookies.set('refreshToken', refreshToken, {
-            httpOnly: true,
-            secure: false,
-            sameSite: 'lax',
-            path: '/',
-            maxAge: 7 * 24 * 60 * 60
-        });
+        // Clear old cookies just in case
+        response.cookies.delete('accessToken');
+        response.cookies.delete('refreshToken');
 
         return response;
 

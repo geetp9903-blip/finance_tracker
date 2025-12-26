@@ -5,7 +5,7 @@ import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { Modal } from "@/components/ui/Modal";
-import { Plus, Search, Trash2, Calculator, X } from "lucide-react";
+import { Plus, Search, Trash2, Calculator, X, Pencil } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ExportMenu } from "@/components/ExportMenu";
 import { CategorySelector } from "@/components/ui/CategorySelector";
@@ -14,7 +14,7 @@ import { TransactionSkeleton } from "@/components/ui/TransactionSkeleton";
 import { useEffect, useRef, useCallback } from "react";
 
 export default function TransactionsPage() {
-    const { transactions, addTransaction, deleteTransaction, formatAmount, isLoading } = useFinance();
+    const { transactions, addTransaction, editTransaction, deleteTransaction, formatAmount, isLoading } = useFinance();
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [filter, setFilter] = useState<'all' | 'income' | 'expense'>('all');
     const [categoryFilter, setCategoryFilter] = useState<string>('all');
@@ -26,6 +26,7 @@ export default function TransactionsPage() {
     const [showTotal, setShowTotal] = useState(false);
 
     // Form State
+    const [editingId, setEditingId] = useState<string | null>(null);
     const [amount, setAmount] = useState("");
     const [description, setDescription] = useState("");
     const [category, setCategory] = useState("");
@@ -70,19 +71,65 @@ export default function TransactionsPage() {
         setDisplayCount(20);
     }, [filter, categoryFilter, sortBy, search, selectedDate, viewMode]);
 
+    const handleMathInput = () => {
+        try {
+            // Safe evaluation of basic math
+            // Allow only numbers, +, -, *, /, ., (, )
+            if (!/^[0-9+\-*/.() ]+$/.test(amount)) return; // Invalid characters
+
+            // eslint-disable-next-line no-new-func
+            const result = new Function(`return ${amount}`)();
+            if (isFinite(result)) {
+                setAmount(String(Math.round(result * 100) / 100)); // Round to 2 decimals
+            }
+        } catch (e) {
+            // Ignore invalid math
+        }
+    };
+
+    const openAddModal = () => {
+        setEditingId(null);
+        setAmount("");
+        setDescription("");
+        setCategory("");
+        setType('expense');
+        setIsModalOpen(true);
+    };
+
+    const handleEdit = (t: any) => {
+        setEditingId(t.id);
+        setAmount(String(t.amount));
+        setDescription(t.description);
+        setCategory(t.category);
+        setType(t.type);
+        setIsModalOpen(true);
+    };
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        await addTransaction({
-            amount: parseFloat(amount),
-            description,
-            category,
-            type,
-            date: new Date().toISOString(),
-        });
+
+        if (editingId) {
+            await editTransaction(editingId, {
+                amount: parseFloat(amount),
+                description,
+                category,
+                type,
+            });
+        } else {
+            await addTransaction({
+                amount: parseFloat(amount),
+                description,
+                category,
+                type,
+                date: new Date().toISOString(),
+            });
+        }
+
         setIsModalOpen(false);
         setAmount("");
         setDescription("");
         setCategory("");
+        setEditingId(null);
     };
 
     // Initial loading or context loading
@@ -137,7 +184,7 @@ export default function TransactionsPage() {
                         <span className="md:hidden">Sum</span>
                     </Button>
                     <ExportMenu transactions={filteredTransactions} />
-                    <Button onClick={() => setIsModalOpen(true)}>
+                    <Button onClick={openAddModal}>
                         <Plus className="h-4 w-4 mr-2" /> <span className="hidden md:inline">Add Transaction</span>
                         <span className="md:hidden">Add</span>
                     </Button>
@@ -228,6 +275,12 @@ export default function TransactionsPage() {
                                 {t.type === 'income' ? '+' : '-'}{formatAmount(t.amount)}
                             </span>
                             <button
+                                onClick={() => handleEdit(t)}
+                                className="p-1.5 sm:p-2 text-muted-foreground hover:text-primary transition-colors"
+                            >
+                                <Pencil className="h-3 w-3 sm:h-4 sm:w-4" />
+                            </button>
+                            <button
                                 onClick={() => deleteTransaction(t.id)}
                                 className="p-1.5 sm:p-2 text-muted-foreground hover:text-destructive transition-colors"
                             >
@@ -249,7 +302,7 @@ export default function TransactionsPage() {
                 )}
             </div>
 
-            <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title="Add Transaction">
+            <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title={editingId ? "Edit Transaction" : "Add Transaction"}>
                 <form onSubmit={handleSubmit} className="space-y-4">
                     <div className="flex gap-4 mb-4">
                         <button
@@ -270,7 +323,15 @@ export default function TransactionsPage() {
 
                     <div>
                         <label className="block text-sm text-muted-foreground mb-1">Amount</label>
-                        <Input type="number" required value={amount} onChange={(e) => setAmount(e.target.value)} placeholder="0.00" />
+                        <Input
+                            type="text"
+                            inputMode="text"
+                            required
+                            value={amount}
+                            onChange={(e) => setAmount(e.target.value)}
+                            onBlur={handleMathInput}
+                            placeholder="0.00 or 10+20"
+                        />
                     </div>
                     <div>
                         <label className="block text-sm text-muted-foreground mb-1">Description</label>
@@ -287,7 +348,7 @@ export default function TransactionsPage() {
 
                     <div className="pt-4 flex justify-end gap-2">
                         <Button type="button" variant="ghost" onClick={() => setIsModalOpen(false)}>Cancel</Button>
-                        <Button type="submit" variant="primary">Add Transaction</Button>
+                        <Button type="submit" variant="primary">{editingId ? "Save Changes" : "Add Transaction"}</Button>
                     </div>
                 </form>
             </Modal>

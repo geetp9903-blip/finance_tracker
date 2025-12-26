@@ -2,19 +2,23 @@
 import { useAuth } from "@/context/AuthContext";
 import { Sidebar } from "./Sidebar";
 import { cn } from "@/lib/utils";
+import { usePathname } from "next/navigation";
 
 import { useState } from "react";
 import { Menu } from "lucide-react";
 
 export function AppLayout({ children }: { children: React.ReactNode }) {
-    const { user } = useAuth();
+    const { user, loading: authLoading } = useAuth();
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+    const pathname = usePathname();
+    const isAuthPage = pathname === '/login' || pathname === '/register';
+    const shouldShowLayout = !isAuthPage;
 
     return (
         <div className="flex min-h-screen relative">
 
             {/* Mobile Header */}
-            {user && (
+            {shouldShowLayout && (
                 <div className="fixed top-0 left-0 right-0 z-30 flex items-center p-4 bg-background/80 backdrop-blur-xl border-b border-border md:hidden">
                     <button
                         onClick={() => setIsSidebarOpen(true)}
@@ -30,7 +34,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
 
             <main className={cn(
                 "flex-1 p-4 md:p-8 transition-all duration-300",
-                user ? "pt-20 md:pt-8 md:ml-64" : ""
+                shouldShowLayout ? "pt-20 md:pt-8 md:ml-64" : ""
             )}>
                 {children}
             </main>

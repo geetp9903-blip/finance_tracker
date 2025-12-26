@@ -1,6 +1,6 @@
 "use client";
 import { useState, useMemo } from "react";
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine } from "recharts";
 import { Card } from "@/components/ui/Card";
 import { Transaction } from "@/lib/types";
 import { CategorySelector } from "@/components/ui/CategorySelector";
@@ -12,6 +12,11 @@ interface CategoryTrendChartProps {
     formatAmount: (amount: number) => string;
 }
 
+const truncate = (str: string, length: number) => {
+    if (str.length <= length) return str;
+    return str.substring(0, length) + '...';
+};
+
 export function CategoryTrendChart({ transactions, formatAmount }: CategoryTrendChartProps) {
     const [selectedCategory, setSelectedCategory] = useState("Food"); // Default
     const [viewMode, setViewMode] = useState<'month' | 'year'>('year');
@@ -22,42 +27,59 @@ export function CategoryTrendChart({ transactions, formatAmount }: CategoryTrend
         [transactions]);
 
     const chartData = useMemo(() => {
-        const dataMap = new Map<string, number>();
+        const dataMap = new Map<string, { amount: number; count: number }>();
 
-        // Initialize keys
         if (viewMode === 'year') {
             for (let i = 0; i < 12; i++) {
-                const date = new Date(selectedDate.getFullYear(), i, 1);
-                dataMap.set(date.toLocaleString('default', { month: 'short' }), 0);
+                const month = new Date(selectedDate.getFullYear(), i, 1).toLocaleString('default', { month: 'short' });
+                dataMap.set(month, { amount: 0, count: 0 });
             }
         } else {
             const daysInMonth = new Date(selectedDate.getFullYear(), selectedDate.getMonth() + 1, 0).getDate();
             for (let i = 1; i <= daysInMonth; i++) {
-                dataMap.set(i.toString(), 0);
+                dataMap.set(i.toString(), { amount: 0, count: 0 });
             }
         }
 
-        transactions.forEach(t => {
-            if (t.type !== 'expense' || t.category !== selectedCategory) return;
+        // Track transactions for average calculation
+        const filteredTransactions = transactions.filter(t => {
+            if (t.type !== 'expense' || t.category !== selectedCategory) return false;
             const d = new Date(t.date);
 
+            if (viewMode === 'year') {
+                return d.getFullYear() === selectedDate.getFullYear();
+            } else {
+                return d.getMonth() === selectedDate.getMonth() && d.getFullYear() === selectedDate.getFullYear();
+            }
+        });
+
+        filteredTransactions.forEach(t => {
+            const d = new Date(t.date);
             let key = "";
-            if (viewMode === 'year' && d.getFullYear() === selectedDate.getFullYear()) {
+
+            if (viewMode === 'year') {
                 key = d.toLocaleString('default', { month: 'short' });
-            } else if (viewMode === 'month' && d.getMonth() === selectedDate.getMonth() && d.getFullYear() === selectedDate.getFullYear()) {
+            } else {
                 key = d.getDate().toString();
             }
 
             if (key && dataMap.has(key)) {
-                dataMap.set(key, (dataMap.get(key) || 0) + t.amount);
+                const current = dataMap.get(key)!;
+                dataMap.set(key, {
+                    amount: current.amount + t.amount,
+                    count: current.count + 1
+                });
             }
         });
 
-        return Array.from(dataMap.entries()).map(([name, amount]) => ({ name, amount }));
+        return Array.from(dataMap.entries()).map(([name, data]) => ({
+            name,
+            amount: data.amount
+        }));
     }, [transactions, selectedCategory, viewMode, selectedDate]);
 
     return (
-        <Card className="glass-card p-6 h-full flex flex-col">
+        <Card className="glass-card p-6 h-full flex flex-col overflow-hidden">
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
                 <div>
                     <h3 className="text-lg font-semibold text-foreground">Category Trend</h3>
@@ -74,16 +96,16 @@ export function CategoryTrendChart({ transactions, formatAmount }: CategoryTrend
                                 <option key={c} value={c} className="bg-card text-foreground">{c}</option>
                             ))}
                         </select>
-                        <div className="flex bg-white/5 border border-white/10 rounded-xl p-1">
+                        <div className="flex bg-white/5 border border-white/10 rounded-full p-1">
                             <button
                                 onClick={() => setViewMode('month')}
-                                className={cn("px-2 py-0.5 rounded-lg text-xs transition-colors", viewMode === 'month' ? "bg-primary text-white" : "text-muted-foreground")}
+                                className={cn("px-3 py-1 rounded-full text-xs transition-colors", viewMode === 'month' ? "bg-primary text-white" : "text-muted-foreground")}
                             >
                                 Month
                             </button>
                             <button
                                 onClick={() => setViewMode('year')}
-                                className={cn("px-2 py-0.5 rounded-lg text-xs transition-colors", viewMode === 'year' ? "bg-primary text-white" : "text-muted-foreground")}
+                                className={cn("px-3 py-1 rounded-full text-xs transition-colors", viewMode === 'year' ? "bg-primary text-white" : "text-muted-foreground")}
                             >
                                 Year
                             </button>
@@ -92,7 +114,7 @@ export function CategoryTrendChart({ transactions, formatAmount }: CategoryTrend
                 </div>
             </div>
 
-            <div className="h-[300px] w-full mt-auto">
+            <div className="flex-1 min-h-0 w-full mt-4">
                 <ResponsiveContainer width="100%" height="100%">
                     <BarChart data={chartData}>
                         <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" vertical={false} />
@@ -102,6 +124,7 @@ export function CategoryTrendChart({ transactions, formatAmount }: CategoryTrend
                             fontSize={12}
                             tickLine={false}
                             axisLine={false}
+                            tickFormatter={(val) => truncate(val, 8)}
                         />
                         <YAxis
                             stroke="#888888"
@@ -115,6 +138,57 @@ export function CategoryTrendChart({ transactions, formatAmount }: CategoryTrend
                             itemStyle={{ color: '#fff' }}
                             formatter={(value: number) => [formatAmount(value), 'amount']}
                         />
+                        {/* Average Line */}
+                        {(() => {
+                            // Calculate average based on actual transactions
+                            const filteredData = transactions.filter(t => {
+                                if (t.type !== 'expense' || t.category !== selectedCategory) return false;
+                                const d = new Date(t.date);
+
+                                if (viewMode === 'year') {
+                                    return d.getFullYear() === selectedDate.getFullYear();
+                                } else {
+                                    return d.getMonth() === selectedDate.getMonth() && d.getFullYear() === selectedDate.getFullYear();
+                                }
+                            });
+
+                            if (filteredData.length === 0) return null;
+
+                            let avg = 0;
+                            if (viewMode === 'month') {
+                                // Month view: sum / number of transactions
+                                const total = filteredData.reduce((sum, t) => sum + t.amount, 0);
+                                avg = total / filteredData.length;
+                            } else {
+                                // Year view: sum / number of months with non-zero data
+                                const monthlyTotals = new Map<number, number>();
+                                filteredData.forEach(t => {
+                                    const month = new Date(t.date).getMonth();
+                                    monthlyTotals.set(month, (monthlyTotals.get(month) || 0) + t.amount);
+                                });
+
+                                const total = Array.from(monthlyTotals.values()).reduce((sum, val) => sum + val, 0);
+                                const nonZeroMonths = monthlyTotals.size;
+                                avg = nonZeroMonths > 0 ? total / nonZeroMonths : 0;
+                            }
+
+                            if (avg > 0) {
+                                return (
+                                    <ReferenceLine
+                                        y={avg}
+                                        stroke="#fbbf24"
+                                        strokeDasharray="3 3"
+                                        label={{
+                                            position: 'right',
+                                            value: 'Avg',
+                                            fill: '#fbbf24',
+                                            fontSize: 10
+                                        }}
+                                    />
+                                );
+                            }
+                            return null;
+                        })()}
                         <Bar
                             dataKey="amount"
                             fill="url(#colorGradient)"

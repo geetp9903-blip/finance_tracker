@@ -1,15 +1,17 @@
 "use client";
 
 import { createContext, useContext, useState, useEffect, ReactNode, useCallback } from 'react';
-import { Transaction, Budget, AppData } from '@/lib/types';
+import { Transaction, Budget, AppData, RecurringRule } from '@/lib/types';
 import { useAuth } from './AuthContext';
 
 interface FinanceContextType {
     transactions: Transaction[];
     budget: Budget;
+    recurringRules: RecurringRule[];
     currency: string;
     setCurrency: (code: string) => void;
     addTransaction: (transaction: Omit<Transaction, 'id' | 'userId'>) => Promise<void>;
+    editTransaction: (id: string, updates: Partial<Transaction>) => Promise<void>;
     deleteTransaction: (id: string) => Promise<void>;
     updateBudget: (budget: Budget) => Promise<void>;
     refreshData: () => Promise<void>;
@@ -20,9 +22,10 @@ interface FinanceContextType {
 const FinanceContext = createContext<FinanceContextType | undefined>(undefined);
 
 export function FinanceProvider({ children }: { children: ReactNode }) {
-    const { user } = useAuth();
+    const { user, loading: authLoading } = useAuth();
     const [transactions, setTransactions] = useState<Transaction[]>([]);
     const [budget, setBudget] = useState<Budget>({ fixedExpenses: [], allocations: [] });
+    const [recurringRules, setRecurringRules] = useState<RecurringRule[]>([]);
     const [currency, setCurrency] = useState('INR');
     const [isLoading, setIsLoading] = useState(true);
 
@@ -36,6 +39,7 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
             const data = await res.json();
             if (data.transactions) setTransactions(data.transactions);
             if (data.budget) setBudget(data.budget);
+            if (data.recurringRules) setRecurringRules(data.recurringRules);
         } catch (error) {
             console.error("Failed to fetch data", error);
         } finally {
@@ -44,9 +48,21 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
     }, [user]);
 
     useEffect(() => {
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-        refreshData();
-    }, [refreshData]);
+        // Wait for auth to complete before deciding what to do
+        if (authLoading) {
+            // Auth is still loading, keep finance loading too
+            setIsLoading(true);
+            return;
+        }
+
+        if (user) {
+            // User is authenticated, fetch data
+            refreshData();
+        } else {
+            // Auth is complete and no user - stop loading
+            setIsLoading(false);
+        }
+    }, [user, authLoading, refreshData]);
 
     const generateId = () => {
         if (typeof crypto !== 'undefined' && crypto.randomUUID) {
@@ -85,6 +101,36 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
         } catch (error) {
             console.error("Error adding transaction:", error);
             alert("Error adding transaction. Please check console.");
+        }
+    };
+
+
+
+    const editTransaction = async (id: string, updates: Partial<Transaction>) => {
+        if (!user) return;
+
+        // Optimistic Update
+        setTransactions(prev => prev.map(t => t.id === id ? { ...t, ...updates } : t));
+
+        try {
+            const res = await fetch('/api/finance', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'x-user-id': user.username
+                },
+                body: JSON.stringify({ type: 'edit_transaction', data: { id, updates } }),
+            });
+
+            if (!res.ok) {
+                // Revert on failure
+                console.error("Failed to edit transaction");
+                refreshData();
+                alert("Failed to save changes.");
+            }
+        } catch (error) {
+            console.error("Error editing transaction:", error);
+            refreshData();
         }
     };
 
@@ -129,9 +175,11 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
         <FinanceContext.Provider value={{
             transactions,
             budget,
+            recurringRules,
             currency,
             setCurrency,
             addTransaction,
+            editTransaction,
             deleteTransaction,
             updateBudget,
             refreshData,

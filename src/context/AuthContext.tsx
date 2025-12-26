@@ -20,17 +20,32 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const router = useRouter();
 
     useEffect(() => {
-        // Check local storage for session persistence
-        const storedUser = localStorage.getItem('finance_user');
-        if (storedUser) {
-            setUser(JSON.parse(storedUser));
-        }
-        setLoading(false);
+        // Verify session with server instead of localStorage
+        const checkSession = async () => {
+            try {
+                // We'll use the profile endpoint or similar to check if we are logged in
+                const res = await fetch('/api/auth/profile');
+                if (res.ok) {
+                    const data = await res.json();
+                    setUser(data.user);
+                } else if (res.status === 401) {
+                    // Session invalid or expired - force redirect
+                    router.push('/login');
+                }
+            } catch (error) {
+                // Not logged in or network error
+                console.log('Session check failed', error);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        checkSession();
     }, []);
 
     const register = async (username: string, pin: string, email?: string) => {
         try {
-            const res = await fetch('/api/auth/register', { // Updated to use new route
+            const res = await fetch('/api/auth/register', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ username, pin, email }),
@@ -45,7 +60,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     const login = async (username: string, pin: string) => {
         try {
-            const res = await fetch('/api/auth/login', { // Updated to use new route
+            const res = await fetch('/api/auth/login', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ username, pin }),
@@ -53,7 +68,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             const data = await res.json();
             if (data.success) {
                 setUser(data.user);
-                localStorage.setItem('finance_user', JSON.stringify(data.user));
+                // No localStorage caching
                 router.push('/');
                 return true;
             }
@@ -64,10 +79,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }
     };
 
-    const logout = () => {
-        setUser(null);
-        localStorage.removeItem('finance_user');
-        router.push('/login');
+    const logout = async () => {
+        try {
+            await fetch('/api/auth/logout', { method: 'POST' });
+            setUser(null);
+            router.push('/login');
+        } catch (error) {
+            console.error('Logout failed', error);
+        }
     };
 
     return (

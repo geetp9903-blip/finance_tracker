@@ -1,7 +1,7 @@
 
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
-import { verifyAccessToken } from './lib/auth-jwt';
+import { verifySessionToken } from './lib/auth-jwt';
 import { checkRateLimit } from './lib/rate-limit';
 
 // Paths to protect
@@ -30,35 +30,25 @@ export async function middleware(request: NextRequest) {
     }
 
     // 2. Route Protection Logic
-    // Check if path matches any protected path prefix
     const isProtected = PROTECTED_PATHS.some(path => pathname.startsWith(path));
 
     if (!isProtected) {
         return NextResponse.next();
     }
 
-    const accessToken = request.cookies.get('accessToken')?.value;
+    const sessionToken = request.cookies.get('sessionToken')?.value;
 
-    if (!accessToken) {
-        const refreshToken = request.cookies.get('refreshToken')?.value;
-        if (refreshToken) {
-            console.log('Middleware: No access token, attempting refresh.');
-            const url = request.nextUrl.clone();
-            url.pathname = '/api/auth/refresh-middleware';
-            url.searchParams.set('from', pathname);
-            return NextResponse.redirect(url);
-        }
-
-        console.log('Middleware: No access token found. Redirecting to login.');
+    if (!sessionToken) {
+        console.log('Middleware: No session token. Redirecting to login.');
         const url = request.nextUrl.clone();
         url.pathname = '/login';
         return NextResponse.redirect(url);
     }
 
     try {
-        const payload = await verifyAccessToken(accessToken);
+        const payload = await verifySessionToken(sessionToken);
         if (!payload) {
-            console.log('Middleware: Token verification failed (null payload). Redirecting.');
+            console.log('Middleware: Invalid session token. Redirecting to login.');
             if (pathname.startsWith('/api/')) {
                 return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
             }
@@ -68,26 +58,11 @@ export async function middleware(request: NextRequest) {
         }
 
         const response = NextResponse.next();
-        // Pass user info to backend via headers if needed
         response.headers.set('x-user-id', payload.userId as string);
         return response;
 
     } catch (e) {
-        console.error('Middleware: Token verification error:', e);
-        if (pathname.startsWith('/api/')) {
-            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-        }
-
-        // If verification fails, try refreshing
-        const refreshToken = request.cookies.get('refreshToken')?.value;
-        if (refreshToken) {
-            console.log('Middleware: Access token invalid, attempting refresh.');
-            const url = request.nextUrl.clone();
-            url.pathname = '/api/auth/refresh-middleware';
-            url.searchParams.set('from', pathname);
-            return NextResponse.redirect(url);
-        }
-
+        console.error('Middleware: Verification error:', e);
         const url = request.nextUrl.clone();
         url.pathname = '/login';
         return NextResponse.redirect(url);

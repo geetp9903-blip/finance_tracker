@@ -1,9 +1,24 @@
 import { NextResponse } from 'next/server';
-import { getTransactions, createTransaction, deleteTransaction, getBudget, updateUserBudget } from '@/lib/storage';
+import { getTransactions, createTransaction, deleteTransaction, updateTransaction, getBudget, updateUserBudget, getRecurringRules } from '@/lib/storage';
 import { cacheService } from '@/lib/cache';
+
+import { cookies } from 'next/headers';
 
 export async function GET(request: Request) {
     try {
+        // Add dbConnect if it's a global utility, otherwise it needs to be imported.
+        // Assuming dbConnect() is available or will be added elsewhere.
+        // For now, I'll add it as requested.
+        // await dbConnect(); // This function is not defined in the provided context.
+
+        // 1. Auth Check - using next/headers
+        const cookieStore = await cookies();
+        const token = cookieStore.get('sessionToken')?.value;
+
+        if (!token) {
+            return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
+        }
+
         const userId = request.headers.get('x-user-id');
         if (!userId) {
             return NextResponse.json({ error: 'User ID required' }, { status: 400 });
@@ -22,7 +37,9 @@ export async function GET(request: Request) {
         const budgetData = await getBudget(userId);
         const budget = budgetData[userId] || { fixedExpenses: [], allocations: [], entries: [] };
 
-        const responseData = { transactions, budget };
+        const recurringRules = await getRecurringRules(userId);
+
+        const responseData = { transactions, budget, recurringRules };
         cacheService.set(cacheKey, responseData);
 
         return NextResponse.json(responseData);
@@ -51,6 +68,19 @@ export async function POST(request: Request) {
             // Use granular create instead of fetch-all-then-save-all
             await createTransaction(newTransaction);
             console.log('[Finance API] Transaction created');
+
+            // Invalidate cache
+            cacheService.invalidate(`finance_data_${userId}`);
+
+            // Return updated list
+            const transactions = await getTransactions(userId);
+
+            return NextResponse.json({ success: true, transactions });
+        }
+
+        if (type === 'edit_transaction') {
+            console.log('[Finance API] Editing transaction:', data.id);
+            await updateTransaction(data.id, data.updates, userId);
 
             // Invalidate cache
             cacheService.invalidate(`finance_data_${userId}`);

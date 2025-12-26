@@ -28,6 +28,11 @@ export async function deleteTransaction(id: string, userId: string) {
     await TransactionModel.deleteOne({ id, userId });
 }
 
+export async function updateTransaction(id: string, updates: Partial<Transaction>, userId: string) {
+    await dbConnect();
+    await TransactionModel.updateOne({ id, userId }, { $set: updates });
+}
+
 // Legacy support for seed/test scripts (overwrite all - discouraged but kept for compatibility if needed)
 // Actually, for seed, we can just insert many.
 export async function saveTransactions(transactions: Transaction[]) {

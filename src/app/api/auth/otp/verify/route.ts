@@ -2,8 +2,7 @@
 import { NextResponse } from 'next/server';
 import { UserModel } from '@/lib/models';
 import dbConnect from '@/lib/db';
-import { verifyEmailOTP } from '@/lib/otp';
-import { signAccessToken, signRefreshToken } from '@/lib/auth-jwt';
+import { signSessionToken } from '@/lib/auth-jwt';
 import crypto from 'crypto';
 
 export async function POST(request: Request) {
@@ -19,7 +18,6 @@ export async function POST(request: Request) {
         }
 
         // Verify OTP
-        // Verify OTP from Database
         if (!user.otp || !user.otp.code || !user.otp.expires) {
             console.log('[OTP Verify] No OTP found on user record.');
             return NextResponse.json({ error: 'Invalid or expired OTP' }, { status: 400 });
@@ -41,9 +39,8 @@ export async function POST(request: Request) {
         user.otp = undefined;
         await user.save();
 
-        // Action: Reset PIN (Mandatory now)
+        // Action: Reset PIN
         if (!newPin) {
-            console.log('[OTP Verify] Missing newPin. Login-only via OTP is disabled.');
             return NextResponse.json({ error: 'New PIN is required to reset.' }, { status: 400 });
         }
 
@@ -52,30 +49,26 @@ export async function POST(request: Request) {
         await user.save();
         console.log('[OTP Verify] PIN updated.');
 
-        // Auto-login (Issue tokens)
-        const accessToken = await signAccessToken({ userId: user.id, username: user.username });
-        const refreshToken = await signRefreshToken({ userId: user.id, username: user.username });
+        // Auto-login (Issue Session Token)
+        const sessionToken = await signSessionToken({ userId: user.id, username: user.username });
 
-        user.refreshToken = refreshToken;
+        user.refreshToken = ""; // Clear legacy token
         await user.save();
 
         const response = NextResponse.json({ success: true });
 
-        response.cookies.set('accessToken', accessToken, {
+        // Set Single Session Cookie
+        response.cookies.set('sessionToken', sessionToken, {
             httpOnly: true,
-            secure: false, // process.env.NODE_ENV === 'production', // Reverted for local network testing
+            secure: process.env.NODE_ENV === 'production',
             sameSite: 'lax',
             path: '/',
-            maxAge: 15 * 60
+            maxAge: 7 * 24 * 60 * 60 // 7 Days
         });
 
-        response.cookies.set('refreshToken', refreshToken, {
-            httpOnly: true,
-            secure: false, // process.env.NODE_ENV === 'production',
-            sameSite: 'lax',
-            path: '/',
-            maxAge: 7 * 24 * 60 * 60
-        });
+        // Clear old cookies
+        response.cookies.delete('accessToken');
+        response.cookies.delete('refreshToken');
 
         return response;
 
