@@ -12,6 +12,7 @@ const UserSchema = new Schema<User>({
         code: { type: String },
         expires: { type: Number }
     },
+    currency: { type: String, default: 'INR' },
     usernameUpdates: {
         count: { type: Number, default: 0 },
         lastReset: { type: Number, default: Date.now }
@@ -51,6 +52,7 @@ const BudgetSchema = new Schema({
         id: { type: String, required: true },
         name: { type: String, required: true },
         percentage: { type: Number, required: true },
+        cap: { type: Number }, // Optional hard limit
         color: { type: String, required: true },
     }],
     entries: [BudgetEntrySchema]

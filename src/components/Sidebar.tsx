@@ -1,16 +1,14 @@
 "use client";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, Receipt, PiggyBank, LogOut, RefreshCw, Calendar, Settings, BarChart3 } from "lucide-react";
+import { LayoutDashboard, Receipt, LogOut, RefreshCw, Calendar, Settings, BarChart3 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/context/AuthContext";
 
 const navItems = [
     { name: "Dashboard", href: "/", icon: LayoutDashboard },
     { name: "Transactions", href: "/transactions", icon: Receipt },
-    { name: "Budget", href: "/budget", icon: PiggyBank },
     { name: "Recurring", href: "/recurring", icon: RefreshCw },
-    { name: "Calendar", href: "/calendar", icon: Calendar },
     { name: "Analytics", href: "/analytics", icon: BarChart3 },
     { name: "Settings", href: "/settings", icon: Settings },
 ];
@@ -20,11 +18,12 @@ import { X } from "lucide-react";
 interface SidebarProps {
     isOpen: boolean;
     onClose: () => void;
+    username?: string;
 }
 
-export function Sidebar({ isOpen, onClose }: SidebarProps) {
+export function Sidebar({ isOpen, onClose, username }: SidebarProps) {
     const pathname = usePathname();
-    const { user, logout, loading } = useAuth();
+    const { logout } = useAuth();
 
     // Always show sidebar unless we are on the login page
     // This prevents the sidebar from disappearing on reload while auth is checking
@@ -34,37 +33,86 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
 
     return (
         <>
-            {/* Mobile Overlay */}
+            {/* Mobile Sidebar (Drawer) */}
             {isOpen && (
-                <div
-                    className="fixed inset-0 z-40 bg-background/80 backdrop-blur-sm md:hidden"
-                    onClick={onClose}
-                />
+                <div className="md:hidden fixed inset-0 z-50 flex">
+                    {/* Backdrop */}
+                    <div
+                        className="fixed inset-0 bg-black/80 backdrop-blur-sm transition-opacity"
+                        onClick={onClose}
+                    />
+
+                    {/* Drawer Content */}
+                    <aside className="relative flex w-[85vw] max-w-sm flex-col bg-card h-full overflow-y-auto border-r border-border shadow-2xl animate-in slide-in-from-left duration-300">
+                        <div className="flex items-center justify-between p-4 border-b border-border/50">
+                            <div className="flex items-center gap-2">
+                                <img src="/Prospera_1_icon.png" alt="Logo" className="h-8 w-8 object-contain" />
+                                <span className="font-semibold text-lg">Prospera</span>
+                            </div>
+                            <button onClick={onClose} className="p-2 text-muted-foreground hover:text-foreground">
+                                <X className="h-5 w-5" />
+                            </button>
+                        </div>
+
+                        <div className="flex-1 px-3 py-4">
+                            <ul className="space-y-1">
+                                {navItems.map((item) => {
+                                    const Icon = item.icon;
+                                    const isActive = pathname === item.href;
+                                    return (
+                                        <li key={item.name}>
+                                            <Link
+                                                href={item.href}
+                                                onClick={onClose}
+                                                className={cn(
+                                                    "flex items-center gap-3 rounded-lg px-3 py-3 text-sm font-medium transition-colors",
+                                                    isActive
+                                                        ? "bg-primary/10 text-primary"
+                                                        : "text-muted-foreground hover:bg-accent hover:text-foreground"
+                                                )}
+                                            >
+                                                <Icon className="h-5 w-5" />
+                                                {item.name}
+                                            </Link>
+                                        </li>
+                                    );
+                                })}
+                            </ul>
+                        </div>
+
+                        <div className="p-4 border-t border-border/50 bg-muted/20">
+                            <div className="flex items-center gap-3 mb-4">
+                                <div className="h-10 w-10 rounded-full bg-primary/20 flex items-center justify-center text-primary font-bold text-lg">
+                                    {username ? username[0].toUpperCase() : 'U'}
+                                </div>
+                                <div className="flex-1 min-w-0">
+                                    <p className="text-sm font-medium truncate">{username || 'User'}</p>
+                                    <p className="text-xs text-muted-foreground">Pro Member</p>
+                                </div>
+                            </div>
+                            <button
+                                onClick={logout}
+                                className="flex w-full items-center justify-center gap-2 rounded-lg bg-destructive/10 px-4 py-2 text-destructive font-medium hover:bg-destructive/20 transition-colors"
+                            >
+                                <LogOut className="h-4 w-4" />
+                                Logout
+                            </button>
+                        </div>
+                    </aside>
+                </div>
             )}
 
-            {/* Sidebar */}
-            <aside className={cn(
-                "fixed left-0 top-0 z-50 h-screen w-64 border-r border-border bg-card/95 backdrop-blur-xl transition-transform duration-300 ease-in-out md:translate-x-0",
-                isOpen ? "translate-x-0" : "-translate-x-full"
-            )}>
-                <div className="flex h-full flex-col px-3 py-4 overflow-y-auto pb-20 md:pb-4">
-                    <div className="mb-10 flex items-center justify-between pl-2.5 mt-4 shrink-0">
-                        <div className="flex items-center">
-                            <div className="h-10 w-10 relative mr-3">
-                                <img src="/Prospera_1_icon.png" alt="Prospera Logo" className="object-contain w-full h-full" />
-                            </div>
-                            <span className="self-center whitespace-nowrap text-xl font-semibold text-foreground">
-                                Prospera
-                            </span>
+            {/* Desktop Sidebar (Fixed, md:flex) */}
+            <aside className="hidden md:flex fixed left-0 top-0 z-50 h-screen w-64 flex-col border-r border-border bg-card/95 backdrop-blur-xl">
+                <div className="flex h-full flex-col px-3 py-4">
+                    <div className="mb-8 flex items-center pl-3 mt-2">
+                        <div className="h-8 w-8 relative mr-3">
+                            <img src="/Prospera_1_icon.png" alt="Logo" className="object-contain" />
                         </div>
-                        <button
-                            onClick={onClose}
-                            className="p-2 text-muted-foreground hover:text-foreground md:hidden"
-                        >
-                            <X className="h-5 w-5" />
-                        </button>
+                        <span className="text-xl font-bold tracking-tight">Prospera</span>
                     </div>
-                    <ul className="space-y-2 font-medium flex-1">
+
+                    <ul className="space-y-1 flex-1">
                         {navItems.map((item) => {
                             const Icon = item.icon;
                             const isActive = pathname === item.href;
@@ -72,30 +120,32 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
                                 <li key={item.name}>
                                     <Link
                                         href={item.href}
-                                        onClick={() => onClose()} // Close sidebar on navigation (mobile)
                                         className={cn(
-                                            "flex items-center rounded-xl p-3 text-foreground transition-all duration-200 ease-in-out hover:bg-accent hover:scale-105 active:scale-95 group",
-                                            isActive && "bg-accent shadow-lg shadow-primary/5 ring-1 ring-border"
+                                            "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-all duration-200 group",
+                                            isActive
+                                                ? "bg-primary/10 text-primary"
+                                                : "text-muted-foreground hover:bg-accent hover:text-foreground"
                                         )}
                                     >
-                                        <Icon className={cn("h-5 w-5 transition-colors duration-200", isActive ? "text-primary" : "text-muted-foreground group-hover:text-foreground")} />
-                                        <span className="ml-3">{item.name}</span>
+                                        <Icon className={cn("h-4 w-4", isActive ? "text-primary" : "text-muted-foreground group-hover:text-foreground")} />
+                                        {item.name}
                                     </Link>
                                 </li>
                             );
                         })}
                     </ul>
-                    <div className="mt-auto mb-4 shrink-0">
-                        <div className="mb-4 px-3 py-2 rounded-xl bg-accent/50 border border-border">
-                            <p className="text-xs text-muted-foreground">Logged in as</p>
-                            <p className="text-sm font-medium text-foreground">{user?.username || 'Loading...'}</p>
+
+                    <div className="mt-auto pt-4 border-t border-border/50">
+                        <div className="mb-4 px-3 py-2 rounded-lg bg-accent/50 border border-border">
+                            <p className="text-xs text-muted-foreground mb-1">Logged in as</p>
+                            <p className="text-sm font-medium truncate">{username || 'Loading...'}</p>
                         </div>
                         <button
                             onClick={logout}
-                            className="flex w-full items-center rounded-xl p-3 text-foreground transition-all duration-200 ease-in-out hover:bg-destructive/10 hover:text-destructive hover:scale-105 active:scale-95 border border-transparent hover:border-destructive/20 cursor-pointer hover:shadow-[0_0_15px_rgba(239,68,68,0.2)]"
+                            className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium text-muted-foreground hover:bg-destructive/10 hover:text-destructive transition-colors"
                         >
-                            <LogOut className="h-5 w-5" />
-                            <span className="ml-3">Logout</span>
+                            <LogOut className="h-4 w-4" />
+                            Logout
                         </button>
                     </div>
                 </div>

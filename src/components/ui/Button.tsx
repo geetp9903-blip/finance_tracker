@@ -1,10 +1,12 @@
+"use client";
+
 import { cn } from "@/lib/utils";
 import { ButtonHTMLAttributes, forwardRef } from "react";
 import { motion, HTMLMotionProps } from "framer-motion";
 
 interface ButtonProps extends HTMLMotionProps<"button"> {
-    variant?: 'primary' | 'secondary' | 'ghost' | 'glass';
-    size?: 'sm' | 'md' | 'lg';
+    variant?: 'primary' | 'secondary' | 'ghost' | 'glass' | 'outline';
+    size?: 'sm' | 'md' | 'lg' | 'icon';
 }
 
 export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
@@ -13,13 +15,15 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
             primary: "bg-primary text-primary-foreground hover:bg-primary/90 shadow-lg shadow-primary/20",
             secondary: "bg-secondary text-secondary-foreground hover:bg-secondary/80",
             ghost: "hover:bg-accent hover:text-accent-foreground",
-            glass: "glass-button"
+            glass: "glass-button",
+            outline: "border border-white/20 bg-transparent hover:bg-white/10 text-foreground"
         };
 
         const sizes = {
             sm: "h-9 px-3 text-xs",
             md: "h-11 px-6 text-sm",
-            lg: "h-14 px-8 text-base"
+            lg: "h-14 px-8 text-base",
+            icon: "h-10 w-10 p-2"
         };
 
         return (

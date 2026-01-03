@@ -1,23 +1,29 @@
-
 import { NextResponse } from 'next/server';
 import { UserModel } from '@/lib/models';
 import dbConnect from '@/lib/db';
 import { signSessionToken } from '@/lib/auth-jwt';
 import crypto from 'crypto';
+import { LoginSchema } from '@/lib/schemas';
 
 function hashPin(pin: string | number): string {
-    // Legacy hash format (SHA256 hex)
     return crypto.createHash('sha256').update(String(pin)).digest('hex');
 }
 
 export async function POST(request: Request) {
     try {
         await dbConnect();
-        const { username, pin } = await request.json();
+        const body = await request.json();
 
-        if (!username || !pin) {
-            return NextResponse.json({ error: 'Username and PIN are required' }, { status: 400 });
+        // 1. Zod Validation
+        const validation = LoginSchema.safeParse(body);
+        if (!validation.success) {
+            return NextResponse.json({
+                error: 'Invalid input',
+                details: validation.error.flatten()
+            }, { status: 400 });
         }
+
+        const { username, pin } = validation.data;
 
         const hashedPin = hashPin(pin);
         const user = await UserModel.findOne({ username });
@@ -26,17 +32,16 @@ export async function POST(request: Request) {
             return NextResponse.json({ error: 'Invalid credentials' }, { status: 401 });
         }
 
-        // Generate Session Token
-        const sessionToken = await signSessionToken({ userId: user.id, username: user.username });
+        const sessionToken = await signSessionToken({ userId: user.id, username: user.username }); // use user.id (uuid) for session
 
-        // We don't necessarily need to store sessionToken in DB unless we want invalidation features.
-        // For now, let's keep it simple as requested. We can clear refreshToken to avoid confusion.
-        user.refreshToken = "";
-        await user.save();
+        // We can clear legacy fields if present
+        if (user.refreshToken) {
+            user.refreshToken = "";
+            await user.save();
+        }
 
         const response = NextResponse.json({ success: true, user: { id: user.id, username: user.username } });
 
-        // Set Single Session Cookie
         response.cookies.set('sessionToken', sessionToken, {
             httpOnly: true,
             secure: process.env.NODE_ENV === 'production',
@@ -45,7 +50,7 @@ export async function POST(request: Request) {
             maxAge: 7 * 24 * 60 * 60 // 7 Days
         });
 
-        // Clear old cookies just in case
+        // Cleanup legacy cookies
         response.cookies.delete('accessToken');
         response.cookies.delete('refreshToken');
 

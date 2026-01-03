@@ -16,20 +16,26 @@ export const viewport = {
   initialScale: 1,
   maximumScale: 1,
   userScalable: false,
+  viewportFit: 'cover',
 };
 
 import { SpeedInsights } from "@vercel/speed-insights/next";
 
-export default function RootLayout({
+import { getUser } from "@/lib/dal/auth";
+
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const user = await getUser();
+  const username = user?.username;
+
   return (
     <html lang="en" className="dark" suppressHydrationWarning>
       <body className={inter.className}>
         <Providers>
-          <AppLayout>
+          <AppLayout username={username}>
             {children}
           </AppLayout>
           <SpeedInsights />

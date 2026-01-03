@@ -7,12 +7,15 @@ import { usePathname } from "next/navigation";
 import { useState } from "react";
 import { Menu } from "lucide-react";
 
-export function AppLayout({ children }: { children: React.ReactNode }) {
-    const { user, loading: authLoading } = useAuth();
+export function AppLayout({ children, username }: { children: React.ReactNode, username?: string }) {
+    const { user: authUser, loading: authLoading } = useAuth();
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
     const pathname = usePathname();
     const isAuthPage = pathname === '/login' || pathname === '/register';
     const shouldShowLayout = !isAuthPage;
+
+    // Use server-provided username if available, else client auth
+    const displayUser = username || authUser?.username;
 
     return (
         <div className="flex min-h-screen relative">
@@ -30,13 +33,21 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
                 </div>
             )}
 
-            <Sidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
+            <Sidebar
+                isOpen={isSidebarOpen}
+                onClose={() => setIsSidebarOpen(false)}
+                username={displayUser}
+            />
 
             <main className={cn(
                 "flex-1 p-4 md:p-8 transition-all duration-300",
                 shouldShowLayout ? "pt-20 md:pt-8 md:ml-64" : ""
             )}>
-                {children}
+                {shouldShowLayout ? (
+                    <div className="bg-card/50 rounded-[20px] overflow-hidden min-h-[calc(100vh-4rem)] p-6 border border-white/5 shadow-2xl">
+                        {children}
+                    </div>
+                ) : children}
             </main>
         </div>
     );

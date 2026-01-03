@@ -80,6 +80,7 @@
     @apply bg-background text-foreground;
     overflow-x: hidden;
     /* Prevent horizontal scroll */
+    @apply overflow-x-hidden;
   }
 
   /* Static Background Implementation */

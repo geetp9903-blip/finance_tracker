@@ -23,6 +23,7 @@ export interface User {
         code: string;
         expires: number;
     };
+    currency?: string;
     usernameUpdates?: {
         count: number;
         lastReset: number; // timestamp

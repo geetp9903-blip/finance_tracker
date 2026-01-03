@@ -1,69 +1,61 @@
-import { useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import { Check, ChevronDown, Globe } from "lucide-react";
-import { cn } from "@/lib/utils";
+"use client";
 
-export const CURRENCIES = [
-    { code: 'INR', symbol: '₹', name: 'Indian Rupee' },
+import { useState, useTransition } from "react";
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuTrigger
+} from "@/components/ui/DropdownMenu";
+import { Button } from "@/components/ui/Button";
+import { updateCurrency } from "@/lib/actions/settings";
+import { CircleDollarSign, Coins, Check } from "lucide-react";
+
+const CURRENCIES = [
     { code: 'USD', symbol: '$', name: 'US Dollar' },
     { code: 'EUR', symbol: '€', name: 'Euro' },
     { code: 'GBP', symbol: '£', name: 'British Pound' },
+    { code: 'INR', symbol: '₹', name: 'Indian Rupee' },
     { code: 'JPY', symbol: '¥', name: 'Japanese Yen' },
 ];
 
-interface CurrencySelectorProps {
-    currentCurrency: string;
-    onSelect: (code: string) => void;
-}
+import { useRouter } from "next/navigation";
 
-export function CurrencySelector({ currentCurrency, onSelect }: CurrencySelectorProps) {
-    const [isOpen, setIsOpen] = useState(false);
-    const selected = CURRENCIES.find(c => c.code === currentCurrency) || CURRENCIES[0];
+export function CurrencySelector({ currentCurrency = 'INR' }: { currentCurrency?: string }) {
+    const router = useRouter();
+    const [currency, setCurrency] = useState(currentCurrency);
+    const [isPending, startTransition] = useTransition();
+
+    const handleSelect = (code: string) => {
+        setCurrency(code); // Optimistic
+        startTransition(async () => {
+            await updateCurrency(code);
+            router.refresh();
+        });
+    };
+
+    const activeCurrency = CURRENCIES.find(c => c.code === currency) || CURRENCIES.find(c => c.code === 'INR');
 
     return (
-        <div className="relative">
-            <button
-                onClick={() => setIsOpen(!isOpen)}
-                className="flex items-center gap-2 rounded-xl bg-white/5 backdrop-blur-md border border-white/10 px-4 py-2 text-sm font-medium transition-all duration-200 ease-in-out hover:scale-105 active:scale-95 hover:shadow-lg hover:shadow-primary/10 hover:bg-white/10"
-            >
-                <Globe className="h-4 w-4" />
-                <span>{selected.symbol} {selected.code}</span>
-                <ChevronDown className={cn("h-4 w-4 transition-transform", isOpen && "rotate-180")} />
-            </button>
-
-            <AnimatePresence>
-                {isOpen && (
-                    <>
-                        <div className="fixed inset-0 z-10" onClick={() => setIsOpen(false)} />
-                        <motion.div
-                            initial={{ opacity: 0, y: 10, scale: 0.95 }}
-                            animate={{ opacity: 1, y: 0, scale: 1 }}
-                            exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                            className="absolute right-0 top-12 z-20 w-56 bg-white/5 backdrop-blur-md border border-white/10 rounded-xl overflow-hidden p-1 shadow-xl"
-                        >
-                            {CURRENCIES.map((currency) => (
-                                <button
-                                    key={currency.code}
-                                    onClick={() => {
-                                        onSelect(currency.code);
-                                        setIsOpen(false);
-                                    }}
-                                    className={cn(
-                                        "flex w-full items-center justify-between rounded-lg px-3 py-2 text-sm text-foreground transition-all duration-200 ease-in-out hover:bg-accent hover:translate-x-1 cursor-pointer",
-                                        currentCurrency === currency.code && "bg-accent"
-                                    )}
-                                >
-                                    <span className="flex items-center gap-2">
-                                        <span className="text-muted-foreground">{currency.symbol}</span>
-                                        {currency.name}
-                                    </span>
-                                    {currentCurrency === currency.code && <Check className="h-4 w-4" />}
-                                </button>
-                            ))}
-                        </motion.div>
-                    </>
-                )}
-            </AnimatePresence>
-        </div>
+        <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="sm" className="h-9 px-2 text-muted-foreground hover:text-foreground">
+                    <Coins className="mr-2 h-4 w-4" />
+                    {activeCurrency?.symbol} {activeCurrency?.code}
+                </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+                {CURRENCIES.map((c) => (
+                    <DropdownMenuItem
+                        key={c.code}
+                        onClick={() => handleSelect(c.code)}
+                        className="flex items-center justify-between min-w-[150px]"
+                    >
+                        <span>{c.symbol} {c.name}</span>
+                        {currency === c.code && <Check className="ml-2 h-4 w-4" />}
+                    </DropdownMenuItem>
+                ))}
+            </DropdownMenuContent>
+        </DropdownMenu>
     );
 }
