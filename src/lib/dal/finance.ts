@@ -137,14 +137,21 @@ export const getRecurringRules = cache(async () => {
 });
 
 // Heavy Analytics Aggregation - Candidate for "use cache" in future
-export const getFinancialSummary = cache(async (startDate: Date, endDate: Date) => {
+export const getFinancialSummary = cache(async (startDate?: Date | null, endDate?: Date | null) => {
     const userId = await assertAuth();
     await ensureDb();
 
-    const transactions = await TransactionModel.find({
-        userId,
-        date: { $gte: startDate.toISOString(), $lte: endDate.toISOString() }
-    }).lean();
+    const query: any = { userId };
+
+    // Only apply date filter if both start and end dates are provided
+    if (startDate && endDate) {
+        query.date = {
+            $gte: startDate.toISOString(),
+            $lte: endDate.toISOString()
+        };
+    }
+
+    const transactions = await TransactionModel.find(query).lean();
 
     const income = transactions
         .filter(t => t.type === 'income')

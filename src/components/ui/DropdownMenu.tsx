@@ -109,4 +109,39 @@ const DropdownMenuItem = React.forwardRef<
 });
 DropdownMenuItem.displayName = "DropdownMenuItem";
 
-export { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem };
+const DropdownMenuSeparator = React.forwardRef<
+    HTMLDivElement,
+    React.HTMLAttributes<HTMLDivElement>
+>(({ className, ...props }, ref) => (
+    <div
+        ref={ref}
+        className={cn("-mx-1 my-1 h-px bg-muted", className)}
+        {...props}
+    />
+));
+DropdownMenuSeparator.displayName = "DropdownMenuSeparator";
+
+const DropdownMenuLabel = React.forwardRef<
+    HTMLDivElement,
+    React.HTMLAttributes<HTMLDivElement> & { inset?: boolean }
+>(({ className, inset, ...props }, ref) => (
+    <div
+        ref={ref}
+        className={cn(
+            "px-2 py-1.5 text-sm font-semibold",
+            inset && "pl-8",
+            className
+        )}
+        {...props}
+    />
+));
+DropdownMenuLabel.displayName = "DropdownMenuLabel";
+
+export {
+    DropdownMenu,
+    DropdownMenuTrigger,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuSeparator,
+    DropdownMenuLabel
+};

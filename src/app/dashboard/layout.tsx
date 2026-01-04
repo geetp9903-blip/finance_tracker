@@ -3,6 +3,7 @@ import { assertAuth } from "@/lib/dal/auth";
 import Link from "next/link";
 import { LogOut } from "lucide-react";
 import { CurrencySelector } from "@/components/ui/CurrencySelector";
+import { DashboardFilter } from "@/components/dashboard/DashboardFilter";
 // We might need a Logout button component that uses Server Actions
 
 export default async function DashboardLayout({
@@ -26,6 +27,7 @@ export default async function DashboardLayout({
                     <p className="text-muted-foreground">Welcome back</p>
                 </div>
                 <div className="flex items-center space-x-2">
+                    <DashboardFilter />
                     <CurrencySelector />
                     {/* Placeholder for toolbar or specific page actions */}
                     <Link href="/settings" className="p-2 hover:bg-accent rounded-md">Settings</Link>

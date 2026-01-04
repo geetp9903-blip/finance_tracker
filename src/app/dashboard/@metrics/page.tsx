@@ -10,7 +10,10 @@ import { assertAuth } from "@/lib/dal/auth";
 import { UserModel } from "@/lib/models";
 import dbConnect from "@/lib/db";
 
-export default async function MetricsPage() {
+export default async function MetricsPage(props: {
+    searchParams: Promise<{ period?: string; month?: string; year?: string }>;
+}) {
+    const searchParams = await props.searchParams;
     const userId = await assertAuth();
     await dbConnect();
     // userId from session is actually the username in this system
@@ -18,11 +21,30 @@ export default async function MetricsPage() {
     const currency = user?.currency || 'INR';
 
     const now = new Date();
-    // Default to current month for summary
-    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
-    const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+    let startDate: Date | null = null;
+    let endDate: Date | null = null;
+    let periodLabel = 'Overall';
 
-    const summary = await getFinancialSummary(startOfMonth, endOfMonth);
+    const period = searchParams?.period || 'all';
+    const yearParam = searchParams?.year ? parseInt(searchParams.year) : now.getFullYear();
+    const monthParam = searchParams?.month ? parseInt(searchParams.month) : now.getMonth();
+
+    const MONTHS = [
+        "January", "February", "March", "April", "May", "June",
+        "July", "August", "September", "October", "November", "December"
+    ];
+
+    if (period === 'month') {
+        startDate = new Date(yearParam, monthParam, 1);
+        endDate = new Date(yearParam, monthParam + 1, 0); // Last day of the month
+        periodLabel = `${MONTHS[monthParam]} ${yearParam}`;
+    } else if (period === 'year') {
+        startDate = new Date(yearParam, 0, 1);
+        endDate = new Date(yearParam, 11, 31);
+        periodLabel = `Year ${yearParam}`;
+    }
+
+    const summary = await getFinancialSummary(startDate, endDate);
 
     const formatter = new Intl.NumberFormat('en-US', {
         style: 'currency',
@@ -38,7 +60,7 @@ export default async function MetricsPage() {
                 </CardHeader>
                 <CardContent>
                     <div className="text-2xl font-bold">{formatter.format(summary.balance)}</div>
-                    <p className="text-xs text-muted-foreground">Current Month</p>
+                    <p className="text-xs text-muted-foreground">{periodLabel}</p>
                 </CardContent>
             </Card>
 
@@ -60,7 +82,7 @@ export default async function MetricsPage() {
                 </CardHeader>
                 <CardContent>
                     <div className="text-2xl font-bold text-destructive">{formatter.format(summary.expense)}</div>
-                    <p className="text-xs text-muted-foreground">Current Month</p>
+                    <p className="text-xs text-muted-foreground">{periodLabel}</p>
                 </CardContent>
             </Card>
 
