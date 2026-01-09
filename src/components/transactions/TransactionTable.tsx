@@ -291,6 +291,7 @@ export function TransactionTable({
                 </div>
 
                 <EditTransactionModal
+                    key={editingTransaction?.id || 'edit-modal'}
                     isOpen={!!editingTransaction}
                     onClose={() => setEditingTransaction(null)}
                     transaction={editingTransaction}

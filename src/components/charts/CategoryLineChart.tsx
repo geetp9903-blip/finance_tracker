@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect, useCallback } from "react";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
@@ -61,21 +61,21 @@ export function CategoryLineChart({ data, currency = 'USD' }: Props) {
         return { chartData: sortedData, categoryTotals: totals };
     }, [data]);
 
-    // 2. Initialize with Top 5 on load
-    useEffect(() => {
-        if (Object.keys(categoryTotals).length > 0 && selectedCategories.length === 0) {
-            selectTop5();
-        }
-    }, [categoryTotals]);
-
-    // Helper: Select Top 5 by Amount
-    const selectTop5 = () => {
+    // 2. Helper: Select Top 5 by Amount
+    const selectTop5 = useCallback(() => {
         const sortedCats = Object.entries(categoryTotals)
             .sort(([, a], [, b]) => b - a)
             .slice(0, 5)
             .map(([cat]) => cat);
         setSelectedCategories(sortedCats);
-    };
+    }, [categoryTotals]);
+
+    // 3. Initialize with Top 5 on load
+    useEffect(() => {
+        if (Object.keys(categoryTotals).length > 0 && selectedCategories.length === 0) {
+            selectTop5();
+        }
+    }, [categoryTotals, selectedCategories.length, selectTop5]);
 
     const toggleCategory = (cat: string) => {
         if (selectedCategories.includes(cat)) {

@@ -33,27 +33,20 @@ export function EditTransactionModal({ isOpen, onClose, transaction }: EditTrans
     const router = useRouter();
     const [isPending, startTransition] = useTransition();
 
-    const [amount, setAmount] = useState<number | "">("");
-    const [description, setDescription] = useState("");
-    const [category, setCategory] = useState("");
-    const [type, setType] = useState<"income" | "expense">("expense");
-    const [date, setDate] = useState("");
+    const [amount, setAmount] = useState<number | "">(transaction?.amount ?? "");
+    const [description, setDescription] = useState(transaction?.description ?? "");
+    const [category, setCategory] = useState(transaction?.category ?? "");
+    const [type, setType] = useState<"income" | "expense">(transaction?.type ?? "expense");
 
-    // Initialize state when transaction changes
-    useEffect(() => {
-        if (transaction) {
-            setAmount(transaction.amount);
-            setDescription(transaction.description);
-            setCategory(transaction.category);
-            setType(transaction.type);
-            // Ensure YYYY-MM-DD
-            try {
-                setDate(new Date(transaction.date).toISOString().split('T')[0]);
-            } catch (e) {
-                setDate("");
-            }
+    // Parse initial date
+    const [date, setDate] = useState(() => {
+        if (!transaction?.date) return "";
+        try {
+            return new Date(transaction.date).toISOString().split('T')[0];
+        } catch {
+            return "";
         }
-    }, [transaction]);
+    });
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();

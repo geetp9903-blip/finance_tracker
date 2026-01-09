@@ -1,5 +1,7 @@
 "use client";
 
+import { useMemo } from 'react';
+
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell, CartesianGrid } from 'recharts';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
 
@@ -8,27 +10,27 @@ interface TopCategoriesChartProps {
     currency?: string;
 }
 
+const CustomTooltip = ({ active, payload, formatter }: any) => {
+    if (active && payload && payload.length) {
+        return (
+            <div className="bg-card border border-border p-2 rounded-lg shadow-xl">
+                <p className="font-semibold mb-1">{payload[0].payload.category}</p>
+                <p className="text-primary font-bold">
+                    {formatter.format(payload[0].value)}
+                </p>
+            </div>
+        );
+    }
+    return null;
+};
+
 export function TopCategoriesChart({ data, currency = 'USD' }: TopCategoriesChartProps) {
-    const formatter = new Intl.NumberFormat('en-US', {
+    const formatter = useMemo(() => new Intl.NumberFormat('en-US', {
         style: 'currency',
         currency: currency,
         minimumFractionDigits: 0,
         maximumFractionDigits: 0
-    });
-
-    const CustomTooltip = ({ active, payload }: any) => {
-        if (active && payload && payload.length) {
-            return (
-                <div className="bg-card border border-border p-2 rounded-lg shadow-xl">
-                    <p className="font-semibold mb-1">{payload[0].payload.category}</p>
-                    <p className="text-primary font-bold">
-                        {formatter.format(payload[0].value)}
-                    </p>
-                </div>
-            );
-        }
-        return null;
-    };
+    }), [currency]);
 
     const hasData = data && data.length > 0;
 
@@ -62,7 +64,7 @@ export function TopCategoriesChart({ data, currency = 'USD' }: TopCategoriesChar
                                     tickLine={false}
                                     axisLine={false}
                                 />
-                                <Tooltip content={<CustomTooltip />} cursor={{ fill: 'rgba(255,255,255,0.05)' }} />
+                                <Tooltip content={<CustomTooltip formatter={formatter} />} cursor={{ fill: 'rgba(255,255,255,0.05)' }} />
                                 <Bar dataKey="value" radius={[0, 4, 4, 0]} barSize={20}>
                                     {data.map((entry, index) => (
                                         <Cell key={`cell-${index}`} fill="hsl(var(--primary))" fillOpacity={0.8} />

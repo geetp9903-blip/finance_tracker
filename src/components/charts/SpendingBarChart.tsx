@@ -16,32 +16,31 @@ interface SpendingBarChartProps {
     currency?: string;
 }
 
+const CustomTooltip = ({ active, payload, formatter }: any) => {
+    if (active && payload && payload.length) {
+        return (
+            <div className="bg-card border border-border p-2 rounded-lg shadow-xl">
+                <p className="font-semibold mb-1">{payload[0].payload.label}</p>
+                <p className="text-primary font-bold">
+                    {formatter.format(payload[0].value)}
+                </p>
+                <p className="text-xs text-muted-foreground">
+                    {payload[0].payload.count} transactions
+                </p>
+            </div>
+        );
+    }
+    return null;
+};
+
 export function SpendingBarChart({ data, periodLabel, currency = 'USD' }: SpendingBarChartProps) {
-    const formatter = new Intl.NumberFormat('en-US', {
+    const formatter = useMemo(() => new Intl.NumberFormat('en-US', {
         style: 'currency',
         currency: currency,
         minimumFractionDigits: 0
-    });
+    }), [currency]);
 
     const hasData = data.length > 0;
-
-    // Custom Tooltip
-    const CustomTooltip = ({ active, payload, label }: any) => {
-        if (active && payload && payload.length) {
-            return (
-                <div className="bg-card border border-border p-2 rounded-lg shadow-xl">
-                    <p className="font-semibold mb-1">{label}</p>
-                    <p className="text-primary font-bold">
-                        {formatter.format(payload[0].value)}
-                    </p>
-                    <p className="text-xs text-muted-foreground">
-                        {payload[0].payload.count} transactions
-                    </p>
-                </div>
-            );
-        }
-        return null;
-    };
 
     return (
         <Card className="glass-card w-full h-full min-h-[400px]">
@@ -71,7 +70,7 @@ export function SpendingBarChart({ data, periodLabel, currency = 'USD' }: Spendi
                                     tick={{ fill: 'rgba(255,255,255,0.5)', fontSize: 12 }}
                                     tickFormatter={(val) => formatter.format(val)}
                                 />
-                                <Tooltip content={<CustomTooltip />} cursor={{ fill: 'rgba(255,255,255,0.05)' }} />
+                                <Tooltip content={<CustomTooltip formatter={formatter} />} cursor={{ fill: 'rgba(255,255,255,0.05)' }} />
                                 <Bar dataKey="value" radius={[4, 4, 0, 0]} maxBarSize={50}>
                                     {data.map((entry, index) => (
                                         <Cell key={`cell-${index}`} fill={index % 2 === 0 ? "hsl(var(--primary))" : "hsl(var(--primary) / 0.7)"} />
