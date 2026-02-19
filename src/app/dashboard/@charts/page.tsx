@@ -1,10 +1,8 @@
-import { ChartControls } from "@/components/analytics/ChartControls";
-import { SpendingBarChart } from "@/components/charts/SpendingBarChart";
-import { TopCategoriesChart } from "@/components/charts/TopCategoriesChart";
 import { getSpendingChartData, getTopCategories } from "@/lib/dal/analytics";
 import { getUser } from "@/lib/dal/auth";
 import { TransactionModel } from "@/lib/models";
 import dbConnect from "@/lib/db";
+import { LazyCharts } from "@/components/dashboard/LazyCharts";
 
 // Use SearchParams for dynamic filtering
 export default async function ChartsPage({
@@ -44,27 +42,12 @@ export default async function ChartsPage({
         : `${year} Annual Overview`;
 
     return (
-        <div className="h-full flex flex-col space-y-4">
-            <ChartControls categories={categories} />
-
-            <div className="grid grid-cols-1 2xl:grid-cols-7 gap-4 min-h-[400px]">
-                {/* Main Spending Chart - Stacks on XL, 5 cols on 2XL */}
-                <div className="h-[400px] 2xl:col-span-5">
-                    <SpendingBarChart
-                        data={spendingData}
-                        periodLabel={periodLabel}
-                        currency={user.currency || 'USD'}
-                    />
-                </div>
-
-                {/* Top Categories - Stacks on XL, 2 cols on 2XL */}
-                <div className="h-[400px] 2xl:col-span-2">
-                    <TopCategoriesChart
-                        data={topCategories}
-                        currency={user.currency || 'USD'}
-                    />
-                </div>
-            </div>
-        </div>
+        <LazyCharts
+            spendingData={spendingData}
+            topCategories={topCategories}
+            categories={categories || []}
+            periodLabel={periodLabel}
+            currency={user.currency || 'USD'}
+        />
     );
 }

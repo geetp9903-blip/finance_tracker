@@ -1,9 +1,9 @@
 
 import { getTransactions } from "@/lib/dal/finance";
-import { TransactionManager } from "@/components/finance/TransactionManager";
 import { assertAuth } from "@/lib/dal/auth";
 import { UserModel } from "@/lib/models";
 import dbConnect from "@/lib/db";
+import { LazyTransactions } from "@/components/dashboard/LazyTransactions";
 
 export const revalidate = 60;
 
@@ -28,8 +28,8 @@ export default async function TransactionsPage() {
     const currency = user?.currency || 'USD';
 
     return (
-        <TransactionManager
-            initialTransactions={sanitizedTransactions}
+        <LazyTransactions
+            transactions={sanitizedTransactions}
             currency={currency}
         />
     );
