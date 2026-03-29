@@ -11,7 +11,7 @@ export function AppLayout({ children, username }: { children: React.ReactNode, u
     const { user: authUser, loading: authLoading } = useAuth();
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
     const pathname = usePathname();
-    const isAuthPage = pathname === '/login' || pathname === '/register';
+    const isAuthPage = pathname === '/login' || pathname === '/register' || pathname === '/setup-username';
     const shouldShowLayout = !isAuthPage;
 
     // Use server-provided username if available, else client auth

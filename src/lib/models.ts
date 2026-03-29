@@ -16,6 +16,11 @@ const UserSchema = new Schema<User>({
     usernameUpdates: {
         count: { type: Number, default: 0 },
         lastReset: { type: Number, default: Date.now }
+    },
+    inactivityNotices: {
+        sent38: { type: Boolean, default: false },
+        sent42: { type: Boolean, default: false },
+        sent44: { type: Boolean, default: false }
     }
 });
 

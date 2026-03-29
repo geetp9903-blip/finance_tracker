@@ -28,6 +28,11 @@ export interface User {
         count: number;
         lastReset: number; // timestamp
     };
+    inactivityNotices?: {
+        sent38: boolean;
+        sent42: boolean;
+        sent44: boolean;
+    };
 }
 
 export interface RecurringRule {
