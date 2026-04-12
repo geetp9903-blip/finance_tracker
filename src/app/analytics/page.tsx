@@ -1,8 +1,9 @@
 import { getDailySpending, getCategoryTrends } from "@/lib/dal/analytics";
-import { SpendingBarChart } from "@/components/charts/SpendingBarChart";
-import { CategoryLineChart } from "@/components/charts/CategoryLineChart";
+import { getFinancialSummary } from "@/lib/dal/finance";
+import { BalanceDepletionChart } from "@/components/charts/BalanceDepletionChart";
+import { CategoryStackedAreaChart } from "@/components/charts/CategoryStackedAreaChart";
 import { DateRangeSelector } from "@/components/analytics/DateRangeSelector";
-import { startOfMonth, endOfMonth, startOfYear, endOfYear } from "date-fns";
+import { startOfMonth, endOfMonth, startOfYear, endOfYear, format } from "date-fns";
 import { assertAuth } from "@/lib/dal/auth";
 import { UserModel } from "@/lib/models";
 import dbConnect from "@/lib/db";
@@ -38,17 +39,14 @@ export default async function AnalyticsPage({ searchParams }: PageProps) {
     }
 
     // 2. Parallel Data Fetching
-    const [dailySpend, categoryTrends] = await Promise.all([
+    const [dailySpend, categoryTrends, globalSummary, periodSummary] = await Promise.all([
         getDailySpending(startDate, endDate),
-        getCategoryTrends(startDate, endDate)
+        getCategoryTrends(startDate, endDate),
+        getFinancialSummary(), // global balance
+        getFinancialSummary(startDate, endDate) // period total expenses
     ]);
 
-    // 3. Transformation for UI
-    const barData = dailySpend.map(d => ({
-        label: d._id,
-        value: d.amount,
-        count: d.count
-    }));
+
 
 
 
@@ -71,21 +69,21 @@ export default async function AnalyticsPage({ searchParams }: PageProps) {
             </div>
 
             <div className="grid gap-6 grid-cols-1">
-                <div className="rounded-xl border bg-card text-card-foreground shadow-sm">
-                    <div className="p-6">
-                        <h3 className="text-lg font-medium">Total Spending Trend</h3>
-                        <div className="mt-4">
-                            <SpendingBarChart data={barData} periodLabel="Spending Overview" currency={currency} />
-                        </div>
-                    </div>
+                <div className="rounded-xl border bg-card text-card-foreground shadow-sm overflow-hidden">
+                    <BalanceDepletionChart 
+                        data={dailySpend} 
+                        currentGlobalBalance={globalSummary.balance}
+                        periodTotalExpenses={periodSummary.expense}
+                        periodLabel={range === 'month' ? format(refDate, "MMMM yyyy") : range === 'year' ? format(refDate, "yyyy") : "All Time"} 
+                        currency={currency} 
+                    />
                 </div>
-                <div className="rounded-xl border bg-card text-card-foreground shadow-sm">
-                    <div className="p-6">
-                        {/* Wrapper to control height if needed, but Chart handles it */}
-                        <div className="mt-0">
-                            <CategoryLineChart data={categoryTrends} currency={currency} />
-                        </div>
-                    </div>
+                <div className="rounded-xl border bg-card text-card-foreground shadow-sm overflow-hidden">
+                    <CategoryStackedAreaChart 
+                        data={categoryTrends} 
+                        periodTotalExpenses={periodSummary.expense}
+                        currency={currency} 
+                    />
                 </div>
             </div>
         </div>

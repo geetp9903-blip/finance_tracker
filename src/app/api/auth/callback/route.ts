@@ -59,28 +59,25 @@ export async function GET(request: Request) {
                     const sessionToken = await signSessionToken({ userId: user.id, username: user.username });
                     console.log("Session token created successfully, setting cookie and redirecting to", next);
                     
-                    const response = NextResponse.redirect(new URL(next, origin));
-                    response.cookies.set('sessionToken', sessionToken, {
+                    cookieStore.set('sessionToken', sessionToken, {
                         httpOnly: true,
                         secure: process.env.NODE_ENV === 'production',
                         sameSite: 'lax',
                         path: '/',
                         maxAge: 7 * 24 * 60 * 60 // 7 Days
                     });
-                    return response;
+                    return NextResponse.redirect(new URL(next, origin));
                 } else {
                     console.log(`No user found for email ${email}. Redirecting to setup-username.`);
                     // New User -> Redirect to Username/PIN setup
-                    const response = NextResponse.redirect(new URL('/setup-username', origin));
-                    // Temporarily store email in cookie to use in the setup phase
-                    response.cookies.set('temp_signup_email', email, {
+                    cookieStore.set('temp_signup_email', email, {
                         httpOnly: true,
                         secure: process.env.NODE_ENV === 'production',
                         sameSite: 'lax',
                         path: '/',
                         maxAge: 15 * 60 // 15 mins
                     });
-                    return response;
+                    return NextResponse.redirect(new URL('/setup-username', origin));
                 }
             } catch (err) {
                 console.error("Auth Callback DB Error:", err);
