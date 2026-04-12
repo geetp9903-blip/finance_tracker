@@ -51,9 +51,12 @@ Prospera is a modern, high-performance personal finance application designed to 
 
 4.  Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
+
+5. Or Click Here to use the app live ⧐ https://prospera-fin-tracker-geet.netlify.app/login
+
 ## 📸 Screenshots
 
-*(Add your screenshots here)*
+![Prospera Banner](public/Prospera_1.png)
 
 ## 📄 License
 
