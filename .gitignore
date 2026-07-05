@@ -43,3 +43,9 @@ next-env.d.ts
 # secrets
 secrets.gitignore
 secrets.gitignore/*
+
+# Agent files
+.agents/
+astra/
+*.b64
+*.zip

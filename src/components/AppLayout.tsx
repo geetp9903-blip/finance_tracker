@@ -26,6 +26,9 @@ export function AppLayout({ children, username }: { children: React.ReactNode, u
                     <button
                         onClick={() => setIsSidebarOpen(true)}
                         className="p-2 -ml-2 text-muted-foreground hover:text-foreground"
+                        aria-label="Open sidebar"
+                        aria-expanded={isSidebarOpen}
+                        aria-controls="mobile-sidebar"
                     >
                         <Menu className="h-6 w-6" />
                     </button>
@@ -40,8 +43,8 @@ export function AppLayout({ children, username }: { children: React.ReactNode, u
             />
 
             <main className={cn(
-                "flex-1 p-4 md:p-8 transition-all duration-300",
-                shouldShowLayout ? "pt-20 md:pt-8 md:ml-64" : ""
+                "flex-1 p-4 md:p-6 lg:p-8 transition-all duration-300",
+                shouldShowLayout ? "pt-20 md:pt-6 lg:pt-8 md:ml-16 lg:ml-64" : ""
             )}>
                 {shouldShowLayout ? (
                     <div className="bg-card/50 rounded-[20px] overflow-hidden min-h-[calc(100vh-4rem)] p-6 border border-white/5 shadow-2xl">

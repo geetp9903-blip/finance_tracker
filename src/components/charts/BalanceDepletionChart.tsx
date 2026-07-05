@@ -3,6 +3,7 @@
 import { useMemo } from "react";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
+import { EmptyState } from "@/components/ui/EmptyState";
 import { format } from "date-fns";
 
 type DailySpend = {
@@ -107,8 +108,11 @@ export function BalanceDepletionChart({
             </CardHeader>
             <CardContent className="flex-1 min-h-[300px] pl-0">
                 {!hasData ? (
-                    <div className="h-full flex items-center justify-center text-muted-foreground">
-                        No transactions found for this period.
+                    <div className="h-full flex items-center justify-center p-4">
+                        <EmptyState 
+                            title="No transactions" 
+                            description="There are no transactions in this period to display." 
+                        />
                     </div>
                 ) : (
                     <ResponsiveContainer width="100%" height="100%">

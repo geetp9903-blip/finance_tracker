@@ -64,8 +64,19 @@ export function CategorySelector({ value, onChange, existingCategories }: Catego
     return (
         <div className="relative" ref={wrapperRef}>
             <div
-                className="flex h-11 w-full items-center justify-between rounded-xl bg-input border border-border px-3 py-2 text-sm text-foreground cursor-pointer transition-all duration-200 ease-in-out hover:bg-accent/50 hover:border-accent hover:shadow-lg active:scale-[0.98]"
+                role="combobox"
+                aria-expanded={open}
+                aria-haspopup="listbox"
+                aria-controls="category-listbox"
+                tabIndex={0}
+                className="flex h-11 w-full items-center justify-between rounded-xl bg-black/20 backdrop-blur-sm border border-white/10 px-3 py-2 text-sm text-foreground cursor-pointer transition-all duration-200 ease-in-out hover:bg-white/5 hover:border-primary/50 hover:shadow-lg focus:ring-2 focus:ring-primary/50 outline-none"
                 onClick={() => setOpen(!open)}
+                onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        setOpen(!open);
+                    }
+                }}
             >
                 <span className={value ? "text-foreground" : "text-muted-foreground"}>
                     {value || "Select category..."}
@@ -74,11 +85,16 @@ export function CategorySelector({ value, onChange, existingCategories }: Catego
             </div>
 
             {open && (
-                <div className="absolute z-[100] mt-1 max-h-[240px] w-full overflow-auto rounded-xl bg-popover border border-border py-1 shadow-xl ring-1 ring-black ring-opacity-5 focus:outline-none animate-in fade-in zoom-in-95 duration-200">
-                    <div className="px-2 py-2 sticky top-0 bg-popover z-10 border-b border-border mb-1">
+                <div 
+                    id="category-listbox"
+                    role="listbox"
+                    className="absolute z-[100] mt-1 max-h-[240px] w-full overflow-auto rounded-xl bg-black/60 backdrop-blur-xl border border-white/10 py-1 shadow-2xl ring-1 ring-black ring-opacity-5 focus:outline-none animate-in fade-in zoom-in-95 duration-200"
+                >
+                    <div className="px-2 py-2 sticky top-0 bg-black/80 backdrop-blur-xl z-10 border-b border-white/10 mb-1">
                         <input
                             type="text"
-                            className="w-full rounded-lg bg-accent/50 border border-border px-2 py-1.5 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all duration-200 focus:bg-accent"
+                            aria-label="Search categories"
+                            className="w-full rounded-lg bg-black/40 border border-white/10 px-2 py-1.5 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all duration-200"
                             placeholder="Search or add..."
                             value={search}
                             onChange={(e) => setSearch(e.target.value)}
@@ -95,9 +111,11 @@ export function CategorySelector({ value, onChange, existingCategories }: Catego
                     {filtered.map((category) => (
                         <div
                             key={category}
+                            role="option"
+                            aria-selected={value === category}
                             className={cn(
-                                "relative flex cursor-pointer select-none items-center px-2 py-2 text-sm outline-none mx-1 rounded-lg transition-all duration-200 ease-in-out truncate hover:bg-accent hover:translate-x-1 text-foreground",
-                                value === category && "bg-accent text-primary"
+                                "relative flex cursor-pointer select-none items-center px-2 py-2 text-sm outline-none mx-1 rounded-lg transition-all duration-200 ease-in-out truncate hover:bg-white/10 text-foreground",
+                                value === category && "bg-white/10 text-primary"
                             )}
                             onClick={() => handleSelect(category)}
                             title={category}

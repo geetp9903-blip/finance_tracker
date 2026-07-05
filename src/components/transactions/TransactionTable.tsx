@@ -9,6 +9,7 @@ import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/Card";
 import { Search, ChevronLeft, ChevronRight, ArrowUpDown, Trash2, Filter, Pencil } from "lucide-react";
 import { deleteTransaction } from "@/lib/actions/finance";
 import { EditTransactionModal } from "./EditTransactionModal";
+import { EmptyState } from "@/components/ui/EmptyState";
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -206,16 +207,13 @@ export function TransactionTable({
                         <tbody className="divide-y divide-white/5">
                             {optimisticTransactions.length === 0 ? (
                                 <tr>
-                                    <td colSpan={5} className="p-8 text-center text-muted-foreground">
-                                        <div className="flex flex-col items-center gap-2">
-                                            <p>No transactions found.</p>
-                                            <Button
-                                                variant="outline"
-                                                onClick={() => window.open('/api/debug/migrate-legacy?source=geetp9903', '_blank')}
-                                            >
-                                                Recover Legacy Data
-                                            </Button>
-                                        </div>
+                                    <td colSpan={5} className="p-8">
+                                        <EmptyState
+                                            title="No transactions found"
+                                            description="You don't have any transactions matching the current filters."
+                                            actionLabel="Recover Legacy Data"
+                                            onAction={() => window.open('/api/debug/migrate-legacy?source=geetp9903', '_blank')}
+                                        />
                                     </td>
                                 </tr>
                             ) : (

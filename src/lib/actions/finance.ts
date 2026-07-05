@@ -27,7 +27,7 @@ export async function addTransaction(
             description: formData.get('description'),
             category: formData.get('category'),
             type: formData.get('type'),
-            date: new Date().toISOString(), // Use server time or form time
+            date: formData.get('date') || new Date().toISOString(), // Use provided date or fallback to server time
         };
 
         const validated = CreateTransactionSchema.safeParse(rawData);
@@ -48,6 +48,8 @@ export async function addTransaction(
         });
 
         revalidatePath('/dashboard');
+        revalidatePath('/transactions');
+        revalidatePath('/analytics');
         return { message: 'Transaction added successfully', success: true };
 
     } catch (error) {
@@ -76,6 +78,8 @@ export async function deleteTransaction(
         }
 
         revalidatePath('/dashboard');
+        revalidatePath('/transactions');
+        revalidatePath('/analytics');
         return { message: 'Transaction deleted successfully', success: true };
 
     } catch (error) {

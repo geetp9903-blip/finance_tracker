@@ -77,8 +77,9 @@ export function EditTransactionModal({ isOpen, onClose, transaction }: EditTrans
         <Modal isOpen={isOpen} onClose={onClose} title="Edit Transaction">
             <form onSubmit={handleSubmit} className="space-y-4">
                 <div className="space-y-2">
-                    <label className="text-sm font-medium">Amount</label>
+                    <label htmlFor="edit-amount" className="text-sm font-medium">Amount</label>
                     <SmartInput
+                        id="edit-amount"
                         value={amount}
                         onValueChange={setAmount}
                         placeholder="0.00"
@@ -88,8 +89,9 @@ export function EditTransactionModal({ isOpen, onClose, transaction }: EditTrans
 
                 <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-2">
-                        <label className="text-sm font-medium">Type</label>
+                        <label htmlFor="edit-type" className="text-sm font-medium">Type</label>
                         <select
+                            id="edit-type"
                             className="w-full h-10 rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
                             value={type}
                             onChange={(e) => setType(e.target.value as "income" | "expense")}
@@ -100,8 +102,9 @@ export function EditTransactionModal({ isOpen, onClose, transaction }: EditTrans
                         </select>
                     </div>
                     <div className="space-y-2">
-                        <label className="text-sm font-medium">Date</label>
+                        <label htmlFor="edit-date" className="text-sm font-medium">Date</label>
                         <Input
+                            id="edit-date"
                             type="date"
                             value={date}
                             onChange={(e) => setDate(e.target.value)}
@@ -119,8 +122,9 @@ export function EditTransactionModal({ isOpen, onClose, transaction }: EditTrans
                 </div>
 
                 <div className="space-y-2">
-                    <label className="text-sm font-medium">Description</label>
+                    <label htmlFor="edit-desc" className="text-sm font-medium">Description</label>
                     <Input
+                        id="edit-desc"
                         value={description}
                         onChange={(e) => setDescription(e.target.value)}
                         placeholder="What is this for?"

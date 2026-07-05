@@ -37,8 +37,10 @@ export default function LoginPage() {
         <div className="flex min-h-screen items-center justify-center p-4 bg-gradient-to-br from-background via-background/95 to-primary/5">
             <Card className="w-full max-w-md border-white/10 shadow-2xl overflow-hidden glass-card">
                 {/* Header Tabs */}
-                <div className="flex w-full bg-black/20 p-1">
+                <div role="tablist" className="flex w-full bg-black/20 p-1">
                     <button
+                        role="tab"
+                        aria-selected={view === 'login'}
                         onClick={() => setView('login')}
                         className={`flex-1 py-3 text-sm font-medium rounded-lg transition-all duration-300 ${view === 'login'
                             ? 'bg-primary text-primary-foreground shadow-lg'
@@ -48,6 +50,8 @@ export default function LoginPage() {
                         Login
                     </button>
                     <button
+                        role="tab"
+                        aria-selected={view === 'register'}
                         onClick={() => setView('register')}
                         className={`flex-1 py-3 text-sm font-medium rounded-lg transition-all duration-300 ${view === 'register'
                             ? 'bg-primary text-primary-foreground shadow-lg'
@@ -80,10 +84,11 @@ export default function LoginPage() {
 
                             <form action={view === 'login' ? loginDispatch : registerDispatch} className="space-y-5">
                                 <div className="space-y-2">
-                                    <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground ml-1">Username</label>
+                                    <label htmlFor="username" className="text-xs font-semibold uppercase tracking-wider text-muted-foreground ml-1">Username</label>
                                     <div className="relative">
                                         <User className="absolute left-3 top-3 h-5 w-5 text-muted-foreground" />
                                         <Input
+                                            id="username"
                                             name="username"
                                             placeholder="Enter username"
                                             className="pl-10 h-12" // h-12 for better touch/click area
@@ -97,10 +102,11 @@ export default function LoginPage() {
 
                                 {view === 'register' && (
                                     <div className="space-y-2">
-                                        <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground ml-1">Email (Optional)</label>
+                                        <label htmlFor="email" className="text-xs font-semibold uppercase tracking-wider text-muted-foreground ml-1">Email (Optional)</label>
                                         <div className="relative">
                                             <Mail className="absolute left-3 top-3 h-5 w-5 text-muted-foreground" />
                                             <Input
+                                                id="email"
                                                 name="email"
                                                 type="email"
                                                 placeholder="name@example.com"
@@ -111,10 +117,11 @@ export default function LoginPage() {
                                 )}
 
                                 <div className="space-y-2">
-                                    <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground ml-1">PIN</label>
+                                    <label htmlFor="pin" className="text-xs font-semibold uppercase tracking-wider text-muted-foreground ml-1">PIN</label>
                                     <div className="relative">
                                         <KeyRound className="absolute left-3 top-3 h-5 w-5 text-muted-foreground" />
                                         <Input
+                                            id="pin"
                                             name="pin"
                                             type="password"
                                             placeholder="••••••"

@@ -9,6 +9,7 @@ import { CategorySelector } from "@/components/ui/CategorySelector";
 import { addTransaction } from "@/lib/actions/finance";
 import { Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { useToast } from "@/context/ToastContext";
 
 // Simple Select for Type until we have a UI component
 const TRANSACTION_TYPES = [
@@ -23,6 +24,7 @@ interface AddTransactionModalProps {
 
 export function AddTransactionModal({ isOpen, onClose }: AddTransactionModalProps) {
     const router = useRouter();
+    const { addToast } = useToast();
     const [isPending, startTransition] = useTransition();
 
     const [amount, setAmount] = useState<number | "">("");
@@ -46,6 +48,7 @@ export function AddTransactionModal({ isOpen, onClose }: AddTransactionModalProp
         startTransition(async () => {
             const result = await addTransaction({ message: '' }, formData);
             if (result.success) {
+                addToast("Successfully added new transaction.", 'success');
                 onClose();
                 // Reset form
                 setAmount("");
@@ -54,7 +57,7 @@ export function AddTransactionModal({ isOpen, onClose }: AddTransactionModalProp
                 setDate(new Date().toISOString().split('T')[0]);
                 router.refresh();
             } else {
-                // Handle error (toast?)
+                addToast(result.message || "An error occurred.", 'error');
                 console.error(result.message);
             }
         });
@@ -64,8 +67,9 @@ export function AddTransactionModal({ isOpen, onClose }: AddTransactionModalProp
         <Modal isOpen={isOpen} onClose={onClose} title="Add Transaction">
             <form onSubmit={handleSubmit} className="space-y-4">
                 <div className="space-y-2">
-                    <label className="text-sm font-medium">Amount</label>
+                    <label htmlFor="add-amount" className="text-sm font-medium">Amount</label>
                     <SmartInput
+                        id="add-amount"
                         value={amount}
                         onValueChange={setAmount}
                         placeholder="0.00 (Try '25+15')"
@@ -75,8 +79,9 @@ export function AddTransactionModal({ isOpen, onClose }: AddTransactionModalProp
 
                 <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-2">
-                        <label className="text-sm font-medium">Type</label>
+                        <label htmlFor="add-type" className="text-sm font-medium">Type</label>
                         <select
+                            id="add-type"
                             className="w-full h-10 rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
                             value={type}
                             onChange={(e) => setType(e.target.value)}
@@ -87,8 +92,9 @@ export function AddTransactionModal({ isOpen, onClose }: AddTransactionModalProp
                         </select>
                     </div>
                     <div className="space-y-2">
-                        <label className="text-sm font-medium">Date</label>
+                        <label htmlFor="add-date" className="text-sm font-medium">Date</label>
                         <Input
+                            id="add-date"
                             type="date"
                             value={date}
                             onChange={(e) => setDate(e.target.value)}
@@ -106,8 +112,9 @@ export function AddTransactionModal({ isOpen, onClose }: AddTransactionModalProp
                 </div>
 
                 <div className="space-y-2">
-                    <label className="text-sm font-medium">Description</label>
+                    <label htmlFor="add-desc" className="text-sm font-medium">Description</label>
                     <Input
+                        id="add-desc"
                         value={description}
                         onChange={(e) => setDescription(e.target.value)}
                         placeholder="What is this for?"

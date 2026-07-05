@@ -104,10 +104,11 @@ import { useState } from 'react';
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { User, Shield, Key, Mail, Edit3, Loader2 } from "lucide-react";
+import { useToast } from "@/context/ToastContext";
 
 function ProfileSecuritySettings() {
     const [loading, setLoading] = useState(false);
-    const [message, setMessage] = useState({ type: '', text: '' });
+    const { addToast } = useToast();
 
     // Forms
     const [newUsername, setNewUsername] = useState('');
@@ -119,11 +120,6 @@ function ProfileSecuritySettings() {
     const [otp, setOtp] = useState('');
     const [newPin, setNewPin] = useState('');
 
-    const toast = (type: 'success' | 'error', text: string) => {
-        setMessage({ type, text });
-        setTimeout(() => setMessage({ type: '', text: '' }), 5000);
-    };
-
     const handleUpdate = async (type: 'username' | 'email', value: string, authorization?: string) => {
         setLoading(true);
         try {
@@ -134,14 +130,14 @@ function ProfileSecuritySettings() {
             });
             const data = await res.json();
             if (res.ok) {
-                toast('success', data.message || 'Updated successfully');
+                addToast(data.message || 'Updated successfully', 'success');
                 if (type === 'username') setNewUsername('');
                 if (type === 'email') { setNewEmail(''); setAuthPin(''); }
             } else {
-                toast('error', data.error || 'Update failed');
+                addToast(data.error || 'Update failed', 'error');
             }
         } catch (e) {
-            toast('error', 'Network error');
+            addToast('Network error', 'error');
         } finally {
             setLoading(false);
         }
@@ -173,7 +169,7 @@ function ProfileSecuritySettings() {
     const [confirmUser, setConfirmUser] = useState('');
 
     const sendOtp = async () => {
-        if (!confirmUser) return toast('error', 'Username required');
+        if (!confirmUser) return addToast('Username required', 'error');
         setLoading(true);
         try {
             const res = await fetch('/api/auth/otp/generate', {
@@ -182,17 +178,17 @@ function ProfileSecuritySettings() {
                 headers: { 'Content-Type': 'application/json' }
             });
             if (res.ok) {
-                toast('success', 'OTP Sent');
+                addToast('OTP Sent', 'success');
                 setPinFlowStep(2); // Move to enter OTP
             } else {
-                toast('error', 'Failed to send OTP');
+                addToast('Failed to send OTP', 'error');
             }
-        } catch (e) { toast('error', 'Error sending OTP'); }
+        } catch (e) { addToast('Error sending OTP', 'error'); }
         setLoading(false);
     };
 
     const updatePin = async () => {
-        if (!otp || !newPin) return toast('error', 'Incomplete fields');
+        if (!otp || !newPin) return addToast('Incomplete fields', 'error');
         setLoading(true);
         try {
             const res = await fetch('/api/auth/profile/update', {
@@ -202,13 +198,13 @@ function ProfileSecuritySettings() {
             });
             const data = await res.json();
             if (res.ok) {
-                toast('success', 'PIN Updated Successfully');
+                addToast('PIN Updated Successfully', 'success');
                 setPinFlowStep(0);
                 setOtp(''); setNewPin(''); setConfirmUser('');
             } else {
-                toast('error', data.error || 'Failed');
+                addToast(data.error || 'Failed', 'error');
             }
-        } catch (e) { toast('error', 'Network error'); }
+        } catch (e) { addToast('Network error', 'error'); }
         setLoading(false);
     };
 
@@ -224,13 +220,6 @@ function ProfileSecuritySettings() {
                 </div>
             </div>
 
-            {/* Notification */}
-            {message.text && (
-                <div className={cn("p-3 rounded-md text-sm text-center", message.type === 'success' ? "bg-green-500/20 text-green-400" : "bg-red-500/20 text-red-400")}>
-                    {message.text}
-                </div>
-            )}
-
             <div className="grid gap-6 md:grid-cols-2">
                 {/* 1. Update Username */}
                 <div className="space-y-3 bg-white/5 p-4 rounded-xl border border-white/5">
@@ -239,12 +228,16 @@ function ProfileSecuritySettings() {
                     </div>
                     <p className="text-xs text-muted-foreground">Limit: 3 changes per week.</p>
                     <div className="flex gap-2">
-                        <Input
-                            value={newUsername}
-                            onChange={(e) => setNewUsername(e.target.value)}
-                            placeholder="New Username"
-                            className="bg-black/20 border-white/10"
-                        />
+                        <div className="flex-1">
+                            <label htmlFor="newUsername" className="sr-only">New Username</label>
+                            <Input
+                                id="newUsername"
+                                value={newUsername}
+                                onChange={(e) => setNewUsername(e.target.value)}
+                                placeholder="New Username"
+                                className="bg-black/20 border-white/10"
+                            />
+                        </div>
                         <Button variant="primary" size="sm" onClick={() => handleUpdate('username', newUsername)} disabled={loading || !newUsername}>
                             <Edit3 className="h-4 w-4" />
                         </Button>
@@ -258,20 +251,26 @@ function ProfileSecuritySettings() {
                     </div>
                     <p className="text-xs text-muted-foreground">Requires current PIN.</p>
                     <div className="space-y-2">
+                        <label htmlFor="newEmail" className="sr-only">New Email</label>
                         <Input
+                            id="newEmail"
                             value={newEmail}
                             onChange={(e) => setNewEmail(e.target.value)}
                             placeholder="New Email"
                             className="bg-black/20 border-white/10"
                         />
                         <div className="flex gap-2">
-                            <Input
-                                type="password"
-                                value={authPin}
-                                onChange={(e) => setAuthPin(e.target.value)}
-                                placeholder="Current PIN"
-                                className="bg-black/20 border-white/10"
-                            />
+                            <div className="flex-1">
+                                <label htmlFor="authPin" className="sr-only">Current PIN</label>
+                                <Input
+                                    id="authPin"
+                                    type="password"
+                                    value={authPin}
+                                    onChange={(e) => setAuthPin(e.target.value)}
+                                    placeholder="Current PIN"
+                                    className="bg-black/20 border-white/10"
+                                />
+                            </div>
                             <Button variant="primary" size="sm" onClick={() => handleUpdate('email', newEmail, authPin)} disabled={loading || !newEmail || !authPin}>
                                 Update
                             </Button>
@@ -294,12 +293,16 @@ function ProfileSecuritySettings() {
 
                     {pinFlowStep === 1 && (
                         <div className="flex gap-2 animate-in fade-in slide-in-from-right-4">
-                            <Input
-                                value={confirmUser}
-                                onChange={(e) => setConfirmUser(e.target.value)}
-                                placeholder="Confirm Username for OTP"
-                                className="bg-black/20 border-white/10"
-                            />
+                            <div className="flex-1">
+                                <label htmlFor="confirmUser" className="sr-only">Confirm Username</label>
+                                <Input
+                                    id="confirmUser"
+                                    value={confirmUser}
+                                    onChange={(e) => setConfirmUser(e.target.value)}
+                                    placeholder="Confirm Username for OTP"
+                                    className="bg-black/20 border-white/10"
+                                />
+                            </div>
                             <Button variant="primary" size="sm" onClick={sendOtp} disabled={loading}>
                                 {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : "Send OTP"}
                             </Button>
@@ -310,20 +313,28 @@ function ProfileSecuritySettings() {
                         <div className="space-y-3 animate-in fade-in slide-in-from-right-4">
                             <p className="text-xs text-green-400">OTP Sent! Enter code and new PIN.</p>
                             <div className="grid grid-cols-2 gap-4">
-                                <Input
-                                    value={otp}
-                                    onChange={(e) => setOtp(e.target.value)}
-                                    placeholder="OTP Code"
-                                    className="bg-black/20 border-white/10 text-center tracking-widest"
-                                />
-                                <Input
-                                    type="password"
-                                    value={newPin}
-                                    onChange={(e) => setNewPin(e.target.value)}
-                                    placeholder="New PIN (6 digits)"
-                                    maxLength={6}
-                                    className="bg-black/20 border-white/10"
-                                />
+                                <div>
+                                    <label htmlFor="otpCode" className="sr-only">OTP Code</label>
+                                    <Input
+                                        id="otpCode"
+                                        value={otp}
+                                        onChange={(e) => setOtp(e.target.value)}
+                                        placeholder="OTP Code"
+                                        className="bg-black/20 border-white/10 text-center tracking-widest"
+                                    />
+                                </div>
+                                <div>
+                                    <label htmlFor="newPin" className="sr-only">New PIN</label>
+                                    <Input
+                                        id="newPin"
+                                        type="password"
+                                        value={newPin}
+                                        onChange={(e) => setNewPin(e.target.value)}
+                                        placeholder="New PIN (6 digits)"
+                                        maxLength={6}
+                                        className="bg-black/20 border-white/10"
+                                    />
+                                </div>
                             </div>
                             <Button variant="primary" className="w-full" onClick={updatePin} disabled={loading}>
                                 {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : "Verify & Update PIN"}

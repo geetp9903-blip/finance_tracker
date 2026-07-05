@@ -2,6 +2,11 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { Card } from "@/components/ui/Card";
+import { Input } from "@/components/ui/Input";
+import { Button } from "@/components/ui/Button";
+import { motion } from "framer-motion";
+import { User, KeyRound, CheckCircle } from "lucide-react";
 
 export default function SetupUsernamePage() {
     const [username, setUsername] = useState('');
@@ -53,48 +58,52 @@ export default function SetupUsernamePage() {
     };
 
     return (
-        <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
-            <div className="sm:mx-auto sm:w-full sm:max-w-md">
-                <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-                    Complete your profile
-                </h2>
-                <p className="mt-2 text-center text-sm text-gray-600">
-                    Choose a unique username and a PIN to secure your account.
-                </p>
-            </div>
+        <div className="flex min-h-screen items-center justify-center p-4 bg-gradient-to-br from-background via-background/95 to-primary/5">
+            <Card className="w-full max-w-md border-white/10 shadow-2xl overflow-hidden glass-card p-6 pt-8">
+                <motion.div
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.2 }}
+                >
+                    <div className="text-center mb-8">
+                        <h1 className="text-3xl font-bold tracking-tight mb-2">Complete Profile</h1>
+                        <p className="text-muted-foreground text-sm">
+                            Choose a unique username and a PIN to secure your account.
+                        </p>
+                    </div>
 
-            <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
-                <div className="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
-                    <form className="space-y-6" onSubmit={handleSubmit}>
+                    <form className="space-y-5" onSubmit={handleSubmit}>
                         {error && (
-                            <div className="bg-red-50 border-l-4 border-red-400 p-4">
-                                <p className="text-sm text-red-700">{error}</p>
+                            <div className="p-3 rounded-lg bg-destructive/10 text-destructive text-sm text-center font-medium">
+                                {error}
                             </div>
                         )}
-                        <div>
-                            <label htmlFor="username" className="block text-sm font-medium text-gray-700">
+                        <div className="space-y-2">
+                            <label htmlFor="username" className="text-xs font-semibold uppercase tracking-wider text-muted-foreground ml-1">
                                 Username
                             </label>
-                            <div className="mt-1">
-                                <input
+                            <div className="relative">
+                                <User className="absolute left-3 top-3 h-5 w-5 text-muted-foreground" />
+                                <Input
                                     id="username"
                                     name="username"
                                     type="text"
                                     required
                                     value={username}
                                     onChange={(e) => setUsername(e.target.value.toLowerCase().replace(/\s+/g, ''))}
-                                    className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                                    className="pl-10 h-12"
                                     placeholder="johndoe123"
                                 />
                             </div>
                         </div>
 
-                        <div>
-                            <label htmlFor="pin" className="block text-sm font-medium text-gray-700">
+                        <div className="space-y-2">
+                            <label htmlFor="pin" className="text-xs font-semibold uppercase tracking-wider text-muted-foreground ml-1">
                                 Create PIN
                             </label>
-                            <div className="mt-1">
-                                <input
+                            <div className="relative">
+                                <KeyRound className="absolute left-3 top-3 h-5 w-5 text-muted-foreground" />
+                                <Input
                                     id="pin"
                                     name="pin"
                                     type="password"
@@ -102,18 +111,19 @@ export default function SetupUsernamePage() {
                                     maxLength={6}
                                     value={pin}
                                     onChange={(e) => setPin(e.target.value.replace(/[^0-9]/g, ''))}
-                                    className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                                    className="pl-10 h-12 tracking-widest"
                                     placeholder="4-6 digits"
                                 />
                             </div>
                         </div>
 
-                        <div>
-                            <label htmlFor="confirmPin" className="block text-sm font-medium text-gray-700">
+                        <div className="space-y-2">
+                            <label htmlFor="confirmPin" className="text-xs font-semibold uppercase tracking-wider text-muted-foreground ml-1">
                                 Confirm PIN
                             </label>
-                            <div className="mt-1">
-                                <input
+                            <div className="relative">
+                                <CheckCircle className="absolute left-3 top-3 h-5 w-5 text-muted-foreground" />
+                                <Input
                                     id="confirmPin"
                                     name="confirmPin"
                                     type="password"
@@ -121,24 +131,22 @@ export default function SetupUsernamePage() {
                                     maxLength={6}
                                     value={confirmPin}
                                     onChange={(e) => setConfirmPin(e.target.value.replace(/[^0-9]/g, ''))}
-                                    className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                                    className="pl-10 h-12 tracking-widest"
                                     placeholder="Repeat PIN"
                                 />
                             </div>
                         </div>
 
-                        <div>
-                            <button
-                                type="submit"
-                                disabled={isLoading}
-                                className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50"
-                            >
-                                {isLoading ? 'Setting up...' : 'Complete Profile'}
-                            </button>
-                        </div>
+                        <Button
+                            type="submit"
+                            disabled={isLoading}
+                            className="w-full h-12 text-base font-semibold shadow-xl shadow-primary/20 mt-4"
+                        >
+                            {isLoading ? 'Setting up...' : 'Complete Profile'}
+                        </Button>
                     </form>
-                </div>
-            </div>
+                </motion.div>
+            </Card>
         </div>
     );
 }

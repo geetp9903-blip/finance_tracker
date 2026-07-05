@@ -56,6 +56,8 @@ const DropdownMenuTrigger = React.forwardRef<
             type="button"
             className={cn("inline-flex justify-center", className)}
             onClick={handleClick}
+            aria-haspopup="menu"
+            aria-expanded={ctx?.open}
             {...props}
         >
             {children}
@@ -75,8 +77,9 @@ const DropdownMenuContent = React.forwardRef<
     return (
         <div
             ref={ref}
+            role="menu"
             className={cn(
-                "absolute z-50 mt-2 min-w-[8rem] overflow-hidden rounded-md border bg-slate-900 p-1 text-slate-100 shadow-md animate-in fade-in-0 zoom-in-95 data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95",
+                "absolute z-50 mt-2 min-w-[8rem] overflow-hidden rounded-xl border border-white/10 bg-black/40 backdrop-blur-xl p-1 text-foreground shadow-xl animate-in fade-in-0 zoom-in-95 data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95",
                 align === "end" ? "right-0" : "left-0",
                 className
             )}
@@ -95,13 +98,22 @@ const DropdownMenuItem = React.forwardRef<
     return (
         <div
             ref={ref}
+            role="menuitem"
+            tabIndex={0}
             className={cn(
-                "relative flex cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none transition-colors hover:bg-slate-800 hover:text-slate-100 data-[disabled]:pointer-events-none data-[disabled]:opacity-50 cursor-pointer",
+                "relative flex cursor-pointer select-none items-center rounded-lg px-2 py-1.5 text-sm outline-none transition-colors hover:bg-white/10 focus:bg-white/10 hover:text-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50",
                 className
             )}
             onClick={(e) => {
                 ctx?.setOpen(false);
                 onClick?.(e);
+            }}
+            onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    ctx?.setOpen(false);
+                    onClick?.(e as any);
+                }
             }}
             {...props}
         />

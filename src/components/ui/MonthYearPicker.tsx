@@ -29,6 +29,7 @@ export function MonthYearPicker({ selectedDate, onChange }: MonthYearPickerProps
     return (
         <div className="flex items-center gap-2 bg-white/5 backdrop-blur-md border border-white/10 rounded-xl p-1 transition-all duration-200 hover:bg-white/10 hover:shadow-lg hover:shadow-primary/5">
             <select
+                aria-label="Select month"
                 value={selectedDate.getMonth()}
                 onChange={handleMonthChange}
                 className="bg-transparent text-sm font-medium text-muted-foreground hover:text-foreground focus:outline-none cursor-pointer p-1 transition-colors duration-200"
@@ -40,6 +41,7 @@ export function MonthYearPicker({ selectedDate, onChange }: MonthYearPickerProps
                 ))}
             </select>
             <select
+                aria-label="Select year"
                 value={selectedDate.getFullYear()}
                 onChange={handleYearChange}
                 className="bg-transparent text-sm font-medium text-muted-foreground hover:text-foreground focus:outline-none cursor-pointer p-1 border-l border-border pl-2 transition-colors duration-200"

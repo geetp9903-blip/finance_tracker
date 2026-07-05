@@ -20,6 +20,12 @@
   --color-border: hsl(var(--border));
   --color-input: hsl(var(--input));
   --color-ring: hsl(var(--ring));
+  
+  /* Additional Semantic Colors */
+  --color-success: #10b981; /* Emerald */
+  --color-warning: #f59e0b; /* Amber */
+  --color-info: #3b82f6; /* Blue */
+
   --radius-lg: var(--radius);
   --radius-md: calc(var(--radius) - 2px);
   --radius-sm: calc(var(--radius) - 4px);
@@ -27,29 +33,33 @@
 
 @layer base {
   :root {
-    /* Dark Mode Variables - Deep, Rich, Nebula Vibes (Default) */
-    --background: 222.2 84% 4.9%;
-    /* Slate-950 */
+    /* Dark Mode Variables - Slate 950 base */
+    --background: 222.2 84% 4.9%; /* Slate-950 equivalent or #020617 */
     --foreground: 210 40% 98%;
-    /* Slate-50 */
     --card: 222.2 84% 4.9%;
     --card-foreground: 210 40% 98%;
     --popover: 222.2 84% 4.9%;
     --popover-foreground: 210 40% 98%;
-    --primary: 217.2 91.2% 59.8%;
-    --primary-foreground: 222.2 47.4% 11.2%;
+    
+    /* Semantic Colors */
+    --primary: 258 90% 66%; /* Purple #8b5cf6 */
+    --primary-foreground: 210 40% 98%;
     --secondary: 217.2 32.6% 17.5%;
     --secondary-foreground: 210 40% 98%;
     --muted: 217.2 32.6% 17.5%;
     --muted-foreground: 215 20.2% 65.1%;
-    --accent: 217.2 32.6% 17.5%;
+    --accent: 258 90% 66%; /* Match Primary for accents */
     --accent-foreground: 210 40% 98%;
-    --destructive: 0 84.2% 60.2%;
-    /* Original Red-500 */
+    --destructive: 0 84.2% 60.2%; /* Red #ef4444 */
     --destructive-foreground: 210 40% 98%;
+    
+    /* System Elements */
     --border: 217.2 32.6% 17.5%;
     --input: 217.2 32.6% 17.5%;
-    --ring: 224.3 76.3% 48%;
+    --ring: 258 90% 66%; /* Purple ring */
+    
+    /* Fix: Add missing radius definition */
+    --radius: 0.75rem;
 
     /* Dark Mode Liquid Colors (Nebula - Purple/Pink/Blue) */
     --liquid-color-1: rgba(168, 85, 247, 0.5);
