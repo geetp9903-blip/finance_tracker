@@ -1,7 +1,7 @@
 "use client";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, Receipt, LogOut, RefreshCw, Calendar, Settings, BarChart3, X } from "lucide-react";
+import { LayoutDashboard, Receipt, LogOut, Bell, Calendar, Settings, BarChart3, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/context/AuthContext";
 import { useEffect, useRef } from "react";
@@ -9,7 +9,7 @@ import { useEffect, useRef } from "react";
 const navItems = [
     { name: "Dashboard", href: "/", icon: LayoutDashboard },
     { name: "Transactions", href: "/transactions", icon: Receipt },
-    { name: "Recurring", href: "/recurring", icon: RefreshCw },
+    { name: "Reminders", href: "/reminders", icon: Bell },
     { name: "Analytics", href: "/analytics", icon: BarChart3 },
     { name: "Settings", href: "/settings", icon: Settings },
 ];

@@ -3,12 +3,11 @@
 import { useOptimistic, useRef, useState } from 'react';
 import { addTransaction, deleteTransaction } from '@/lib/actions/finance';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/Card';
-import { Button } from '@/components/ui/Button'; // Assuming we have a Button component or need to confirm
-import { Input } from '@/components/ui/Input';   // Assuming
-import { Plus, Trash2 } from 'lucide-react';
+import { Button } from '@/components/ui/Button';
+import { Input } from '@/components/ui/Input';
+import { Plus, Trash2, ChevronDown, ChevronUp } from 'lucide-react';
 import { format } from 'date-fns';
 
-// Define the shape of a simple transaction for the UI
 type Transaction = {
     id: string;
     description: string;
@@ -27,6 +26,7 @@ export function TransactionManager({
 }) {
     const formRef = useRef<HTMLFormElement>(null);
     const [isPending, setIsPending] = useState(false);
+    const [showForm, setShowForm] = useState(false);
 
     // Optimistic State
     const [optimisticTransactions, addOptimisticTransaction] = useOptimistic(
@@ -43,7 +43,7 @@ export function TransactionManager({
 
         // 1. Optimistic Update
         addOptimisticTransaction({
-            id: Math.random().toString(), // Temp ID
+            id: Math.random().toString(),
             description,
             amount,
             type,
@@ -51,8 +51,9 @@ export function TransactionManager({
             date: new Date().toISOString()
         });
 
-        // 2. Clear form validation/reset
+        // 2. Clear form
         formRef.current?.reset();
+        setShowForm(false);
 
         // 3. Server Action
         await addTransaction({ message: '' }, formData);
@@ -60,72 +61,97 @@ export function TransactionManager({
     }
 
     const handleDelete = async (id: string) => {
-        // Typically we'd also do optimistic delete here
         await deleteTransaction(id);
     };
 
     const formatter = new Intl.NumberFormat('en-US', {
         style: 'currency',
         currency: currency,
+        minimumFractionDigits: 0,
     });
 
     return (
-        <Card className="h-full border-0 shadow-none flex flex-col">
-            <CardHeader className="flex flex-row items-center justify-between shrink-0">
-                <CardTitle>Recent Transactions</CardTitle>
-                {/* Minimal Form Toggle could go here, for now inline form */}
-            </CardHeader>
-            <CardContent className="flex-1 flex flex-col min-h-0">
-                {/* Add Transaction Form */}
-                <form ref={formRef} action={clientAction} className="grid gap-2 mb-4 border-b pb-4 shrink-0">
-                    <div className="grid grid-cols-2 gap-2">
-                        <Input name="description" placeholder="Description" required />
-                        <Input name="amount" type="number" step="0.01" placeholder="Amount" required />
-                    </div>
-                    <div className="grid grid-cols-2 gap-2">
-                        <select name="type" className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50">
-                            <option value="expense">Expense</option>
-                            <option value="income">Income</option>
-                        </select>
-                        <select name="category" className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50">
-                            <option value="Food">Food</option>
-                            <option value="Transport">Transport</option>
-                            <option value="Utilities">Utilities</option>
-                            <option value="Salary">Salary</option>
-                            <option value="Entertainment">Entertainment</option>
-                            <option value="Health">Health</option>
-                        </select>
-                    </div>
-                    <Button type="submit" disabled={isPending} className="w-full">
-                        <Plus className="mr-2 h-4 w-4" /> Add Transaction
-                    </Button>
-                </form>
+        <Card className="h-full border-0 shadow-none flex flex-col overflow-hidden">
+            <CardHeader className="flex flex-row items-center justify-between shrink-0 pb-3 border-b border-border/40">
+                <div className="flex items-center gap-2">
+                    <CardTitle className="text-base font-semibold">Recent Transactions</CardTitle>
+                    <span className="text-xs px-2 py-0.5 rounded-full bg-accent text-muted-foreground font-medium">
+                        {optimisticTransactions.length}
+                    </span>
+                </div>
 
-                {/* List */}
-                <div className="space-y-4 flex-1 overflow-y-auto pr-2 min-h-0">
+                <Button
+                    size="sm"
+                    variant="ghost"
+                    onClick={() => setShowForm(!showForm)}
+                    className="h-8 text-xs font-medium text-primary hover:bg-primary/10"
+                >
+                    <Plus className="mr-1 h-3.5 w-3.5" />
+                    Add
+                    {showForm ? <ChevronUp className="ml-1 h-3.5 w-3.5" /> : <ChevronDown className="ml-1 h-3.5 w-3.5" />}
+                </Button>
+            </CardHeader>
+
+            <CardContent className="flex-1 flex flex-col min-h-0 pt-3">
+                {/* Collapsible Add Transaction Form */}
+                {showForm && (
+                    <form ref={formRef} action={clientAction} className="grid gap-2.5 mb-3 border-b border-border/40 pb-3 shrink-0 bg-accent/20 p-3 rounded-xl">
+                        <div className="grid grid-cols-2 gap-2">
+                            <Input name="description" placeholder="Description" required className="h-9 text-xs" />
+                            <Input name="amount" type="number" step="0.01" placeholder="Amount" required className="h-9 text-xs" />
+                        </div>
+                        <div className="grid grid-cols-2 gap-2">
+                            <select name="type" className="flex h-9 w-full rounded-md border border-input bg-background px-2.5 py-1 text-xs text-foreground focus:ring-2 focus:ring-primary/50">
+                                <option value="expense">Expense</option>
+                                <option value="income">Income</option>
+                            </select>
+                            <select name="category" className="flex h-9 w-full rounded-md border border-input bg-background px-2.5 py-1 text-xs text-foreground focus:ring-2 focus:ring-primary/50">
+                                <option value="Food">Food</option>
+                                <option value="Transport">Transport</option>
+                                <option value="Utilities">Utilities</option>
+                                <option value="Salary">Salary</option>
+                                <option value="Entertainment">Entertainment</option>
+                                <option value="Health">Health</option>
+                                <option value="Shopping">Shopping</option>
+                            </select>
+                        </div>
+                        <Button type="submit" disabled={isPending} size="sm" className="w-full text-xs h-8">
+                            <Plus className="mr-1.5 h-3.5 w-3.5" /> Add Transaction
+                        </Button>
+                    </form>
+                )}
+
+                {/* Scrollable Transactions List with Max Height */}
+                <div className="space-y-2.5 flex-1 overflow-y-auto max-h-[360px] pr-1.5 min-h-0 text-xs">
                     {optimisticTransactions.length === 0 ? (
-                        <p className="text-sm text-muted-foreground">No recent transactions.</p>
+                        <p className="text-xs text-muted-foreground text-center py-6">No recent transactions.</p>
                     ) : (
                         optimisticTransactions.map((t) => (
-                            <div key={t.id} className="flex items-center group">
-                                <span className={`relative flex h-9 w-9 shrink-0 overflow-hidden rounded-full items-center justify-center border
-                                    ${t.type === 'income' ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-500' : 'bg-red-500/10 border-red-500/20 text-red-500'}
-                                `}>
-                                    {t.category ? t.category.charAt(0).toUpperCase() : '?'}
-                                </span>
-                                <div className="ml-4 space-y-1 flex-1 min-w-0">
-                                    <p className="text-sm font-medium leading-none truncate">{t.description}</p>
-                                    <p className="text-xs text-muted-foreground">{t.category} • {t.date ? format(new Date(t.date), 'MMM d') : 'Now'}</p>
+                            <div key={t.id} className="flex items-center justify-between p-2.5 rounded-lg bg-card/40 border border-border/40 hover:border-border transition-all group">
+                                <div className="flex items-center gap-2.5 min-w-0">
+                                    <span className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg font-bold text-xs border
+                                        ${t.type === 'income' ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400' : 'bg-destructive/10 border-destructive/20 text-destructive'}
+                                    `}>
+                                        {t.category ? t.category.charAt(0).toUpperCase() : '?'}
+                                    </span>
+                                    <div className="min-w-0">
+                                        <p className="font-semibold text-foreground text-xs truncate">{t.description}</p>
+                                        <p className="text-[11px] text-muted-foreground">{t.category} • {t.date ? format(new Date(t.date), 'MMM d') : 'Now'}</p>
+                                    </div>
                                 </div>
-                                <div className={`ml-auto font-medium ${t.type === 'income' ? 'text-emerald-500' : 'text-red-500'}`}>
-                                    {t.type === 'income' ? '+' : '-'}{formatter.format(t.amount)}
+
+                                <div className="flex items-center gap-2 shrink-0">
+                                    <span className={`font-bold text-xs ${t.type === 'income' ? 'text-emerald-400' : 'text-foreground'}`}>
+                                        {t.type === 'income' ? '+' : '-'}{formatter.format(t.amount)}
+                                    </span>
+                                    <button
+                                        onClick={() => handleDelete(t.id)}
+                                        title="Delete transaction"
+                                        className="opacity-0 group-hover:opacity-100 transition-opacity p-1 text-muted-foreground hover:text-destructive"
+                                    >
+                                        <Trash2 className="h-3.5 w-3.5" />
+                                    </button>
                                 </div>
-                                <button
-                                    onClick={() => handleDelete(t.id)}
-                                    className="ml-2 opacity-0 group-hover:opacity-100 transition-opacity p-2 text-muted-foreground hover:text-destructive"
-                                >
-                                    <Trash2 className="h-4 w-4" />
-                                </button>
                             </div>
                         ))
                     )}

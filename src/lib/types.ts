@@ -1,15 +1,17 @@
 export type TransactionType = 'income' | 'expense';
 export type Frequency = 'daily' | 'weekly' | 'monthly' | 'yearly';
 
-export interface Transaction {
-    id: string;
-    userId: string;
-    amount: number;
-    type: TransactionType;
-    category: string;
-    date: string;
-    description: string;
-    recurringRuleId?: string;
+export interface WidgetConfig {
+    id: string; // e.g., 'quick_stats', 'predictive_cashflow', 'pending_reminders', etc.
+    enabled: boolean;
+    colSpan: number; // 1 to 12
+    heightPx?: number; // Height in pixels e.g., 340, 420, 500, 600
+    order: number;
+}
+
+export interface DashboardLayoutSettings {
+    widgets: WidgetConfig[];
+    preset?: 'default' | 'analytics' | 'reminders_cashflow' | 'minimal' | 'custom';
 }
 
 export interface User {
@@ -33,6 +35,63 @@ export interface User {
         sent42: boolean;
         sent44: boolean;
     };
+    dashboardLayout?: DashboardLayoutSettings;
+}
+
+export interface Transaction {
+    id: string;
+    userId: string;
+    amount: number;
+    type: TransactionType;
+    category: string;
+    date: string;
+    description: string;
+    recurringRuleId?: string;
+    reminderId?: string;
+    isDeleted?: boolean;
+    deletedAt?: string;
+}
+
+export interface TransactionReminder {
+    id: string;
+    userId: string;
+    title: string;
+    amount: number;
+    type: TransactionType;
+    category: string;
+    frequency: Frequency;
+    dueDay: number; // Day of month (1-31) or offset
+    active: boolean;
+    startDate?: string;
+}
+
+export type ReminderStatusState = 'pending' | 'paid' | 'skipped' | 'expired';
+
+export interface ReminderStatus {
+    id: string;
+    reminderId: string;
+    userId: string;
+    periodKey: string; // e.g., "2026-08"
+    status: ReminderStatusState;
+    paidTransactionId?: string;
+    actualAmount?: number;
+    paidDate?: string;
+}
+
+export interface MonthlyReminderItem {
+    id: string; // reminderId or statusId
+    reminderId: string;
+    title: string;
+    amount: number;
+    type: TransactionType;
+    category: string;
+    dueDate: string; // YYYY-MM-DD for current period
+    dueDay: number;
+    status: ReminderStatusState;
+    actualAmount?: number;
+    paidDate?: string;
+    paidTransactionId?: string;
+    daysOverdue?: number;
 }
 
 export interface RecurringRule {

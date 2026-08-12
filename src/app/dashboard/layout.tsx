@@ -1,51 +1,30 @@
 import { ReactNode } from "react";
 import { assertAuth } from "@/lib/dal/auth";
 import Link from "next/link";
-import { LogOut } from "lucide-react";
 import { CurrencySelector } from "@/components/ui/CurrencySelector";
 import { DashboardFilter } from "@/components/dashboard/DashboardFilter";
-// We might need a Logout button component that uses Server Actions
 
 export default async function DashboardLayout({
     children,
-    metrics,
-    charts,
-    transactions
 }: {
     children: ReactNode;
-    metrics: ReactNode;
-    charts: ReactNode;
-    transactions: ReactNode;
+    [key: string]: any;
 }) {
-    const userId = await assertAuth(); // Protects the entire layout
+    await assertAuth(); // Protect layout auth
 
     return (
-        <div className="space-y-8">
-            <div className="flex items-center justify-between space-y-2">
+        <div className="space-y-6">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
-                    <h2 className="text-3xl font-bold tracking-tight">Dashboard</h2>
-                    <p className="text-muted-foreground">Welcome back</p>
+                    <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
+                    <p className="text-muted-foreground">Welcome back to your financial control center</p>
                 </div>
                 <div className="flex items-center space-x-2">
                     <DashboardFilter />
                     <CurrencySelector />
-                    {/* Placeholder for toolbar or specific page actions */}
-                    <Link href="/settings" className="p-2 hover:bg-accent rounded-md">Settings</Link>
-                </div>
-            </div>
-
-            {/* 
-         Parallel Routes allow us to stream these independently.
-         If 'charts' takes 2s, 'metrics' (100ms) will still show immediately. 
-      */}
-            {metrics}
-
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
-                <div className="col-span-4 rounded-xl border bg-card text-card-foreground shadow glass-card">
-                    {charts}
-                </div>
-                <div className="col-span-3 rounded-xl border bg-card text-card-foreground shadow glass-card">
-                    {transactions}
+                    <Link href="/settings" className="px-3 py-2 text-sm font-medium hover:bg-accent rounded-lg border border-border/50">
+                        Settings
+                    </Link>
                 </div>
             </div>
 
