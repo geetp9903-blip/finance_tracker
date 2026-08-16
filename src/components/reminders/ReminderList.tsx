@@ -1,12 +1,14 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import { useRouter } from "next/navigation";
 import { TransactionReminder } from "@/lib/types";
 import { updateReminderTemplate, deleteReminderTemplate } from "@/lib/actions/reminders";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import { Modal } from "@/components/ui/Modal";
 import { Input } from "@/components/ui/Input";
+import { CategorySelector } from "@/components/ui/CategorySelector";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { Trash2, Edit2, ArrowUpRight, ArrowDownRight, Calendar, Loader2 } from "lucide-react";
 
@@ -16,11 +18,12 @@ interface ReminderListProps {
 }
 
 export function ReminderList({ reminders, currency = 'INR' }: ReminderListProps) {
+    const router = useRouter();
     const [editingReminder, setEditingReminder] = useState<TransactionReminder | null>(null);
     const [editTitle, setEditTitle] = useState("");
     const [editAmount, setEditAmount] = useState("");
     const [editDueDay, setEditDueDay] = useState("1");
-    const [editCategory, setEditCategory] = useState("");
+    const [editCategory, setEditCategory] = useState("Subscription");
     const [editType, setEditType] = useState<'income' | 'expense'>('expense');
 
     const [isPending, startTransition] = useTransition();
@@ -35,9 +38,9 @@ export function ReminderList({ reminders, currency = 'INR' }: ReminderListProps)
         setEditingReminder(reminder);
         setEditTitle(reminder.title);
         setEditAmount(String(reminder.amount));
-        setEditDueDay(String(reminder.dueDay));
-        setEditCategory(reminder.category);
-        setEditType(reminder.type);
+        setEditDueDay(String(reminder.dueDay || 1));
+        setEditCategory(reminder.category || 'Subscription');
+        setEditType(reminder.type || 'expense');
     };
 
     const handleSaveEdit = () => {
@@ -52,6 +55,7 @@ export function ReminderList({ reminders, currency = 'INR' }: ReminderListProps)
                 type: editType,
             });
             setEditingReminder(null);
+            router.refresh();
         });
     };
 
@@ -60,6 +64,7 @@ export function ReminderList({ reminders, currency = 'INR' }: ReminderListProps)
 
         startTransition(async () => {
             await deleteReminderTemplate(id);
+            router.refresh();
         });
     };
 
@@ -73,6 +78,7 @@ export function ReminderList({ reminders, currency = 'INR' }: ReminderListProps)
                 type: reminder.type,
                 active: !reminder.active,
             });
+            router.refresh();
         });
     };
 
@@ -87,7 +93,7 @@ export function ReminderList({ reminders, currency = 'INR' }: ReminderListProps)
                 {reminders.length === 0 ? (
                     <EmptyState
                         title="No reminder templates"
-                        description="You haven't set up any recurring reminder templates yet."
+                        description="You haven't set up any recurring reminder templates yet. Create one on the left to start tracking pending monthly transactions."
                     />
                 ) : (
                     reminders.map((reminder) => {
@@ -106,9 +112,9 @@ export function ReminderList({ reminders, currency = 'INR' }: ReminderListProps)
                                     </div>
 
                                     <div>
-                                        <div className="flex items-center gap-2">
+                                        <div className="flex items-center gap-2 flex-wrap">
                                             <h4 className="font-semibold text-foreground text-sm">{reminder.title}</h4>
-                                            <span className="text-[10px] font-bold uppercase px-2 py-0.5 rounded bg-accent text-muted-foreground">
+                                            <span className="text-[10px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded-md bg-indigo-500/20 text-indigo-200 border border-indigo-500/30 whitespace-nowrap">
                                                 {reminder.category}
                                             </span>
                                         </div>
@@ -145,7 +151,8 @@ export function ReminderList({ reminders, currency = 'INR' }: ReminderListProps)
                                             variant="ghost"
                                             onClick={() => openEditModal(reminder)}
                                             disabled={isPending}
-                                            className="h-8 w-8 p-0"
+                                            className="h-8 w-8 p-0 hover:bg-accent text-muted-foreground hover:text-foreground"
+                                            title="Edit Reminder"
                                         >
                                             <Edit2 className="w-4 h-4" />
                                         </Button>
@@ -155,7 +162,8 @@ export function ReminderList({ reminders, currency = 'INR' }: ReminderListProps)
                                             variant="ghost"
                                             onClick={() => handleDelete(reminder.id)}
                                             disabled={isPending}
-                                            className="h-8 w-8 p-0 text-destructive hover:text-destructive/80"
+                                            className="h-8 w-8 p-0 text-destructive hover:bg-destructive/10"
+                                            title="Delete Reminder"
                                         >
                                             <Trash2 className="w-4 h-4" />
                                         </Button>
@@ -176,7 +184,7 @@ export function ReminderList({ reminders, currency = 'INR' }: ReminderListProps)
                 {editingReminder && (
                     <div className="space-y-4">
                         <div>
-                            <label className="text-xs font-medium text-muted-foreground mb-1 block">Title</label>
+                            <label className="text-xs font-medium text-muted-foreground mb-1 block">Title / Description</label>
                             <Input value={editTitle} onChange={(e) => setEditTitle(e.target.value)} />
                         </div>
 
@@ -198,17 +206,26 @@ export function ReminderList({ reminders, currency = 'INR' }: ReminderListProps)
                                     onChange={(e) => setEditType(e.target.value as 'income' | 'expense')}
                                     className="bg-background w-full rounded-md border border-input p-2.5 text-sm text-foreground"
                                 >
-                                    <option value="expense">Expense</option>
-                                    <option value="income">Income</option>
+                                    <option value="expense">Expense (-)</option>
+                                    <option value="income">Income (+)</option>
                                 </select>
                             </div>
                         </div>
 
-                        <div className="flex justify-end gap-2 pt-2">
+                        <div>
+                            <label className="text-xs font-medium text-muted-foreground mb-1 block">Category</label>
+                            <CategorySelector
+                                value={editCategory}
+                                onChange={setEditCategory}
+                                existingCategories={[]}
+                            />
+                        </div>
+
+                        <div className="flex justify-end gap-2 pt-2 border-t border-border/40">
                             <Button variant="ghost" onClick={() => setEditingReminder(null)} disabled={isPending}>
                                 Cancel
                             </Button>
-                            <Button onClick={handleSaveEdit} disabled={isPending}>
+                            <Button onClick={handleSaveEdit} disabled={isPending} className="bg-primary text-primary-foreground font-semibold">
                                 {isPending ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
                                 Save Changes
                             </Button>

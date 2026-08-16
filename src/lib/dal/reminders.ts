@@ -11,24 +11,25 @@ const ensureDb = async () => {
 };
 
 /**
- * Get all active transaction reminder templates for user.
+ * Get all transaction reminder templates for user (both active and paused).
  */
 export const getReminderTemplates = cache(async (): Promise<TransactionReminder[]> => {
     const userId = await assertAuth();
     await ensureDb();
 
-    const templates = await TransactionReminderModel.find({ userId, isActive: true }).lean();
+    const templates = await TransactionReminderModel.find({ userId }).lean();
 
     return templates.map(t => ({
         ...t,
-        id: t.id || (t as any)._id?.toString(),
+        id: t.id || (t as any)._id?.toString() || '',
         _id: (t as any)._id?.toString(),
         amount: t.amount,
         title: t.title,
-        dueDay: t.dueDay,
+        dueDay: t.dueDay || 1,
         category: t.category,
         type: t.type,
-        isActive: t.isActive,
+        frequency: t.frequency || 'monthly',
+        active: t.active !== undefined ? t.active : ((t as any).isActive !== undefined ? (t as any).isActive : true),
     }));
 });
 
@@ -44,7 +45,10 @@ export const getMonthlyReminders = cache(async (targetYear?: number, targetMonth
     const month = targetMonth || (now.getMonth() + 1);
     const periodKey = `${year}-${String(month).padStart(2, '0')}`;
 
-    const templates = await getReminderTemplates();
+    // Filter to only active templates for monthly tracking
+    const allTemplates = await getReminderTemplates();
+    const templates = allTemplates.filter(t => t.active !== false);
+
     const statuses = await ReminderStatusModel.find({ userId, periodKey }).lean();
     const statusMap = new Map(statuses.map(s => [s.reminderId, s]));
 

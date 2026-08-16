@@ -1,21 +1,26 @@
 "use client";
 
-import { useTransition, useState } from "react";
+import { useTransition, useState, useRef } from "react";
+import { useRouter } from "next/navigation";
 import { createReminderTemplate } from "@/lib/actions/reminders";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { CategorySelector } from "@/components/ui/CategorySelector";
-import { PlusCircle, Loader2 } from "lucide-react";
+import { PlusCircle, Loader2, CheckCircle2 } from "lucide-react";
 
 export function AddReminderForm() {
+    const router = useRouter();
+    const formRef = useRef<HTMLFormElement>(null);
     const [isPending, startTransition] = useTransition();
     const [msg, setMsg] = useState("");
+    const [isSuccess, setIsSuccess] = useState(false);
     const [category, setCategory] = useState("Subscription");
     const [type, setType] = useState<'income' | 'expense'>('expense');
 
     const handleSubmit = (formData: FormData) => {
         setMsg("");
+        setIsSuccess(false);
         formData.set("category", category);
         formData.set("type", type);
 
@@ -23,6 +28,12 @@ export function AddReminderForm() {
             const res = await createReminderTemplate({ message: '' }, formData);
             if (res.message) {
                 setMsg(res.message);
+                if (res.success) {
+                    setIsSuccess(true);
+                    formRef.current?.reset();
+                    router.refresh();
+                    setTimeout(() => setMsg(""), 3000);
+                }
             }
         });
     };
@@ -36,8 +47,8 @@ export function AddReminderForm() {
                 </CardTitle>
             </CardHeader>
             <CardContent>
-                <form action={handleSubmit} className="space-y-4">
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <form ref={formRef} action={handleSubmit} className="space-y-4">
+                    <div className="space-y-4">
                         <div>
                             <label htmlFor="rem-title" className="text-xs font-medium text-muted-foreground mb-1 block">
                                 Title / Description
@@ -71,7 +82,7 @@ export function AddReminderForm() {
 
                         <div>
                             <label htmlFor="rem-dueday" className="text-xs font-medium text-muted-foreground mb-1 block">
-                                Expected Day of Month (1-31)
+                                Due Day (1-31)
                             </label>
                             <Input id="rem-dueday" name="dueDay" type="number" min="1" max="31" defaultValue="1" required />
                         </div>
@@ -101,7 +112,12 @@ export function AddReminderForm() {
                         />
                     </div>
 
-                    {msg && <p className="text-sm font-medium text-primary">{msg}</p>}
+                    {msg && (
+                        <p className={`text-xs p-2.5 rounded-lg border font-medium flex items-center gap-1.5 ${isSuccess ? 'bg-emerald-500/15 text-emerald-300 border-emerald-500/30' : 'bg-destructive/15 text-destructive border-destructive/30'}`}>
+                            {isSuccess ? <CheckCircle2 className="w-3.5 h-3.5" /> : null}
+                            <span>{msg}</span>
+                        </p>
+                    )}
 
                     <Button className="w-full" disabled={isPending}>
                         {isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <PlusCircle className="mr-2 h-4 w-4" />}
