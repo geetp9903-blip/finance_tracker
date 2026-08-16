@@ -211,8 +211,8 @@ export function CustomizableDashboard({
                 return (
                     <QuickStats
                         balance={predictiveData.currentBalance}
-                        income={predictiveData.totalPendingIncome}
-                        expense={predictiveData.totalPaidExpenses}
+                        income={predictiveData.totalActualIncome !== undefined ? predictiveData.totalActualIncome : (predictiveData.totalIncome || 0)}
+                        expense={predictiveData.totalActualExpenses !== undefined ? predictiveData.totalActualExpenses : (predictiveData.totalPaidExpenses || 0)}
                         transactionCount={sanitizedTransactions.length}
                         currency={currency}
                         periodLabel={periodLabel}

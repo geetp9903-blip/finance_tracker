@@ -1,108 +1,61 @@
 import 'server-only';
 import { cache } from 'react';
-import { TransactionReminderModel, ReminderStatusModel, TransactionModel, RecurringRuleModel } from '@/lib/models';
-import dbConnect from '@/lib/db';
+import { TransactionReminderModel, ReminderStatusModel, TransactionModel } from '../models';
+import { TransactionReminder, MonthlyReminderItem, ReminderStatusState } from '../types';
+import dbConnect from '../db';
 import { assertAuth } from './auth';
-import { TransactionReminder, MonthlyReminderItem, ReminderStatusState } from '@/lib/types';
-import { format, endOfMonth, startOfMonth, parseISO, differenceInDays } from 'date-fns';
+import { startOfMonth, endOfMonth, format, parseISO, differenceInDays } from 'date-fns';
+
+const ensureDb = async () => {
+    await dbConnect();
+};
 
 /**
- * Ensures legacy RecurringRule documents are migrated to TransactionReminder documents.
- */
-async function autoMigrateRecurringRules(userId: string) {
-    const existingRemindersCount = await TransactionReminderModel.countDocuments({ userId });
-    if (existingRemindersCount > 0) return;
-
-    const legacyRules = await RecurringRuleModel.find({ userId, active: true }).lean();
-    if (!legacyRules || legacyRules.length === 0) return;
-
-    const newReminders = legacyRules.map((rule: any) => {
-        let dueDay = 1;
-        if (rule.nextDueDate) {
-            dueDay = new Date(rule.nextDueDate).getDate();
-        } else if (rule.startDate) {
-            dueDay = new Date(rule.startDate).getDate();
-        }
-
-        return {
-            id: `rem_${rule.id || rule._id}`,
-            userId,
-            title: rule.description || `${rule.category} Reminder`,
-            amount: rule.amount,
-            type: rule.type,
-            category: rule.category,
-            frequency: rule.frequency || 'monthly',
-            dueDay: dueDay > 31 ? 28 : (dueDay < 1 ? 1 : dueDay),
-            active: rule.active !== undefined ? rule.active : true,
-            startDate: rule.startDate || rule.nextDueDate,
-        };
-    });
-
-    if (newReminders.length > 0) {
-        await TransactionReminderModel.insertMany(newReminders);
-    }
-}
-
-/**
- * Fetch all reminder templates for current user.
+ * Get all active transaction reminder templates for user.
  */
 export const getReminderTemplates = cache(async (): Promise<TransactionReminder[]> => {
     const userId = await assertAuth();
-    await dbConnect();
+    await ensureDb();
 
-    await autoMigrateRecurringRules(userId);
+    const templates = await TransactionReminderModel.find({ userId, isActive: true }).lean();
 
-    const templates = await TransactionReminderModel.find({ userId })
-        .sort({ dueDay: 1 })
-        .lean();
-
-    return templates.map((t: any) => ({
-        id: t.id || t._id.toString(),
-        userId: t.userId,
-        title: t.title,
+    return templates.map(t => ({
+        ...t,
+        id: t.id || (t as any)._id?.toString(),
+        _id: (t as any)._id?.toString(),
         amount: t.amount,
-        type: t.type,
+        title: t.title,
+        dueDay: t.dueDay,
         category: t.category,
-        frequency: t.frequency || 'monthly',
-        dueDay: t.dueDay || 1,
-        active: t.active,
-        startDate: t.startDate,
+        type: t.type,
+        isActive: t.isActive,
     }));
 });
 
 /**
- * Get monthly reminder status items for a specific month/year.
- * Handles 14-day auto-expiration rule.
+ * Get monthly reminder instances with calculated status and 14-day auto-expiration.
  */
 export const getMonthlyReminders = cache(async (targetYear?: number, targetMonth?: number): Promise<MonthlyReminderItem[]> => {
     const userId = await assertAuth();
-    await dbConnect();
-
-    await autoMigrateRecurringRules(userId);
+    await ensureDb();
 
     const now = new Date();
     const year = targetYear || now.getFullYear();
     const month = targetMonth || (now.getMonth() + 1);
-
     const periodKey = `${year}-${String(month).padStart(2, '0')}`;
-    const daysInMonth = new Date(year, month, 0).getDate();
 
-    // 1. Fetch active templates
-    const templates = await TransactionReminderModel.find({ userId, active: true }).lean();
-
-    // 2. Fetch existing status overrides for periodKey
+    const templates = await getReminderTemplates();
     const statuses = await ReminderStatusModel.find({ userId, periodKey }).lean();
-    const statusMap = new Map<string, any>();
-    statuses.forEach((s: any) => statusMap.set(s.reminderId, s));
+    const statusMap = new Map(statuses.map(s => [s.reminderId, s]));
 
-    const todayStr = format(now, 'yyyy-MM-dd');
-    const todayDate = parseISO(todayStr);
+    const daysInMonth = new Date(year, month, 0).getDate();
+    const todayDate = new Date(now.getFullYear(), now.getMonth(), now.getDate());
 
     const result: MonthlyReminderItem[] = [];
     const statusUpdatesToSave: any[] = [];
 
     for (const t of templates) {
-        const reminderId = t.id || t._id.toString();
+        const reminderId = t.id || (t as any)._id?.toString() || '';
         const effectiveDay = Math.min(t.dueDay || 1, daysInMonth);
         const dueDateStr = `${year}-${String(month).padStart(2, '0')}-${String(effectiveDay).padStart(2, '0')}`;
         const dueDate = parseISO(dueDateStr);
@@ -183,7 +136,7 @@ export const getPredictiveBalanceData = cache(async (targetYear?: number, target
     const monthEnd = endOfMonth(monthStart);
 
     const monthStartStr = format(monthStart, 'yyyy-MM-dd');
-    const monthEndStr = format(monthEnd, 'yyyy-MM-dd');
+    const monthEndStr = format(monthEnd, 'yyyy-MM-dd') + '~'; // ASCII ~ ensures ISO string dates match
 
     // 1. Fetch user's net historical balance before this month
     const previousTransactions = await TransactionModel.find({
@@ -205,13 +158,23 @@ export const getPredictiveBalanceData = cache(async (targetYear?: number, target
         date: { $gte: monthStartStr, $lte: monthEndStr }
     }).sort({ date: 1 }).lean();
 
-    // Group actual transactions by date
+    // Calculate actual monthly income & expenses
+    let totalActualIncome = 0;
+    let totalActualExpenses = 0;
+
+    // Group actual transactions by date (normalizing ISO dates to YYYY-MM-DD)
     const actualByDate = new Map<string, { income: number; expense: number }>();
     monthTransactions.forEach((tx: any) => {
-        const curr = actualByDate.get(tx.date) || { income: 0, expense: 0 };
-        if (tx.type === 'income') curr.income += tx.amount;
-        else curr.expense += tx.amount;
-        actualByDate.set(tx.date, curr);
+        const dateKey = tx.date ? tx.date.substring(0, 10) : '';
+        const curr = actualByDate.get(dateKey) || { income: 0, expense: 0 };
+        if (tx.type === 'income') {
+            curr.income += tx.amount;
+            totalActualIncome += tx.amount;
+        } else {
+            curr.expense += tx.amount;
+            totalActualExpenses += tx.amount;
+        }
+        actualByDate.set(dateKey, curr);
     });
 
     // 3. Fetch monthly pending reminders
@@ -297,9 +260,12 @@ export const getPredictiveBalanceData = cache(async (targetYear?: number, target
     return {
         chartPoints,
         currentBalance: runningActual,
+        totalActualIncome,
+        totalActualExpenses,
         totalPaidExpenses,
         totalPendingExpenses,
         totalPendingIncome,
+        totalIncome: totalActualIncome + totalPendingIncome,
         pendingCount: pendingReminders.length,
     };
 });

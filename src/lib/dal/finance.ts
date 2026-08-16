@@ -143,11 +143,12 @@ export const getFinancialSummary = cache(async (startDate?: Date | null, endDate
 
     const query: any = { userId, isDeleted: { $ne: true } };
 
-    // Only apply date filter if both start and end dates are provided
     if (startDate && endDate) {
+        const startStr = startDate.toISOString().substring(0, 10);
+        const endStr = endDate.toISOString().substring(0, 10) + '~';
         query.date = {
-            $gte: startDate.toISOString(),
-            $lte: endDate.toISOString()
+            $gte: startStr,
+            $lte: endStr
         };
     }
 
