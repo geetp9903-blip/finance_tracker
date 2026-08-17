@@ -87,25 +87,25 @@ export function ExportMenu({ transactions }: ExportMenuProps) {
             </Button>
 
             {isOpen && (
-                <div className="absolute right-0 mt-2 w-48 origin-top-right rounded-xl bg-popover backdrop-blur-xl border border-border shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none z-50">
+                <div className="absolute right-0 mt-2 w-48 origin-top-right rounded-xl bg-black/60 backdrop-blur-xl border border-white/10 shadow-2xl ring-1 ring-black ring-opacity-5 focus:outline-none z-50">
                     <div className="py-1">
                         <button
                             onClick={exportPDF}
-                            className="group flex w-full items-center px-4 py-2 text-sm text-foreground hover:bg-accent cursor-pointer"
+                            className="group flex w-full items-center px-4 py-2 text-sm text-foreground hover:bg-white/10 cursor-pointer"
                         >
                             <Download className="mr-3 h-4 w-4 text-muted-foreground group-hover:text-foreground" />
                             Export PDF
                         </button>
                         <button
                             onClick={exportExcel}
-                            className="group flex w-full items-center px-4 py-2 text-sm text-foreground hover:bg-accent cursor-pointer"
+                            className="group flex w-full items-center px-4 py-2 text-sm text-foreground hover:bg-white/10 cursor-pointer"
                         >
                             <FileSpreadsheet className="mr-3 h-4 w-4 text-muted-foreground group-hover:text-foreground" />
                             Export Excel
                         </button>
                         <button
                             onClick={handlePrint}
-                            className="group flex w-full items-center px-4 py-2 text-sm text-foreground hover:bg-accent cursor-pointer"
+                            className="group flex w-full items-center px-4 py-2 text-sm text-foreground hover:bg-white/10 cursor-pointer"
                         >
                             <Printer className="mr-3 h-4 w-4 text-muted-foreground group-hover:text-foreground" />
                             Print View

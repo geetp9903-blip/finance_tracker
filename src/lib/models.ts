@@ -16,6 +16,21 @@ const UserSchema = new Schema<User>({
     usernameUpdates: {
         count: { type: Number, default: 0 },
         lastReset: { type: Number, default: Date.now }
+    },
+    inactivityNotices: {
+        sent38: { type: Boolean, default: false },
+        sent42: { type: Boolean, default: false },
+        sent44: { type: Boolean, default: false }
+    },
+    dashboardLayout: { type: Object },
+    aiConsent: {
+        enabled: { type: Boolean, default: false },
+        consentedAt: { type: String },
+        termsVersion: { type: String, default: '1.0' }
+    },
+    aiInsights: {
+        data: { type: Object },
+        lastGeneratedAt: { type: String }
     }
 });
 
@@ -28,6 +43,36 @@ const TransactionSchema = new Schema<Transaction>({
     category: { type: String, required: true },
     description: { type: String, required: true },
     date: { type: String, required: true },
+    recurringRuleId: { type: String },
+    reminderId: { type: String },
+    isDeleted: { type: Boolean, default: false, index: true },
+    deletedAt: { type: String },
+});
+
+// Transaction Reminder Template Schema
+const TransactionReminderSchema = new Schema({
+    id: { type: String, required: true, unique: true },
+    userId: { type: String, required: true, index: true },
+    title: { type: String, required: true },
+    amount: { type: Number, required: true },
+    type: { type: String, enum: ['income', 'expense'], required: true },
+    category: { type: String, required: true },
+    frequency: { type: String, enum: ['daily', 'weekly', 'monthly', 'yearly'], default: 'monthly' },
+    dueDay: { type: Number, required: true, default: 1 }, // 1-31
+    active: { type: Boolean, default: true },
+    startDate: { type: String },
+});
+
+// Reminder Status Per Period Schema
+const ReminderStatusSchema = new Schema({
+    id: { type: String, required: true, unique: true },
+    reminderId: { type: String, required: true, index: true },
+    userId: { type: String, required: true, index: true },
+    periodKey: { type: String, required: true, index: true }, // "YYYY-MM"
+    status: { type: String, enum: ['pending', 'paid', 'skipped', 'expired'], default: 'pending' },
+    paidTransactionId: { type: String },
+    actualAmount: { type: Number },
+    paidDate: { type: String },
 });
 
 // Budget Schema
@@ -58,7 +103,7 @@ const BudgetSchema = new Schema({
     entries: [BudgetEntrySchema]
 });
 
-// Recurring Rule Schema
+// Recurring Rule Schema (Legacy)
 const RecurringRuleSchema = new Schema<RecurringRule>({
     id: { type: String, required: true, unique: true },
     userId: { type: String, required: true, index: true },
@@ -88,3 +133,6 @@ export const TransactionModel = models.Transaction || model<Transaction>('Transa
 export const BudgetModel = models.Budget || model('Budget', BudgetSchema);
 export const RecurringRuleModel = models.RecurringRule || model<RecurringRule>('RecurringRule', RecurringRuleSchema);
 export const BudgetPeriodModel = models.BudgetPeriod || model<BudgetPeriod>('BudgetPeriod', BudgetPeriodSchema);
+export const TransactionReminderModel = models.TransactionReminder || model('TransactionReminder', TransactionReminderSchema);
+export const ReminderStatusModel = models.ReminderStatus || model('ReminderStatus', ReminderStatusSchema);
+

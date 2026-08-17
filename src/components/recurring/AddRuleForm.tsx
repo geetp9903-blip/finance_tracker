@@ -32,32 +32,51 @@ export function AddRuleForm() {
             <CardContent>
                 <form action={handleSubmit} className="space-y-4">
                     <div className="grid grid-cols-2 gap-4">
-                        <Input name="description" placeholder="Name (e.g. Netflix)" required />
-                        <Input name="amount" type="number" step="0.01" placeholder="Amount" required />
+                        <div>
+                            <label htmlFor="rule-desc" className="sr-only">Description</label>
+                            <Input id="rule-desc" name="description" placeholder="Name (e.g. Netflix)" required />
+                        </div>
+                        <div>
+                            <label htmlFor="rule-amount" className="sr-only">Amount</label>
+                            <Input id="rule-amount" name="amount" type="number" step="0.01" placeholder="Amount" required />
+                        </div>
                     </div>
 
                     <div className="grid grid-cols-2 gap-4">
-                        <select
-                            name="frequency"
-                            className="bg-black/20 w-full rounded-md border border-white/10 p-2 text-sm text-foreground focus:ring-2 focus:ring-primary/50"
-                        >
-                            <option value="monthly">Monthly</option>
-                            <option value="weekly">Weekly</option>
-                            <option value="daily">Daily</option>
-                            <option value="yearly">Yearly</option>
-                        </select>
-                        <select
-                            name="type"
-                            className="bg-black/20 w-full rounded-md border border-white/10 p-2 text-sm text-foreground focus:ring-2 focus:ring-primary/50"
-                        >
-                            <option value="expense">Expense</option>
-                            <option value="income">Income</option>
-                        </select>
+                        <div>
+                            <label htmlFor="rule-frequency" className="sr-only">Frequency</label>
+                            <select
+                                id="rule-frequency"
+                                name="frequency"
+                                className="bg-black/20 w-full rounded-md border border-white/10 p-2 text-sm text-foreground focus:ring-2 focus:ring-primary/50"
+                            >
+                                <option value="monthly">Monthly</option>
+                                <option value="weekly">Weekly</option>
+                                <option value="daily">Daily</option>
+                                <option value="yearly">Yearly</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label htmlFor="rule-type" className="sr-only">Type</label>
+                            <select
+                                id="rule-type"
+                                name="type"
+                                className="bg-black/20 w-full rounded-md border border-white/10 p-2 text-sm text-foreground focus:ring-2 focus:ring-primary/50"
+                            >
+                                <option value="expense">Expense</option>
+                                <option value="income">Income</option>
+                            </select>
+                        </div>
                     </div>
 
-                    <Input name="category" placeholder="Category" defaultValue="Subscription" required />
+                    <div>
+                        <label htmlFor="rule-category" className="sr-only">Category</label>
+                        <Input id="rule-category" name="category" placeholder="Category" defaultValue="Subscription" required />
+                    </div>
                     <div className="relative">
+                        <label htmlFor="rule-start" className="sr-only">Start Date</label>
                         <Input
+                            id="rule-start"
                             name="startDate"
                             type="date"
                             required

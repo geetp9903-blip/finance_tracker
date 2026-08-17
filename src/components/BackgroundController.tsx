@@ -19,8 +19,9 @@ export function BackgroundController() {
                     left: '20%',
                     width: '60vw',
                     height: '60vw',
-                    background: 'radial-gradient(circle, rgba(220, 38, 38, 0.15) 0%, transparent 70%)', // Red-600 low opacity
+                    background: 'radial-gradient(circle, rgba(220, 38, 38, 0.08) 0%, transparent 70%)',
                     transform: 'translate3d(0, 0, 0)',
+                    filter: 'blur(100px)',
                 }}
             />
 
@@ -32,8 +33,9 @@ export function BackgroundController() {
                     right: '10%',
                     width: '70vw',
                     height: '70vw',
-                    background: 'radial-gradient(circle, rgba(16, 185, 129, 0.15) 0%, transparent 70%)', // Emerald-500 low opacity
+                    background: 'radial-gradient(circle, rgba(16, 185, 129, 0.08) 0%, transparent 70%)',
                     transform: 'translate3d(0, 0, 0)',
+                    filter: 'blur(120px)',
                 }}
             />
             
@@ -45,8 +47,9 @@ export function BackgroundController() {
                     left: '-10%',
                     width: '50vw',
                     height: '50vw',
-                    background: 'radial-gradient(circle, rgba(79, 70, 229, 0.1) 0%, transparent 70%)', // Indigo-600 very low opacity
+                    background: 'radial-gradient(circle, rgba(79, 70, 229, 0.05) 0%, transparent 70%)',
                     transform: 'translate3d(0, 0, 0)',
+                    filter: 'blur(90px)',
                 }}
             />
         </div>

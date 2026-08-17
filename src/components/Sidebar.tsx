@@ -1,19 +1,18 @@
 "use client";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, Receipt, LogOut, RefreshCw, Calendar, Settings, BarChart3 } from "lucide-react";
+import { LayoutDashboard, Receipt, LogOut, Bell, Calendar, Settings, BarChart3, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/context/AuthContext";
+import { useEffect, useRef } from "react";
 
 const navItems = [
     { name: "Dashboard", href: "/", icon: LayoutDashboard },
     { name: "Transactions", href: "/transactions", icon: Receipt },
-    { name: "Recurring", href: "/recurring", icon: RefreshCw },
+    { name: "Reminders", href: "/reminders", icon: Bell },
     { name: "Analytics", href: "/analytics", icon: BarChart3 },
     { name: "Settings", href: "/settings", icon: Settings },
 ];
-
-import { X } from "lucide-react";
 
 interface SidebarProps {
     isOpen: boolean;
@@ -24,6 +23,36 @@ interface SidebarProps {
 export function Sidebar({ isOpen, onClose, username }: SidebarProps) {
     const pathname = usePathname();
     const { logout } = useAuth();
+    const sidebarRef = useRef<HTMLElement>(null);
+
+    // Handle Escape key and body scroll lock for mobile sidebar
+    useEffect(() => {
+        if (isOpen) {
+            document.body.style.overflow = "hidden";
+        } else {
+            document.body.style.overflow = "unset";
+        }
+
+        const handleKeyDown = (e: KeyboardEvent) => {
+            if (e.key === "Escape" && isOpen) {
+                onClose();
+            }
+        };
+
+        window.addEventListener("keydown", handleKeyDown);
+        return () => {
+            document.body.style.overflow = "unset";
+            window.removeEventListener("keydown", handleKeyDown);
+        };
+    }, [isOpen, onClose]);
+
+    // Focus trap on open
+    useEffect(() => {
+        if (isOpen && sidebarRef.current) {
+            const firstLink = sidebarRef.current.querySelector('a') as HTMLElement;
+            if (firstLink) firstLink.focus();
+        }
+    }, [isOpen]);
 
     // Always show sidebar unless we are on the login page
     // This prevents the sidebar from disappearing on reload while auth is checking
@@ -43,7 +72,7 @@ export function Sidebar({ isOpen, onClose, username }: SidebarProps) {
                     />
 
                     {/* Drawer Content */}
-                    <aside className="relative flex w-[85vw] max-w-sm flex-col bg-card h-full overflow-y-auto border-r border-border shadow-2xl animate-in slide-in-from-left duration-300">
+                    <aside id="mobile-sidebar" ref={sidebarRef} className="relative flex w-[85vw] max-w-sm flex-col bg-card h-full overflow-y-auto border-r border-border shadow-2xl animate-in slide-in-from-left duration-300">
                         <div className="flex items-center justify-between p-4 border-b border-border/50">
                             <div className="flex items-center gap-2">
                                 <img src="/Prospera_1_icon.png" alt="Logo" className="h-8 w-8 object-contain" />
@@ -102,14 +131,14 @@ export function Sidebar({ isOpen, onClose, username }: SidebarProps) {
                 </div>
             )}
 
-            {/* Desktop Sidebar (Fixed, md:flex) */}
-            <aside className="hidden md:flex fixed left-0 top-0 z-50 h-screen w-64 flex-col border-r border-border bg-card/95 backdrop-blur-xl">
-                <div className="flex h-full flex-col px-3 py-4">
-                    <div className="mb-8 flex items-center pl-3 mt-2">
-                        <div className="h-8 w-8 relative mr-3">
+            {/* Desktop Sidebar (Fixed, md:flex, responsive rail) */}
+            <aside className="hidden md:flex fixed left-0 top-0 z-50 h-screen w-16 lg:w-64 flex-col border-r border-border bg-card/95 backdrop-blur-xl transition-all duration-300">
+                <div className="flex h-full flex-col py-4 px-2 lg:px-3">
+                    <div className="mb-8 flex items-center justify-center lg:justify-start lg:pl-3 mt-2">
+                        <div className="h-8 w-8 relative flex-shrink-0">
                             <img src="/Prospera_1_icon.png" alt="Logo" className="object-contain" />
                         </div>
-                        <span className="text-xl font-bold tracking-tight">Prospera</span>
+                        <span className="text-xl font-bold tracking-tight hidden lg:block ml-3">Prospera</span>
                     </div>
 
                     <ul className="space-y-1 flex-1">
@@ -120,15 +149,17 @@ export function Sidebar({ isOpen, onClose, username }: SidebarProps) {
                                 <li key={item.name}>
                                     <Link
                                         href={item.href}
+                                        title={item.name}
+                                        aria-current={isActive ? "page" : undefined}
                                         className={cn(
-                                            "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-all duration-200 group",
+                                            "flex items-center justify-center lg:justify-start gap-3 rounded-lg px-3 py-3 lg:py-2 text-sm font-medium transition-all duration-200 group",
                                             isActive
                                                 ? "bg-primary/10 text-primary"
                                                 : "text-muted-foreground hover:bg-accent hover:text-foreground"
                                         )}
                                     >
-                                        <Icon className={cn("h-4 w-4", isActive ? "text-primary" : "text-muted-foreground group-hover:text-foreground")} />
-                                        {item.name}
+                                        <Icon className={cn("h-5 w-5 lg:h-4 lg:w-4 flex-shrink-0", isActive ? "text-primary" : "text-muted-foreground group-hover:text-foreground")} />
+                                        <span className="hidden lg:block">{item.name}</span>
                                     </Link>
                                 </li>
                             );
@@ -136,16 +167,18 @@ export function Sidebar({ isOpen, onClose, username }: SidebarProps) {
                     </ul>
 
                     <div className="mt-auto pt-4 border-t border-border/50">
-                        <div className="mb-4 px-3 py-2 rounded-lg bg-accent/50 border border-border">
+                        <div className="hidden lg:block mb-4 px-3 py-2 rounded-lg bg-accent/50 border border-border">
                             <p className="text-xs text-muted-foreground mb-1">Logged in as</p>
                             <p className="text-sm font-medium truncate">{username || 'Loading...'}</p>
                         </div>
                         <button
                             onClick={logout}
-                            className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium text-muted-foreground hover:bg-destructive/10 hover:text-destructive transition-colors"
+                            title="Logout"
+                            aria-label="Logout"
+                            className="flex w-full items-center justify-center lg:justify-start gap-2 rounded-lg px-3 py-3 lg:py-2 text-sm font-medium text-muted-foreground hover:bg-destructive/10 hover:text-destructive transition-colors"
                         >
-                            <LogOut className="h-4 w-4" />
-                            Logout
+                            <LogOut className="h-5 w-5 lg:h-4 lg:w-4 flex-shrink-0" />
+                            <span className="hidden lg:block">Logout</span>
                         </button>
                     </div>
                 </div>

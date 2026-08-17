@@ -2,7 +2,7 @@ import { Card } from "@/components/ui/Card";
 
 export function TransactionSkeleton() {
     return (
-        <Card className="glass-card flex items-center justify-between p-4 animate-pulse">
+        <Card role="status" aria-label="Loading transaction" className="glass-card flex items-center justify-between p-4 animate-pulse">
             <div className="flex items-center gap-4 min-w-0 flex-1">
                 {/* Icon Skeleton */}
                 <div className="h-10 w-10 shrink-0 rounded-full bg-white/10" />

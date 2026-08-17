@@ -33,6 +33,7 @@ export const getDailySpending = cache(async (
         {
             $match: {
                 userId: userId,
+                isDeleted: { $ne: true },
                 type: 'expense',
                 date: { $gte: startDate.toISOString(), $lte: endDate.toISOString() }
             }
@@ -40,11 +41,10 @@ export const getDailySpending = cache(async (
         {
             $project: {
                 amount: 1,
-                // Convert ISO date to "YYYY-MM-DD" in User's Timezone
                 dateString: {
                     $dateToString: {
                         format: "%Y-%m-%d",
-                        date: { $toDate: "$date" }, // Ensure it's treated as date
+                        date: { $toDate: "$date" },
                         timezone: timezone
                     }
                 }
@@ -57,7 +57,7 @@ export const getDailySpending = cache(async (
                 count: { $sum: 1 }
             }
         },
-        { $sort: { _id: 1 as const } } // Sort by date ascending
+        { $sort: { _id: 1 as const } }
     ];
 
     const results = await TransactionModel.aggregate(pipeline);
@@ -78,6 +78,7 @@ export const getCategoryBreakdown = cache(async (
         {
             $match: {
                 userId: userId,
+                isDeleted: { $ne: true },
                 type: 'expense',
                 date: { $gte: startDate.toISOString(), $lte: endDate.toISOString() }
             }
@@ -89,7 +90,7 @@ export const getCategoryBreakdown = cache(async (
                 count: { $sum: 1 }
             }
         },
-        { $sort: { total: -1 as const } } // Highest spend first
+        { $sort: { total: -1 as const } }
     ];
 
     const results = await TransactionModel.aggregate(pipeline);
@@ -111,6 +112,7 @@ export const getIncomeTrend = cache(async (
         {
             $match: {
                 userId: userId,
+                isDeleted: { $ne: true },
                 type: 'income',
                 date: { $gte: startDate.toISOString(), $lte: endDate.toISOString() }
             }
@@ -171,6 +173,7 @@ export const getSpendingChartData = cache(async (
 
     const matchQuery: any = {
         userId: userId,
+        isDeleted: { $ne: true },
         type: 'expense',
         date: { $gte: startDate.toISOString(), $lte: endDate.toISOString() }
     };
@@ -240,6 +243,7 @@ export const getTopCategories = cache(async (
         {
             $match: {
                 userId: userId,
+                isDeleted: { $ne: true },
                 type: 'expense',
                 date: { $gte: startDate.toISOString(), $lte: endDate.toISOString() }
             }
@@ -280,6 +284,7 @@ export const getCategoryTrends = cache(async (
         {
             $match: {
                 userId: userId,
+                isDeleted: { $ne: true },
                 type: 'expense',
                 date: { $gte: startDate.toISOString(), $lte: endDate.toISOString() }
             }

@@ -54,7 +54,7 @@ export const getTransactions = cache(async (options: number | TransactionFilterO
     const skip = (page - 1) * limit;
 
     // Build Query
-    const mongoQuery: any = { userId };
+    const mongoQuery: any = { userId, isDeleted: { $ne: true } };
 
     if (type && type !== 'all') {
         mongoQuery.type = type;
@@ -141,13 +141,14 @@ export const getFinancialSummary = cache(async (startDate?: Date | null, endDate
     const userId = await assertAuth();
     await ensureDb();
 
-    const query: any = { userId };
+    const query: any = { userId, isDeleted: { $ne: true } };
 
-    // Only apply date filter if both start and end dates are provided
     if (startDate && endDate) {
+        const startStr = startDate.toISOString().substring(0, 10);
+        const endStr = endDate.toISOString().substring(0, 10) + '~';
         query.date = {
-            $gte: startDate.toISOString(),
-            $lte: endDate.toISOString()
+            $gte: startStr,
+            $lte: endStr
         };
     }
 
@@ -173,13 +174,12 @@ export const getCalendarData = cache(async (year: number, month: number) => {
     const userId = await assertAuth();
     await ensureDb();
 
-    // specific month range
-    // Note: Month is 0-indexed in JS Date? No, usually passed as 1-12 from UI, let's assume 1-based input
     const startDate = new Date(year, month - 1, 1);
     const endDate = new Date(year, month, 0, 23, 59, 59);
 
     const transactions = await TransactionModel.find({
         userId,
+        isDeleted: { $ne: true },
         date: { $gte: startDate.toISOString(), $lte: endDate.toISOString() }
     }).select('date type amount category').lean();
 

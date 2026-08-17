@@ -2,7 +2,7 @@
 
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { User } from '@/lib/types';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 
 interface AuthContextType {
     user: User | null;
@@ -18,22 +18,27 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const [user, setUser] = useState<User | null>(null);
     const [loading, setLoading] = useState(true);
     const router = useRouter();
+    const pathname = usePathname();
 
     useEffect(() => {
         // Verify session with server instead of localStorage
         const checkSession = async () => {
             try {
-                // We'll use the profile endpoint or similar to check if we are logged in
                 const res = await fetch('/api/auth/profile');
                 if (res.ok) {
                     const data = await res.json();
                     setUser(data.user);
                 } else if (res.status === 401) {
-                    // Session invalid or expired - force redirect
-                    router.push('/login');
+                    // VERIFY: Still redirecting despite setup page? 
+                    // Use window.location directly for the most accurate current state during redirection hops
+                    if (window.location.pathname !== '/setup-username') {
+                        console.log(`AuthSync: Not authenticated at ${window.location.pathname}. Redirecting to /login`);
+                        router.push('/login');
+                    } else {
+                        console.log('AuthSync: At /setup-username, skipping login redirect.');
+                    }
                 }
             } catch (error) {
-                // Not logged in or network error
                 console.log('Session check failed', error);
             } finally {
                 setLoading(false);

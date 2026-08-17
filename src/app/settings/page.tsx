@@ -95,19 +95,25 @@ export default function SettingsPage() {
 
                 {/* Profile Security Settings */}
                 <ProfileSecuritySettings />
+
+                {/* AI & Privacy Intelligence Settings */}
+                <AIPrivacySettings />
             </div>
         </div>
     );
 }
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
-import { User, Shield, Key, Mail, Edit3, Loader2 } from "lucide-react";
+import { User, Shield, Key, Mail, Edit3, Loader2, ShieldCheck, ExternalLink } from "lucide-react";
+import { useToast } from "@/context/ToastContext";
+import { AIConsentModal } from "@/components/ai/AIConsentModal";
+import { AIPrivacyPolicyModal } from "@/components/ai/AIPrivacyPolicyModal";
 
 function ProfileSecuritySettings() {
     const [loading, setLoading] = useState(false);
-    const [message, setMessage] = useState({ type: '', text: '' });
+    const { addToast } = useToast();
 
     // Forms
     const [newUsername, setNewUsername] = useState('');
@@ -119,11 +125,6 @@ function ProfileSecuritySettings() {
     const [otp, setOtp] = useState('');
     const [newPin, setNewPin] = useState('');
 
-    const toast = (type: 'success' | 'error', text: string) => {
-        setMessage({ type, text });
-        setTimeout(() => setMessage({ type: '', text: '' }), 5000);
-    };
-
     const handleUpdate = async (type: 'username' | 'email', value: string, authorization?: string) => {
         setLoading(true);
         try {
@@ -134,14 +135,14 @@ function ProfileSecuritySettings() {
             });
             const data = await res.json();
             if (res.ok) {
-                toast('success', data.message || 'Updated successfully');
+                addToast(data.message || 'Updated successfully', 'success');
                 if (type === 'username') setNewUsername('');
                 if (type === 'email') { setNewEmail(''); setAuthPin(''); }
             } else {
-                toast('error', data.error || 'Update failed');
+                addToast(data.error || 'Update failed', 'error');
             }
         } catch (e) {
-            toast('error', 'Network error');
+            addToast('Network error', 'error');
         } finally {
             setLoading(false);
         }
@@ -173,7 +174,7 @@ function ProfileSecuritySettings() {
     const [confirmUser, setConfirmUser] = useState('');
 
     const sendOtp = async () => {
-        if (!confirmUser) return toast('error', 'Username required');
+        if (!confirmUser) return addToast('Username required', 'error');
         setLoading(true);
         try {
             const res = await fetch('/api/auth/otp/generate', {
@@ -182,17 +183,17 @@ function ProfileSecuritySettings() {
                 headers: { 'Content-Type': 'application/json' }
             });
             if (res.ok) {
-                toast('success', 'OTP Sent');
+                addToast('OTP Sent', 'success');
                 setPinFlowStep(2); // Move to enter OTP
             } else {
-                toast('error', 'Failed to send OTP');
+                addToast('Failed to send OTP', 'error');
             }
-        } catch (e) { toast('error', 'Error sending OTP'); }
+        } catch (e) { addToast('Error sending OTP', 'error'); }
         setLoading(false);
     };
 
     const updatePin = async () => {
-        if (!otp || !newPin) return toast('error', 'Incomplete fields');
+        if (!otp || !newPin) return addToast('Incomplete fields', 'error');
         setLoading(true);
         try {
             const res = await fetch('/api/auth/profile/update', {
@@ -202,13 +203,13 @@ function ProfileSecuritySettings() {
             });
             const data = await res.json();
             if (res.ok) {
-                toast('success', 'PIN Updated Successfully');
+                addToast('PIN Updated Successfully', 'success');
                 setPinFlowStep(0);
                 setOtp(''); setNewPin(''); setConfirmUser('');
             } else {
-                toast('error', data.error || 'Failed');
+                addToast(data.error || 'Failed', 'error');
             }
-        } catch (e) { toast('error', 'Network error'); }
+        } catch (e) { addToast('Network error', 'error'); }
         setLoading(false);
     };
 
@@ -224,13 +225,6 @@ function ProfileSecuritySettings() {
                 </div>
             </div>
 
-            {/* Notification */}
-            {message.text && (
-                <div className={cn("p-3 rounded-md text-sm text-center", message.type === 'success' ? "bg-green-500/20 text-green-400" : "bg-red-500/20 text-red-400")}>
-                    {message.text}
-                </div>
-            )}
-
             <div className="grid gap-6 md:grid-cols-2">
                 {/* 1. Update Username */}
                 <div className="space-y-3 bg-white/5 p-4 rounded-xl border border-white/5">
@@ -239,12 +233,16 @@ function ProfileSecuritySettings() {
                     </div>
                     <p className="text-xs text-muted-foreground">Limit: 3 changes per week.</p>
                     <div className="flex gap-2">
-                        <Input
-                            value={newUsername}
-                            onChange={(e) => setNewUsername(e.target.value)}
-                            placeholder="New Username"
-                            className="bg-black/20 border-white/10"
-                        />
+                        <div className="flex-1">
+                            <label htmlFor="newUsername" className="sr-only">New Username</label>
+                            <Input
+                                id="newUsername"
+                                value={newUsername}
+                                onChange={(e) => setNewUsername(e.target.value)}
+                                placeholder="New Username"
+                                className="bg-black/20 border-white/10"
+                            />
+                        </div>
                         <Button variant="primary" size="sm" onClick={() => handleUpdate('username', newUsername)} disabled={loading || !newUsername}>
                             <Edit3 className="h-4 w-4" />
                         </Button>
@@ -258,20 +256,26 @@ function ProfileSecuritySettings() {
                     </div>
                     <p className="text-xs text-muted-foreground">Requires current PIN.</p>
                     <div className="space-y-2">
+                        <label htmlFor="newEmail" className="sr-only">New Email</label>
                         <Input
+                            id="newEmail"
                             value={newEmail}
                             onChange={(e) => setNewEmail(e.target.value)}
                             placeholder="New Email"
                             className="bg-black/20 border-white/10"
                         />
                         <div className="flex gap-2">
-                            <Input
-                                type="password"
-                                value={authPin}
-                                onChange={(e) => setAuthPin(e.target.value)}
-                                placeholder="Current PIN"
-                                className="bg-black/20 border-white/10"
-                            />
+                            <div className="flex-1">
+                                <label htmlFor="authPin" className="sr-only">Current PIN</label>
+                                <Input
+                                    id="authPin"
+                                    type="password"
+                                    value={authPin}
+                                    onChange={(e) => setAuthPin(e.target.value)}
+                                    placeholder="Current PIN"
+                                    className="bg-black/20 border-white/10"
+                                />
+                            </div>
                             <Button variant="primary" size="sm" onClick={() => handleUpdate('email', newEmail, authPin)} disabled={loading || !newEmail || !authPin}>
                                 Update
                             </Button>
@@ -294,12 +298,16 @@ function ProfileSecuritySettings() {
 
                     {pinFlowStep === 1 && (
                         <div className="flex gap-2 animate-in fade-in slide-in-from-right-4">
-                            <Input
-                                value={confirmUser}
-                                onChange={(e) => setConfirmUser(e.target.value)}
-                                placeholder="Confirm Username for OTP"
-                                className="bg-black/20 border-white/10"
-                            />
+                            <div className="flex-1">
+                                <label htmlFor="confirmUser" className="sr-only">Confirm Username</label>
+                                <Input
+                                    id="confirmUser"
+                                    value={confirmUser}
+                                    onChange={(e) => setConfirmUser(e.target.value)}
+                                    placeholder="Confirm Username for OTP"
+                                    className="bg-black/20 border-white/10"
+                                />
+                            </div>
                             <Button variant="primary" size="sm" onClick={sendOtp} disabled={loading}>
                                 {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : "Send OTP"}
                             </Button>
@@ -310,20 +318,28 @@ function ProfileSecuritySettings() {
                         <div className="space-y-3 animate-in fade-in slide-in-from-right-4">
                             <p className="text-xs text-green-400">OTP Sent! Enter code and new PIN.</p>
                             <div className="grid grid-cols-2 gap-4">
-                                <Input
-                                    value={otp}
-                                    onChange={(e) => setOtp(e.target.value)}
-                                    placeholder="OTP Code"
-                                    className="bg-black/20 border-white/10 text-center tracking-widest"
-                                />
-                                <Input
-                                    type="password"
-                                    value={newPin}
-                                    onChange={(e) => setNewPin(e.target.value)}
-                                    placeholder="New PIN (6 digits)"
-                                    maxLength={6}
-                                    className="bg-black/20 border-white/10"
-                                />
+                                <div>
+                                    <label htmlFor="otpCode" className="sr-only">OTP Code</label>
+                                    <Input
+                                        id="otpCode"
+                                        value={otp}
+                                        onChange={(e) => setOtp(e.target.value)}
+                                        placeholder="OTP Code"
+                                        className="bg-black/20 border-white/10 text-center tracking-widest"
+                                    />
+                                </div>
+                                <div>
+                                    <label htmlFor="newPin" className="sr-only">New PIN</label>
+                                    <Input
+                                        id="newPin"
+                                        type="password"
+                                        value={newPin}
+                                        onChange={(e) => setNewPin(e.target.value)}
+                                        placeholder="New PIN (6 digits)"
+                                        maxLength={6}
+                                        className="bg-black/20 border-white/10"
+                                    />
+                                </div>
                             </div>
                             <Button variant="primary" className="w-full" onClick={updatePin} disabled={loading}>
                                 {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : "Verify & Update PIN"}
@@ -335,3 +351,177 @@ function ProfileSecuritySettings() {
         </Card>
     );
 }
+
+function AIPrivacySettings() {
+    const [consentEnabled, setConsentEnabled] = useState(false);
+    const [consentedAt, setConsentedAt] = useState<string | null>(null);
+    const [termsVersion, setTermsVersion] = useState<string>('1.0');
+    const [loading, setLoading] = useState(true);
+    const [updating, setUpdating] = useState(false);
+    const [isConsentModalOpen, setIsConsentModalOpen] = useState(false);
+    const [isPolicyModalOpen, setIsPolicyModalOpen] = useState(false);
+    const { addToast } = useToast();
+
+    const fetchConsentStatus = async () => {
+        try {
+            setLoading(true);
+            const res = await fetch('/api/user/ai-consent');
+            if (res.ok) {
+                const data = await res.json();
+                setConsentEnabled(data.aiConsent?.enabled ?? false);
+                setConsentedAt(data.aiConsent?.consentedAt ?? null);
+                setTermsVersion(data.aiConsent?.termsVersion ?? '1.0');
+            }
+        } catch (err) {
+            console.error("Failed to load AI consent status:", err);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        fetchConsentStatus();
+    }, []);
+
+    const handleToggle = async () => {
+        if (!consentEnabled) {
+            // Open modal to get consent
+            setIsConsentModalOpen(true);
+        } else {
+            // Disable immediately
+            try {
+                setUpdating(true);
+                const res = await fetch('/api/user/ai-consent', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ enabled: false }),
+                });
+                if (res.ok) {
+                    setConsentEnabled(false);
+                    addToast("AI data processing disabled and cached insights cleared.", "info");
+                } else {
+                    throw new Error("Failed to update status");
+                }
+            } catch (err: any) {
+                addToast(err.message || "Failed to update AI settings.", "error");
+            } finally {
+                setUpdating(false);
+            }
+        }
+    };
+
+    const handleConsentSuccess = () => {
+        setConsentEnabled(true);
+        setConsentedAt(new Date().toISOString());
+        addToast("Prospera AI Analytical Advisor is now analyzing your patterns with zero-PII safeguards.", "success");
+    };
+
+    return (
+        <>
+            <Card className="glass-card p-6 space-y-6 md:col-span-2 border-purple-500/20">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    <div className="flex items-center gap-3">
+                        <div className="p-3 rounded-xl bg-purple-500/20 text-purple-400">
+                            <Sparkles className="h-6 w-6" />
+                        </div>
+                        <div>
+                            <div className="flex items-center gap-2">
+                                <h2 className="text-xl font-semibold text-foreground">AI Intelligence & Privacy</h2>
+                                <span className={`text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full border ${
+                                    consentEnabled 
+                                        ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' 
+                                        : 'bg-zinc-800 text-zinc-400 border-zinc-700'
+                                }`}>
+                                    {consentEnabled ? 'Active' : 'Disabled'}
+                                </span>
+                            </div>
+                            <p className="text-sm text-muted-foreground">Manage automated spending anomaly detection and Gemini AI access</p>
+                        </div>
+                    </div>
+
+                    <div className="flex items-center gap-3 self-end sm:self-auto">
+                        <button
+                            type="button"
+                            onClick={handleToggle}
+                            disabled={loading || updating}
+                            className={`relative inline-flex h-7 w-12 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 focus:ring-offset-background disabled:opacity-50 ${
+                                consentEnabled ? 'bg-purple-600' : 'bg-zinc-700'
+                            }`}
+                            role="switch"
+                            aria-checked={consentEnabled}
+                        >
+                            <span
+                                className={`pointer-events-none inline-block h-6 w-6 transform rounded-full bg-white shadow-lg ring-0 transition duration-200 ease-in-out ${
+                                    consentEnabled ? 'translate-x-5' : 'translate-x-0'
+                                }`}
+                            />
+                        </button>
+                    </div>
+                </div>
+
+                <div className="grid md:grid-cols-3 gap-4 pt-2">
+                    <div className="p-4 rounded-xl bg-accent/40 border border-border/40 space-y-1">
+                        <div className="flex items-center gap-2 text-xs font-semibold text-foreground">
+                            <ShieldCheck className="w-4 h-4 text-emerald-400" />
+                            <span>Privacy Standard</span>
+                        </div>
+                        <p className="text-xs text-muted-foreground">
+                            Strict Zero-PII sanitization. Names, emails, and credentials are never transmitted.
+                        </p>
+                    </div>
+
+                    <div className="p-4 rounded-xl bg-accent/40 border border-border/40 space-y-1">
+                        <div className="flex items-center gap-2 text-xs font-semibold text-foreground">
+                            <Sparkles className="w-4 h-4 text-purple-400" />
+                            <span>Analytical Focus</span>
+                        </div>
+                        <p className="text-xs text-muted-foreground">
+                            Flags category surges, impending cashflow pinches against bills, and subscription creep.
+                        </p>
+                    </div>
+
+                    <div className="p-4 rounded-xl bg-accent/40 border border-border/40 space-y-1">
+                        <div className="flex items-center gap-2 text-xs font-semibold text-foreground">
+                            <Shield className="w-4 h-4 text-blue-400" />
+                            <span>Consent Status</span>
+                        </div>
+                        <p className="text-xs text-muted-foreground">
+                            {consentedAt 
+                                ? `Granted on ${new Date(consentedAt).toLocaleDateString()} (v${termsVersion})`
+                                : "Opt-in pending approval"}
+                        </p>
+                    </div>
+                </div>
+
+                <div className="pt-2 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 border-t border-border/40">
+                    <button
+                        type="button"
+                        onClick={() => setIsPolicyModalOpen(true)}
+                        className="text-xs text-purple-400 hover:text-purple-300 flex items-center gap-1.5 underline-offset-2 hover:underline transition-colors"
+                    >
+                        <ExternalLink className="w-3.5 h-3.5" />
+                        View Full AI Privacy Policy & Terms of Service
+                    </button>
+                    
+                    {consentEnabled && (
+                        <p className="text-[11px] text-muted-foreground">
+                            Toggling off will instantly delete cached insights and stop all AI queries.
+                        </p>
+                    )}
+                </div>
+            </Card>
+
+            <AIConsentModal
+                isOpen={isConsentModalOpen}
+                onClose={() => setIsConsentModalOpen(false)}
+                onConsentSuccess={handleConsentSuccess}
+            />
+
+            <AIPrivacyPolicyModal
+                isOpen={isPolicyModalOpen}
+                onClose={() => setIsPolicyModalOpen(false)}
+            />
+        </>
+    );
+}
+

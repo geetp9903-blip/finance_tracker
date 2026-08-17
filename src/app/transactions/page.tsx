@@ -2,6 +2,7 @@ import { getTransactions } from "@/lib/dal/finance";
 import { TransactionTable } from "@/components/transactions/TransactionTable";
 import { ExportButton } from "@/components/transactions/ExportButton";
 import { AddTransactionButton } from "@/components/transactions/AddTransactionButton";
+import { FlushButton } from "@/components/transactions/FlushButton";
 import { assertAuth } from "@/lib/dal/auth";
 import { UserModel } from "@/lib/models";
 import dbConnect from "@/lib/db";
@@ -42,9 +43,6 @@ export default async function TransactionsPage({ searchParams }: PageProps) {
     let startDate: Date | undefined;
     let endDate: Date | undefined;
 
-    // Default to handling all time if no specific date filter, 
-    // BUT user often expects "Current Month" in many apps. 
-    // Here we'll default to "All Time" to match previous behavior unless filter is set.
     if (monthParam && yearParam) {
         const y = Number(yearParam);
         const m = Number(monthParam);
@@ -57,7 +55,6 @@ export default async function TransactionsPage({ searchParams }: PageProps) {
     }
 
     // 2. Fetch Data (Server Side)
-    // Fetch User for Currency
     const userId = await assertAuth();
     await dbConnect();
     const user = await UserModel.findOne({ username: userId }).lean();
@@ -81,7 +78,8 @@ export default async function TransactionsPage({ searchParams }: PageProps) {
                     <h2 className="text-3xl font-bold tracking-tight">Transactions</h2>
                     <p className="text-muted-foreground">Manage your entire financial history.</p>
                 </div>
-                <div className="flex items-center gap-2">
+                <div className="flex flex-wrap items-center gap-2">
+                    <FlushButton />
                     <ExportButton currency={currency} />
                     <AddTransactionButton />
                 </div>

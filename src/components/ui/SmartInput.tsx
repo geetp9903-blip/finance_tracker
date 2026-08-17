@@ -6,7 +6,7 @@ import { Calculator } from "lucide-react";
 
 interface SmartInputProps extends Omit<InputHTMLAttributes<HTMLInputElement>, 'onChange'> {
     value: number | string;
-    onValueChange: (val: number) => void;
+    onValueChange: (val: number | "") => void;
 }
 
 export const SmartInput = forwardRef<HTMLInputElement, SmartInputProps>(
@@ -55,10 +55,19 @@ export const SmartInput = forwardRef<HTMLInputElement, SmartInputProps>(
                     ref={ref}
                     {...props}
                     value={displayValue}
-                    onChange={(e) => setDisplayValue(e.target.value)}
+                    onChange={(e) => {
+                        const val = e.target.value;
+                        setDisplayValue(val);
+                        if (val === '') {
+                            onValueChange("");
+                        } else if (/^\d*\.?\d*$/.test(val)) {
+                            onValueChange(Number(val));
+                        }
+                    }}
                     onBlur={handleBlur}
                     onKeyDown={handleKeyDown}
                     className={`pr-8 ${className}`}
+                    title="You can type math expressions (e.g. 100 + 20)"
                 />
                 <Calculator className="absolute right-2.5 top-2.5 h-4 w-4 text-muted-foreground opacity-50" />
             </div>

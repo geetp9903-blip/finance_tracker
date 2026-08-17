@@ -26,7 +26,7 @@ export async function GET(request: Request) {
         }
 
         // 3. Get User (Project specific fields)
-        const user = await UserModel.findOne({ id: payload.userId }).select('-pin -totpSecret -otp -refreshToken');
+        const user = await UserModel.findById(payload.userId).select('-pin -totpSecret -otp -refreshToken');
 
         if (!user) {
             return NextResponse.json({ error: 'User not found' }, { status: 401 });

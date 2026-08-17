@@ -1,8 +1,10 @@
 import { SignJWT, jwtVerify } from 'jose';
 import { v4 as uuidv4 } from 'uuid';
 
-const SECRET_KEY = process.env.JWT_SECRET || 'default-secret-key-change-me';
-
+const SECRET_KEY = process.env.JWT_SECRET;
+if (!SECRET_KEY) {
+    throw new Error('JWT_SECRET is not defined in environment variables');
+}
 const encodedKey = new TextEncoder().encode(SECRET_KEY);
 
 export async function signSessionToken(payload: any) {

@@ -6,6 +6,7 @@ import { randomUUID } from 'crypto';
 
 // CRON jobs must be dynamic to run on schedule
 export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
 
 export async function GET() {
     console.log("Starting Recurring Transaction Cron Job...");

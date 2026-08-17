@@ -39,7 +39,7 @@ export function CurrencySelector({ currentCurrency = 'INR' }: { currentCurrency?
     return (
         <DropdownMenu>
             <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="sm" className="h-9 px-2 text-muted-foreground hover:text-foreground">
+                <Button aria-label="Select Currency" variant="ghost" size="sm" className="h-9 px-2 text-muted-foreground hover:text-foreground">
                     <Coins className="mr-2 h-4 w-4" />
                     {activeCurrency?.symbol} {activeCurrency?.code}
                 </Button>

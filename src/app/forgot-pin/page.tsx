@@ -54,8 +54,8 @@ export default function ForgotPinPage() {
     };
 
     return (
-        <div className="flex min-h-screen items-center justify-center p-4 bg-background">
-            <Card className="w-full max-w-md glass-card">
+        <div className="flex min-h-screen items-center justify-center p-4 bg-gradient-to-br from-background via-background/95 to-primary/5">
+            <Card className="w-full max-w-md border-white/10 shadow-2xl overflow-hidden glass-card">
                 <CardHeader className="space-y-1">
                     <CardTitle className="text-2xl font-bold">Reset PIN</CardTitle>
                     <CardDescription>
@@ -68,8 +68,9 @@ export default function ForgotPinPage() {
                     {step === 1 ? (
                         <form onSubmit={handleRequest} className="space-y-4">
                             <div className="space-y-2">
-                                <label className="text-sm font-medium">Username</label>
+                                <label htmlFor="username" className="text-sm font-medium">Username</label>
                                 <Input
+                                    id="username"
                                     value={username}
                                     onChange={(e) => setUsername(e.target.value)}
                                     placeholder="Enter your username"
@@ -91,8 +92,9 @@ export default function ForgotPinPage() {
                             </div>
 
                             <div className="space-y-2">
-                                <label className="text-sm font-medium">Verification Code</label>
+                                <label htmlFor="otp" className="text-sm font-medium">Verification Code</label>
                                 <Input
+                                    id="otp"
                                     value={otp}
                                     onChange={(e) => setOtp(e.target.value)}
                                     placeholder="000000"
@@ -101,8 +103,9 @@ export default function ForgotPinPage() {
                             </div>
 
                             <div className="space-y-2">
-                                <label className="text-sm font-medium">New PIN</label>
+                                <label htmlFor="newPin" className="text-sm font-medium">New PIN</label>
                                 <Input
+                                    id="newPin"
                                     type="password"
                                     value={newPin}
                                     onChange={(e) => setNewPin(e.target.value)}
