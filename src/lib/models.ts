@@ -22,7 +22,12 @@ const UserSchema = new Schema<User>({
         sent42: { type: Boolean, default: false },
         sent44: { type: Boolean, default: false }
     },
-    dashboardLayout: { type: Object }
+    dashboardLayout: { type: Object },
+    aiConsent: {
+        enabled: { type: Boolean, default: false },
+        consentedAt: { type: String },
+        termsVersion: { type: String, default: '1.0' }
+    }
 });
 
 // Transaction Schema

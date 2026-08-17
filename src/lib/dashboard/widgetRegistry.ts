@@ -12,6 +12,16 @@ export interface WidgetMetadata {
 }
 
 export const WIDGET_REGISTRY: Record<string, WidgetMetadata> = {
+    ai_agent_insights: {
+        id: 'ai_agent_insights',
+        title: 'AI Analytical Advisor',
+        description: 'Proactive spending anomaly detection, bill watchlist, and actionable budget insights',
+        category: 'analytics',
+        defaultEnabled: true,
+        defaultColSpan: 12,
+        minColSpan: 6,
+        maxColSpan: 12,
+    },
     quick_stats: {
         id: 'quick_stats',
         title: 'Quick Stats Metrics',
@@ -127,30 +137,32 @@ export const WIDGET_REGISTRY: Record<string, WidgetMetadata> = {
 export const PRESET_LAYOUTS: Record<string, { title: string; description: string; settings: DashboardLayoutSettings }> = {
     default: {
         title: "Default Balanced View",
-        description: "Metrics, Cashflow Forecast, Pending Reminders, Spending Bar, and Recent Transactions",
+        description: "AI Analytical Advisor, Metrics, Cashflow Forecast, Pending Reminders, and Spending Trends",
         settings: {
             preset: 'default',
             widgets: [
-                { id: 'quick_stats', enabled: true, colSpan: 12, order: 1 },
-                { id: 'predictive_cashflow', enabled: true, colSpan: 7, order: 2 },
-                { id: 'pending_reminders', enabled: true, colSpan: 5, order: 3 },
-                { id: 'spending_analysis', enabled: true, colSpan: 7, order: 4 },
-                { id: 'recent_transactions', enabled: true, colSpan: 5, order: 5 },
+                { id: 'ai_agent_insights', enabled: true, colSpan: 12, order: 1 },
+                { id: 'quick_stats', enabled: true, colSpan: 12, order: 2 },
+                { id: 'predictive_cashflow', enabled: true, colSpan: 7, order: 3 },
+                { id: 'pending_reminders', enabled: true, colSpan: 5, order: 4 },
+                { id: 'spending_analysis', enabled: true, colSpan: 7, order: 5 },
+                { id: 'recent_transactions', enabled: true, colSpan: 5, order: 6 },
             ],
         },
     },
     analytics: {
         title: "Analytics Heavy",
-        description: "Deep dive into category stacked area, Pareto 80/20, trends, and depletion charts",
+        description: "AI Advisor, category stacked area, Pareto 80/20, trends, and depletion charts",
         settings: {
             preset: 'analytics',
             widgets: [
-                { id: 'quick_stats', enabled: true, colSpan: 12, order: 1 },
-                { id: 'category_stacked', enabled: true, colSpan: 12, order: 2 },
-                { id: 'spending_analysis', enabled: true, colSpan: 6, order: 3 },
-                { id: 'top_categories', enabled: true, colSpan: 6, order: 4 },
-                { id: 'category_trend', enabled: true, colSpan: 6, order: 5 },
-                { id: 'pareto_analysis', enabled: true, colSpan: 6, order: 6 },
+                { id: 'ai_agent_insights', enabled: true, colSpan: 12, order: 1 },
+                { id: 'quick_stats', enabled: true, colSpan: 12, order: 2 },
+                { id: 'category_stacked', enabled: true, colSpan: 12, order: 3 },
+                { id: 'spending_analysis', enabled: true, colSpan: 6, order: 4 },
+                { id: 'top_categories', enabled: true, colSpan: 6, order: 5 },
+                { id: 'category_trend', enabled: true, colSpan: 6, order: 6 },
+                { id: 'pareto_analysis', enabled: true, colSpan: 6, order: 7 },
             ],
         },
     },

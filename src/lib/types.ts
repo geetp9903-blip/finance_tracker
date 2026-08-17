@@ -36,6 +36,34 @@ export interface User {
         sent44: boolean;
     };
     dashboardLayout?: DashboardLayoutSettings;
+    aiConsent?: {
+        enabled: boolean;
+        consentedAt?: string;
+        termsVersion: string;
+    };
+}
+
+export type InsightSeverity = 'critical' | 'warning' | 'tip' | 'positive';
+export type InsightCategory = 'cashflow_risk' | 'category_spike' | 'subscription_creep' | 'budget_burndown' | 'general_advice';
+
+export interface AIInsightItem {
+    id: string;
+    category: InsightCategory;
+    severity: InsightSeverity;
+    title: string;
+    message: string;
+    actionableTip?: string;
+    metric?: string; // e.g. "+45% vs avg", "₹2,500 over cap", "Due in 3 days"
+    relatedReminderId?: string;
+    relatedCategory?: string;
+}
+
+export interface AIAnalysisResponse {
+    insights: AIInsightItem[];
+    summary: string;
+    healthScore: number; // 0-100 score
+    generatedAt: string;
+    isConsented: boolean;
 }
 
 export interface Transaction {
@@ -118,6 +146,7 @@ export interface Allocation {
     id: string;
     name: string;
     percentage: number;
+    cap?: number;
     color: string;
 }
 

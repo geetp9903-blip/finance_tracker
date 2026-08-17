@@ -10,6 +10,7 @@ import { QuickStats } from "./QuickStats";
 import { PredictiveBalanceChart } from "@/components/charts/PredictiveBalanceChart";
 import { PendingRemindersCard } from "./PendingRemindersCard";
 import { TransactionManager } from "@/components/finance/TransactionManager";
+import { AIAgentInsightsWidget } from "./widgets/AIAgentInsightsWidget";
 import { Button } from "@/components/ui/Button";
 import {
     SlidersHorizontal,
@@ -207,6 +208,13 @@ export function CustomizableDashboard({
     // Helper map to render corresponding widget component
     const renderWidgetComponent = (widgetId: string) => {
         switch (widgetId) {
+            case 'ai_agent_insights':
+                return (
+                    <AIAgentInsightsWidget
+                        currency={currency}
+                    />
+                );
+
             case 'quick_stats':
                 return (
                     <QuickStats

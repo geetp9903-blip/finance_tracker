@@ -2,6 +2,7 @@ import { getDailySpending, getCategoryTrends } from "@/lib/dal/analytics";
 import { getFinancialSummary } from "@/lib/dal/finance";
 import { BalanceDepletionChart } from "@/components/charts/BalanceDepletionChart";
 import { CategoryStackedAreaChart } from "@/components/charts/CategoryStackedAreaChart";
+import { AIAgentInsightsWidget } from "@/components/dashboard/widgets/AIAgentInsightsWidget";
 import { DateRangeSelector } from "@/components/analytics/DateRangeSelector";
 import { startOfMonth, endOfMonth, startOfYear, endOfYear, format } from "date-fns";
 import { assertAuth } from "@/lib/dal/auth";
@@ -69,6 +70,9 @@ export default async function AnalyticsPage({ searchParams }: PageProps) {
             </div>
 
             <div className="grid gap-6 grid-cols-1">
+                {/* AI Analytical Advisor */}
+                <AIAgentInsightsWidget currency={currency} />
+
                 <div className="rounded-xl border bg-card text-card-foreground shadow-sm overflow-hidden">
                     <BalanceDepletionChart 
                         data={dailySpend} 

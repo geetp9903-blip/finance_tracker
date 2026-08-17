@@ -95,16 +95,21 @@ export default function SettingsPage() {
 
                 {/* Profile Security Settings */}
                 <ProfileSecuritySettings />
+
+                {/* AI & Privacy Intelligence Settings */}
+                <AIPrivacySettings />
             </div>
         </div>
     );
 }
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
-import { User, Shield, Key, Mail, Edit3, Loader2 } from "lucide-react";
+import { User, Shield, Key, Mail, Edit3, Loader2, ShieldCheck, ExternalLink } from "lucide-react";
 import { useToast } from "@/context/ToastContext";
+import { AIConsentModal } from "@/components/ai/AIConsentModal";
+import { AIPrivacyPolicyModal } from "@/components/ai/AIPrivacyPolicyModal";
 
 function ProfileSecuritySettings() {
     const [loading, setLoading] = useState(false);
@@ -346,3 +351,177 @@ function ProfileSecuritySettings() {
         </Card>
     );
 }
+
+function AIPrivacySettings() {
+    const [consentEnabled, setConsentEnabled] = useState(false);
+    const [consentedAt, setConsentedAt] = useState<string | null>(null);
+    const [termsVersion, setTermsVersion] = useState<string>('1.0');
+    const [loading, setLoading] = useState(true);
+    const [updating, setUpdating] = useState(false);
+    const [isConsentModalOpen, setIsConsentModalOpen] = useState(false);
+    const [isPolicyModalOpen, setIsPolicyModalOpen] = useState(false);
+    const { addToast } = useToast();
+
+    const fetchConsentStatus = async () => {
+        try {
+            setLoading(true);
+            const res = await fetch('/api/user/ai-consent');
+            if (res.ok) {
+                const data = await res.json();
+                setConsentEnabled(data.aiConsent?.enabled ?? false);
+                setConsentedAt(data.aiConsent?.consentedAt ?? null);
+                setTermsVersion(data.aiConsent?.termsVersion ?? '1.0');
+            }
+        } catch (err) {
+            console.error("Failed to load AI consent status:", err);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        fetchConsentStatus();
+    }, []);
+
+    const handleToggle = async () => {
+        if (!consentEnabled) {
+            // Open modal to get consent
+            setIsConsentModalOpen(true);
+        } else {
+            // Disable immediately
+            try {
+                setUpdating(true);
+                const res = await fetch('/api/user/ai-consent', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ enabled: false }),
+                });
+                if (res.ok) {
+                    setConsentEnabled(false);
+                    addToast("AI data processing disabled and cached insights cleared.", "info");
+                } else {
+                    throw new Error("Failed to update status");
+                }
+            } catch (err: any) {
+                addToast(err.message || "Failed to update AI settings.", "error");
+            } finally {
+                setUpdating(false);
+            }
+        }
+    };
+
+    const handleConsentSuccess = () => {
+        setConsentEnabled(true);
+        setConsentedAt(new Date().toISOString());
+        addToast("Prospera AI Analytical Advisor is now analyzing your patterns with zero-PII safeguards.", "success");
+    };
+
+    return (
+        <>
+            <Card className="glass-card p-6 space-y-6 md:col-span-2 border-purple-500/20">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    <div className="flex items-center gap-3">
+                        <div className="p-3 rounded-xl bg-purple-500/20 text-purple-400">
+                            <Sparkles className="h-6 w-6" />
+                        </div>
+                        <div>
+                            <div className="flex items-center gap-2">
+                                <h2 className="text-xl font-semibold text-foreground">AI Intelligence & Privacy</h2>
+                                <span className={`text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full border ${
+                                    consentEnabled 
+                                        ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' 
+                                        : 'bg-zinc-800 text-zinc-400 border-zinc-700'
+                                }`}>
+                                    {consentEnabled ? 'Active' : 'Disabled'}
+                                </span>
+                            </div>
+                            <p className="text-sm text-muted-foreground">Manage automated spending anomaly detection and Gemini AI access</p>
+                        </div>
+                    </div>
+
+                    <div className="flex items-center gap-3 self-end sm:self-auto">
+                        <button
+                            type="button"
+                            onClick={handleToggle}
+                            disabled={loading || updating}
+                            className={`relative inline-flex h-7 w-12 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 focus:ring-offset-background disabled:opacity-50 ${
+                                consentEnabled ? 'bg-purple-600' : 'bg-zinc-700'
+                            }`}
+                            role="switch"
+                            aria-checked={consentEnabled}
+                        >
+                            <span
+                                className={`pointer-events-none inline-block h-6 w-6 transform rounded-full bg-white shadow-lg ring-0 transition duration-200 ease-in-out ${
+                                    consentEnabled ? 'translate-x-5' : 'translate-x-0'
+                                }`}
+                            />
+                        </button>
+                    </div>
+                </div>
+
+                <div className="grid md:grid-cols-3 gap-4 pt-2">
+                    <div className="p-4 rounded-xl bg-accent/40 border border-border/40 space-y-1">
+                        <div className="flex items-center gap-2 text-xs font-semibold text-foreground">
+                            <ShieldCheck className="w-4 h-4 text-emerald-400" />
+                            <span>Privacy Standard</span>
+                        </div>
+                        <p className="text-xs text-muted-foreground">
+                            Strict Zero-PII sanitization. Names, emails, and credentials are never transmitted.
+                        </p>
+                    </div>
+
+                    <div className="p-4 rounded-xl bg-accent/40 border border-border/40 space-y-1">
+                        <div className="flex items-center gap-2 text-xs font-semibold text-foreground">
+                            <Sparkles className="w-4 h-4 text-purple-400" />
+                            <span>Analytical Focus</span>
+                        </div>
+                        <p className="text-xs text-muted-foreground">
+                            Flags category surges, impending cashflow pinches against bills, and subscription creep.
+                        </p>
+                    </div>
+
+                    <div className="p-4 rounded-xl bg-accent/40 border border-border/40 space-y-1">
+                        <div className="flex items-center gap-2 text-xs font-semibold text-foreground">
+                            <Shield className="w-4 h-4 text-blue-400" />
+                            <span>Consent Status</span>
+                        </div>
+                        <p className="text-xs text-muted-foreground">
+                            {consentedAt 
+                                ? `Granted on ${new Date(consentedAt).toLocaleDateString()} (v${termsVersion})`
+                                : "Opt-in pending approval"}
+                        </p>
+                    </div>
+                </div>
+
+                <div className="pt-2 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 border-t border-border/40">
+                    <button
+                        type="button"
+                        onClick={() => setIsPolicyModalOpen(true)}
+                        className="text-xs text-purple-400 hover:text-purple-300 flex items-center gap-1.5 underline-offset-2 hover:underline transition-colors"
+                    >
+                        <ExternalLink className="w-3.5 h-3.5" />
+                        View Full AI Privacy Policy & Terms of Service
+                    </button>
+                    
+                    {consentEnabled && (
+                        <p className="text-[11px] text-muted-foreground">
+                            Toggling off will instantly delete cached insights and stop all AI queries.
+                        </p>
+                    )}
+                </div>
+            </Card>
+
+            <AIConsentModal
+                isOpen={isConsentModalOpen}
+                onClose={() => setIsConsentModalOpen(false)}
+                onConsentSuccess={handleConsentSuccess}
+            />
+
+            <AIPrivacyPolicyModal
+                isOpen={isPolicyModalOpen}
+                onClose={() => setIsPolicyModalOpen(false)}
+            />
+        </>
+    );
+}
+
