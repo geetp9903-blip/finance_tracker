@@ -41,6 +41,10 @@ export interface User {
         consentedAt?: string;
         termsVersion: string;
     };
+    aiInsights?: {
+        data: AIAnalysisResponse;
+        lastGeneratedAt?: string;
+    };
 }
 
 export type InsightSeverity = 'critical' | 'warning' | 'tip' | 'positive';

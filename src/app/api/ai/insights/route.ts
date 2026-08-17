@@ -1,11 +1,16 @@
 import { NextResponse } from 'next/server';
-import { getUser, assertAuth } from '@/lib/dal/auth';
+import { getUser } from '@/lib/dal/auth';
 import { getMonthlyReminders, getPredictiveBalanceData } from '@/lib/dal/reminders';
 import { getTransactions, getBudget } from '@/lib/dal/finance';
 import { sanitizeAndAggregateFinancialData } from '@/lib/ai/sanitizer';
-import { generateAIAnalyticsInsights, invalidateUserAICache } from '@/lib/ai/gemini';
+import { generateAIAnalyticsInsights } from '@/lib/ai/gemini';
+import { UserModel } from '@/lib/models';
+import dbConnect from '@/lib/db';
 
 export const dynamic = 'force-dynamic';
+
+// Rate limit cooldown in seconds between explicit generations
+const RATE_LIMIT_COOLDOWN_SECONDS = 60;
 
 export async function GET() {
     try {
@@ -22,65 +27,37 @@ export async function GET() {
                 summary: "AI Insights are currently disabled. Enable AI in Settings or via the prompt above to receive personalized anomaly detection, bill reminders, and budget analysis.",
                 healthScore: 0,
                 insights: [],
-                generatedAt: new Date().toISOString()
+                generatedAt: new Date().toISOString(),
+                hasRunBefore: false
             });
         }
 
-        const now = new Date();
-        const year = now.getFullYear();
-        const month = now.getMonth() + 1;
+        // Return stored/persisted insights directly without calling Gemini API on page refresh
+        if (user.aiInsights?.data) {
+            return NextResponse.json({
+                ...user.aiInsights.data,
+                isConsented: true,
+                hasRunBefore: true,
+                lastGeneratedAt: user.aiInsights.lastGeneratedAt || user.aiInsights.data.generatedAt
+            });
+        }
 
-        // Previous month for run-rate comparisons
-        const prevMonthDate = new Date(year, month - 2, 1);
-        const prevYear = prevMonthDate.getFullYear();
-        const prevMonth = prevMonthDate.getMonth() + 1;
-
-        // Fetch user financial records
-        const [
-            currentTxnsResult,
-            prevTxnsResult,
-            monthlyReminders,
-            budget,
-            predictiveData
-        ] = await Promise.all([
-            getTransactions({ limit: 150, sort: 'date', sortDirection: 'desc' }),
-            getTransactions({
-                startDate: new Date(prevYear, prevMonth - 1, 1),
-                endDate: new Date(prevYear, prevMonth, 0, 23, 59, 59),
-                limit: 150
-            }),
-            getMonthlyReminders(year, month),
-            getBudget(),
-            getPredictiveBalanceData(year, month)
-        ]);
-
-        const currentBalance = predictiveData.currentBalance || 0;
-
-        // Sanitize data (strips PII)
-        const payload = sanitizeAndAggregateFinancialData({
-            currentTransactions: currentTxnsResult.data || [],
-            previousTransactions: prevTxnsResult.data || [],
-            reminders: monthlyReminders || [],
-            budget,
-            currency: user.currency || 'INR',
-            currentBalance
+        // If no insights generated yet, return empty state with hasRunBefore: false
+        return NextResponse.json({
+            isConsented: true,
+            hasRunBefore: false,
+            summary: "No insights generated yet. Click \"Generate New Insights\" below to run an analytical evaluation of your spending patterns and cashflow.",
+            healthScore: 0,
+            insights: [],
+            generatedAt: null
         });
-
-        // Run Gemini AI Analytics
-        const insights = await generateAIAnalyticsInsights({
-            userId: user._id.toString(),
-            payload,
-            forceRefresh: false
-        });
-
-        return NextResponse.json(insights);
     } catch (error: any) {
         console.error("AI Insights GET error:", error);
         return NextResponse.json({
-            error: error.message || 'Failed to generate AI insights',
+            error: error.message || 'Failed to retrieve AI insights',
             isConsented: true,
-            summary: "Unable to generate insights at this moment. Please check your network or try again in a few moments.",
-            healthScore: 70,
+            summary: "Unable to retrieve insights at this moment.",
+            healthScore: 0,
             insights: []
         }, { status: 500 });
     }
@@ -94,7 +71,21 @@ export async function POST() {
         }
 
         if (user.aiConsent?.enabled !== true) {
-            return NextResponse.json({ error: 'AI Consent not granted' }, { status: 403 });
+            return NextResponse.json({ error: 'AI Consent not granted. Please enable AI in Settings first.' }, { status: 403 });
+        }
+
+        // Rate Limit Enforcement (Cooldown check)
+        const lastGeneratedAtStr = user.aiInsights?.lastGeneratedAt;
+        if (lastGeneratedAtStr) {
+            const lastGenerated = new Date(lastGeneratedAtStr).getTime();
+            const elapsedSeconds = Math.floor((Date.now() - lastGenerated) / 1000);
+            if (elapsedSeconds < RATE_LIMIT_COOLDOWN_SECONDS) {
+                const remaining = RATE_LIMIT_COOLDOWN_SECONDS - elapsedSeconds;
+                return NextResponse.json({
+                    error: `Please wait ${remaining}s before generating new insights.`,
+                    cooldownRemaining: remaining
+                }, { status: 429 });
+            }
         }
 
         const now = new Date();
@@ -134,16 +125,33 @@ export async function POST() {
             currentBalance
         });
 
-        // Force refresh by invalidating cache
+        // Run Gemini AI Analytics
         const insights = await generateAIAnalyticsInsights({
             userId: user._id.toString(),
             payload,
             forceRefresh: true
         });
 
-        return NextResponse.json(insights);
+        const generatedTimestamp = new Date().toISOString();
+
+        // Persist to MongoDB User Record
+        await dbConnect();
+        await UserModel.findByIdAndUpdate(user._id, {
+            $set: {
+                aiInsights: {
+                    data: insights,
+                    lastGeneratedAt: generatedTimestamp
+                }
+            }
+        });
+
+        return NextResponse.json({
+            ...insights,
+            hasRunBefore: true,
+            lastGeneratedAt: generatedTimestamp
+        });
     } catch (error: any) {
         console.error("AI Insights POST error:", error);
-        return NextResponse.json({ error: error.message || 'Failed to refresh AI insights' }, { status: 500 });
+        return NextResponse.json({ error: error.message || 'Failed to generate AI insights' }, { status: 500 });
     }
 }

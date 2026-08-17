@@ -48,11 +48,16 @@ export async function POST(req: Request) {
             termsVersion: '1.0'
         };
 
-        await UserModel.findByIdAndUpdate(user._id, {
-            $set: {
-                aiConsent: updatedConsent
-            }
-        });
+        if (!enabled) {
+            await UserModel.findByIdAndUpdate(user._id, {
+                $set: { aiConsent: updatedConsent },
+                $unset: { aiInsights: 1 }
+            });
+        } else {
+            await UserModel.findByIdAndUpdate(user._id, {
+                $set: { aiConsent: updatedConsent }
+            });
+        }
 
         // Invalidate cache if disabled or changed
         invalidateUserAICache(user._id.toString());

@@ -27,6 +27,10 @@ const UserSchema = new Schema<User>({
         enabled: { type: Boolean, default: false },
         consentedAt: { type: String },
         termsVersion: { type: String, default: '1.0' }
+    },
+    aiInsights: {
+        data: { type: Object },
+        lastGeneratedAt: { type: String }
     }
 });
 

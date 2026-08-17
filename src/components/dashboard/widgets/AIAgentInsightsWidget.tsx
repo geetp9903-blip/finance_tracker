@@ -12,11 +12,12 @@ import {
     RefreshCw, 
     ShieldCheck, 
     ArrowRight, 
-    ExternalLink,
-    ChevronDown,
-    ChevronUp,
-    Zap,
-    Info
+    ChevronDown, 
+    ChevronUp, 
+    Zap, 
+    Info,
+    Clock,
+    Flame
 } from 'lucide-react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
@@ -28,42 +29,77 @@ interface AIAgentInsightsWidgetProps {
 }
 
 export function AIAgentInsightsWidget({ currency = 'INR' }: AIAgentInsightsWidgetProps) {
-    const [data, setData] = useState<AIAnalysisResponse | null>(null);
+    const [data, setData] = useState<(AIAnalysisResponse & { hasRunBefore?: boolean; lastGeneratedAt?: string }) | null>(null);
     const [loading, setLoading] = useState(true);
-    const [refreshing, setRefreshing] = useState(false);
+    const [generating, setGenerating] = useState(false);
     const [selectedCategory, setSelectedCategory] = useState<string>('all');
     const [isConsentModalOpen, setIsConsentModalOpen] = useState(false);
     const [expandedInsightId, setExpandedInsightId] = useState<string | null>(null);
     const [error, setError] = useState<string | null>(null);
+    const [cooldownRemaining, setCooldownRemaining] = useState<number>(0);
 
-    const fetchInsights = async (isRefresh = false) => {
-        if (isRefresh) setRefreshing(true);
-        else setLoading(true);
+    // Countdown timer for rate limiting
+    useEffect(() => {
+        if (cooldownRemaining <= 0) return;
+        const timer = setInterval(() => {
+            setCooldownRemaining((prev) => (prev <= 1 ? 0 : prev - 1));
+        }, 1000);
+        return () => clearInterval(timer);
+    }, [cooldownRemaining]);
+
+    // Initial load: Only fetches already persisted insights (Zero Gemini API calls)
+    const loadStoredInsights = async () => {
+        setLoading(true);
         setError(null);
-
         try {
-            const res = await fetch('/api/ai/insights', {
-                method: isRefresh ? 'POST' : 'GET',
-            });
-
+            const res = await fetch('/api/ai/insights', { method: 'GET' });
             if (!res.ok) {
                 const errData = await res.json().catch(() => ({}));
                 throw new Error(errData.error || 'Failed to load AI insights');
             }
-
-            const json: AIAnalysisResponse = await res.json();
+            const json = await res.json();
             setData(json);
         } catch (err: any) {
-            console.error("Failed to load insights:", err);
-            setError(err.message || 'An error occurred while loading AI insights');
+            console.error("Failed to load stored insights:", err);
+            setError(err.message || 'An error occurred while loading insights');
         } finally {
             setLoading(false);
-            setRefreshing(false);
+        }
+    };
+
+    // Explicit Generation: Only runs when the user clicks "Generate New Insights"
+    const handleGenerateNewInsights = async () => {
+        if (cooldownRemaining > 0 || generating) return;
+        setGenerating(true);
+        setError(null);
+
+        try {
+            const res = await fetch('/api/ai/insights', {
+                method: 'POST',
+            });
+
+            const json = await res.json();
+
+            if (!res.ok) {
+                if (res.status === 429) {
+                    setCooldownRemaining(json.cooldownRemaining || 60);
+                }
+                throw new Error(json.error || 'Failed to generate new AI insights');
+            }
+
+            setData(json);
+            // Set 60-second cooldown locally after successful generation
+            setCooldownRemaining(60);
+        } catch (err: any) {
+            console.error("Failed to generate insights:", err);
+            setError(err.message || 'An error occurred during insight generation');
+        } finally {
+            setGenerating(false);
         }
     };
 
     useEffect(() => {
-        fetchInsights();
+        loadStoredInsights();
     }, []);
 
     // Filter insights
@@ -131,6 +167,17 @@ export function AIAgentInsightsWidget({ currency = 'INR' }: AIAgentInsightsWidge
         return 'text-rose-400 border-rose-500/30 bg-rose-500/10';
     };
 
+    // Format timestamp nicely
+    const formatTimestamp = (dateStr?: string | null) => {
+        if (!dateStr) return null;
+        try {
+            const date = new Date(dateStr);
+            return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) + ' • ' + date.toLocaleDateString([], { month: 'short', day: 'numeric' });
+        } catch {
+            return null;
+        }
+    };
+
     // State 1: Consent Required / Disabled State
     if (!loading && data && !data.isConsented) {
         return (
@@ -179,11 +226,14 @@ export function AIAgentInsightsWidget({ currency = 'INR' }: AIAgentInsightsWidge
                 <AIConsentModal
                     isOpen={isConsentModalOpen}
                     onClose={() => setIsConsentModalOpen(false)}
-                    onConsentSuccess={() => fetchInsights(false)}
+                    onConsentSuccess={() => loadStoredInsights()}
                 />
             </>
         );
     }
+
+    const hasStoredInsights = data && data.insights && data.insights.length > 0;
+    const formattedLastGenerated = formatTimestamp(data?.lastGeneratedAt || data?.generatedAt);
 
     return (
         <>
@@ -201,28 +251,51 @@ export function AIAgentInsightsWidget({ currency = 'INR' }: AIAgentInsightsWidge
                                         Gemini Active
                                     </span>
                                 </div>
-                                <p className="text-xs text-zinc-400">Proactive pattern recognition & liquidity protection</p>
+                                <div className="flex items-center gap-2 text-xs text-zinc-400">
+                                    <span>Proactive pattern recognition & liquidity protection</span>
+                                    {formattedLastGenerated && (
+                                        <>
+                                            <span>•</span>
+                                            <span className="flex items-center gap-1 text-zinc-400">
+                                                <Clock className="w-3 h-3 text-purple-400" />
+                                                Last: {formattedLastGenerated}
+                                            </span>
+                                        </>
+                                    )}
+                                </div>
                             </div>
                         </div>
 
                         {/* Actions & Health Gauge */}
-                        <div className="flex items-center gap-3 self-end md:self-auto">
-                            {data && (
+                        <div className="flex flex-wrap items-center gap-3 self-end md:self-auto">
+                            {hasStoredInsights && (
                                 <div className={`flex items-center gap-2 px-3 py-1.5 rounded-xl border text-xs font-semibold ${getScoreColor(data.healthScore)}`}>
                                     <span>Financial Health:</span>
                                     <span className="text-sm font-bold">{data.healthScore}/100</span>
                                 </div>
                             )}
 
+                            {/* Generate New Insights Button with Cooldown Handling */}
                             <Button
-                                variant="outline"
                                 size="sm"
-                                onClick={() => fetchInsights(true)}
-                                disabled={loading || refreshing}
-                                className="h-9 px-3 rounded-xl border-zinc-800 hover:border-zinc-700 bg-zinc-900/60 hover:bg-zinc-800 text-zinc-300 text-xs flex items-center gap-1.5"
+                                onClick={handleGenerateNewInsights}
+                                disabled={loading || generating || cooldownRemaining > 0}
+                                className={`h-9 px-4 rounded-xl text-xs font-medium flex items-center gap-2 transition-all shadow-md ${
+                                    cooldownRemaining > 0
+                                        ? 'bg-zinc-800 text-zinc-400 border border-zinc-700 cursor-not-allowed'
+                                        : 'bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white shadow-purple-600/25'
+                                }`}
                             >
-                                <RefreshCw className={`w-3.5 h-3.5 ${refreshing ? 'animate-spin' : ''}`} />
-                                <span className="hidden sm:inline">Refresh</span>
+                                <RefreshCw className={`w-3.5 h-3.5 ${generating ? 'animate-spin' : ''}`} />
+                                <span>
+                                    {generating
+                                        ? 'Analyzing Data...'
+                                        : cooldownRemaining > 0
+                                        ? `Cooldown (${cooldownRemaining}s)`
+                                        : hasStoredInsights
+                                        ? 'Generate New Insights'
+                                        : 'Generate Insights'}
+                                </span>
                             </Button>
                         </div>
                     </div>
@@ -236,7 +309,7 @@ export function AIAgentInsightsWidget({ currency = 'INR' }: AIAgentInsightsWidge
                     )}
 
                     {/* Filter Category Chips */}
-                    {data?.insights && data.insights.length > 0 && !loading && (
+                    {hasStoredInsights && !loading && (
                         <div className="flex items-center gap-1.5 overflow-x-auto pt-3 pb-1 scrollbar-none">
                             {[
                                 { id: 'all', label: 'All Insights' },
@@ -263,32 +336,63 @@ export function AIAgentInsightsWidget({ currency = 'INR' }: AIAgentInsightsWidge
                 </CardHeader>
 
                 <CardContent className="p-5 md:p-6 space-y-3">
-                    {/* Loading State */}
-                    {loading && (
+                    {/* Generating Shimmer State */}
+                    {generating && (
                         <div className="py-12 flex flex-col items-center justify-center gap-4 text-center">
                             <div className="relative">
                                 <div className="w-12 h-12 rounded-full border-2 border-purple-500/20 border-t-purple-500 animate-spin" />
                                 <Sparkles className="w-5 h-5 text-purple-400 absolute inset-0 m-auto animate-pulse" />
                             </div>
                             <div className="space-y-1">
-                                <h4 className="text-sm font-semibold text-zinc-200">Analyzing Financial Patterns...</h4>
-                                <p className="text-xs text-zinc-400">Cross-referencing category velocities, pending bill schedules, and cash balance</p>
+                                <h4 className="text-sm font-semibold text-zinc-200">Evaluating Financial Posture...</h4>
+                                <p className="text-xs text-zinc-400">Comparing category velocity, upcoming scheduled bills, and liquid cash reserves</p>
                             </div>
                         </div>
                     )}
 
+                    {/* Initial Loading (just reading stored data) */}
+                    {loading && !generating && (
+                        <div className="py-8 flex flex-col items-center justify-center gap-2 text-center text-xs text-zinc-500">
+                            <RefreshCw className="w-5 h-5 animate-spin text-purple-400" />
+                            <span>Loading stored insights...</span>
+                        </div>
+                    )}
+
                     {/* Error State */}
-                    {!loading && error && (
-                        <div className="p-4 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-300 text-xs flex items-center justify-between">
+                    {!loading && !generating && error && (
+                        <div className="p-4 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-300 text-xs flex items-center justify-between gap-3">
                             <span>{error}</span>
-                            <Button size="sm" variant="ghost" onClick={() => fetchInsights(false)} className="text-xs text-rose-300 hover:text-rose-200">
+                            <Button size="sm" variant="ghost" onClick={handleGenerateNewInsights} className="text-xs text-rose-300 hover:text-rose-200 shrink-0">
                                 Try Again
                             </Button>
                         </div>
                     )}
 
+                    {/* Empty State when no insights generated yet */}
+                    {!loading && !generating && !error && (!data?.insights || data.insights.length === 0) && (
+                        <div className="py-10 text-center space-y-4">
+                            <div className="p-4 rounded-2xl bg-purple-500/10 border border-purple-500/20 text-purple-400 w-fit mx-auto">
+                                <Flame className="w-8 h-8" />
+                            </div>
+                            <div className="space-y-1 max-w-md mx-auto">
+                                <h4 className="text-sm font-semibold text-zinc-200">Ready to Analyze Your Finances</h4>
+                                <p className="text-xs text-zinc-400 leading-relaxed">
+                                    Click the button below to run an instant analysis on your spending categories, bills watchlist, and cashflow health.
+                                </p>
+                            </div>
+                            <Button
+                                onClick={handleGenerateNewInsights}
+                                disabled={cooldownRemaining > 0}
+                                className="px-6 py-2.5 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white text-xs font-medium shadow-lg shadow-purple-600/25"
+                            >
+                                <Sparkles className="w-3.5 h-3.5 mr-2" />
+                                Generate New Insights
+                            </Button>
+                        </div>
+                    )}
+
                     {/* Insights List */}
-                    {!loading && !error && filteredInsights.length > 0 && (
+                    {!loading && !generating && !error && filteredInsights.length > 0 && (
                         <div className="grid grid-cols-1 gap-3">
                             <AnimatePresence mode="popLayout">
                                 {filteredInsights.map((insight) => {
@@ -366,8 +470,8 @@ export function AIAgentInsightsWidget({ currency = 'INR' }: AIAgentInsightsWidge
                         </div>
                     )}
 
-                    {/* Empty State when no insights match filter */}
-                    {!loading && !error && filteredInsights.length === 0 && (
+                    {/* Filter empty state */}
+                    {!loading && !generating && !error && hasStoredInsights && filteredInsights.length === 0 && (
                         <div className="py-8 text-center text-xs text-zinc-500 space-y-1">
                             <CheckCircle className="w-8 h-8 mx-auto text-emerald-500/60" />
                             <p className="font-semibold text-zinc-400">No issues detected for this filter</p>
@@ -380,7 +484,7 @@ export function AIAgentInsightsWidget({ currency = 'INR' }: AIAgentInsightsWidge
             <AIConsentModal
                 isOpen={isConsentModalOpen}
                 onClose={() => setIsConsentModalOpen(false)}
-                onConsentSuccess={() => fetchInsights(false)}
+                onConsentSuccess={() => loadStoredInsights()}
             />
         </>
     );
